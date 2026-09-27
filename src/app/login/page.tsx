@@ -102,6 +102,13 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white p-8 rounded-xl border border-zinc-200 shadow-sm">
         {/* Header Branding */}
         <div className="text-center mb-6">
+          {/* next/image ไม่รองรับไฟล์ .ico จึงต้องใช้ img ตรง ๆ */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/favicon.ico"
+            alt="SCADA System"
+            className="mx-auto mb-3 h-12 w-12 rounded-xl border border-zinc-200 bg-zinc-50 object-contain p-1"
+          />
           <h1 className="text-xl font-bold text-zinc-900 tracking-wider">
             SCADA System
           </h1>

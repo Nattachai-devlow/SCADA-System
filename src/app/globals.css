@@ -197,6 +197,22 @@ body {
   animation: nav-item-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* กล่องเมนูที่ถูกเลือก ขยายจากกลางออกเล็กน้อยตอนเข้าหน้านั้น */
+@keyframes nav-pill-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.nav-item-active {
+  animation: nav-pill-in 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* แถบเน้นด้านซ้ายของเมนูที่ active ยืดจากกลางออกสู่ปลาย */
 @keyframes nav-accent-in {
   from {
@@ -216,35 +232,13 @@ body {
   animation: nav-accent-in 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* แสงวิ่งผ่านคำว่า SCADA */
-@keyframes brand-shine {
-  0% {
-    transform: translateX(-120%);
-  }
-  55%,
-  100% {
-    transform: translateX(340%);
-  }
+/* โลโก้ลอยขึ้นเล็กน้อยตอนเมาส์ผ่าน พื้นขาวไม่ควรมีแสงวิ่งแบบโทนเข้ม */
+.nav-logo {
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.nav-brand {
-  position: relative;
-  overflow: hidden;
-}
-
-.nav-brand::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    100deg,
-    transparent 25%,
-    rgba(255, 255, 255, 0.4) 50%,
-    transparent 75%
-  );
-  transform: translateX(-120%);
-  animation: brand-shine 4.5s ease-in-out infinite;
+.nav-brand:hover .nav-logo {
+  transform: translateY(-2px) scale(1.04);
 }
 
 @keyframes nav-dot-ping {
@@ -316,9 +310,17 @@ body {
   }
 
   .nav-item-in,
-  .nav-brand::after,
+  .nav-item-active,
   .nav-status-ping::before,
   .nav-item-active .nav-accent {
     animation: none;
+  }
+
+  .nav-logo {
+    transition: none;
+  }
+
+  .nav-brand:hover .nav-logo {
+    transform: none;
   }
 }

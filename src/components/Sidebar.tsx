@@ -43,9 +43,9 @@ export default function Sidebar() {
       <button
         onClick={() => setMobileOpen(true)}
         aria-label="เปิดเมนู"
-        className="lg:hidden fixed top-4 left-4 z-50 h-10 w-10 flex items-center justify-center rounded-xl bg-zinc-900/90 text-white shadow-lg shadow-zinc-900/20 backdrop-blur transition active:scale-95"
+        className="lg:hidden fixed top-4 left-4 z-50 flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-900 shadow-sm transition hover:bg-zinc-50 active:scale-95"
       >
-        <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth={2}>
+        <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth={1.75}>
           <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
         </svg>
       </button>
@@ -53,34 +53,35 @@ export default function Sidebar() {
       {/* ฉากพื้นหลังเข้ม กดเพื่อปิดเมนู */}
       <div
         onClick={() => setMobileOpen(false)}
-        className={`lg:hidden fixed inset-0 z-40 bg-zinc-950/60 backdrop-blur-sm transition-opacity duration-300 ${
-          mobileOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        className={`fixed inset-0 z-40 bg-zinc-900/20 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+          mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 flex flex-col justify-between overflow-y-auto bg-gradient-to-b from-zinc-950 via-slate-900 to-zinc-950 px-4 py-6 transition-transform duration-300 ease-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col justify-between overflow-y-auto border-r border-zinc-200 bg-white px-4 py-6 transition-transform duration-300 ease-out lg:translate-x-0 ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* แสงฟ้าจาง ๆ ที่มุมบน ทำให้พื้นที่มีมิติ */}
-        <div className="pointer-events-none absolute -top-24 -right-16 h-64 w-64 rounded-full bg-sky-500/20 blur-3xl" />
-
-        <div className="relative">
+        <div>
           {/* Brand */}
-          <div className="nav-brand mb-8 rounded-2xl border border-white/10 bg-white/5 px-4 py-4 backdrop-blur-sm">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 text-lg shadow-lg shadow-sky-500/25">
-                ⚙️
-              </div>
-              <div className="min-w-0">
-                <h1 className="truncate bg-gradient-to-r from-white to-sky-200 bg-clip-text text-base font-bold tracking-wide text-transparent">
-                  SCADA System
-                </h1>
-                <p className="truncate font-mono text-[10px] text-slate-400">
-                  Water Circulation Control
-                </p>
-              </div>
+          <div className="nav-brand mb-8 flex items-center gap-3 rounded-xl px-2 py-2">
+            <div className="nav-logo flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
+              {/* next/image ไม่รองรับไฟล์ .ico จึงต้องใช้ img ตรง ๆ */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/favicon.ico"
+                alt="SCADA System"
+                className="h-7 w-7 object-contain"
+              />
+            </div>
+            <div className="min-w-0">
+              <h1 className="truncate text-[15px] font-bold tracking-wide text-zinc-900">
+                SCADA System
+              </h1>
+              <p className="truncate font-mono text-[10px] text-zinc-500">
+                Water Circulation Control
+              </p>
             </div>
           </div>
 
@@ -95,22 +96,22 @@ export default function Sidebar() {
                   href={item.path}
                   onClick={() => setMobileOpen(false)}
                   style={{ animationDelay: `${index * 55}ms` }}
-                  className={`nav-item-in nav-item group relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-3 transition-colors duration-200 ${
+                  className={`nav-item-in nav-item group relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 transition-colors duration-200 ${
                     isActive
-                      ? "nav-item-active bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/25"
-                      : "text-slate-400 hover:bg-white/5 hover:text-slate-100"
+                      ? "nav-item-active bg-zinc-900 text-white"
+                      : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
                   }`}
                 >
                   {/* แถบเน้นด้านซ้าย ยืดขึ้นเมื่อเมนูถูกเลือก */}
                   <span
-                    className="nav-accent absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-white/90"
+                    className={`nav-accent absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full ${
+                      isActive ? "bg-white" : "bg-zinc-900"
+                    }`}
                   />
 
                   <span
                     className={`nav-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-base ${
-                      isActive
-                        ? "bg-white/20"
-                        : "bg-white/5 group-hover:bg-white/10"
+                      isActive ? "bg-white/10" : "bg-zinc-100 group-hover:bg-zinc-200"
                     }`}
                   >
                     {item.icon}
@@ -120,11 +121,7 @@ export default function Sidebar() {
                     <span className="block truncate text-[13px] font-semibold leading-tight">
                       {item.name}
                     </span>
-                    <span
-                      className={`block truncate text-[10px] leading-tight ${
-                        isActive ? "text-white/75" : "text-slate-500"
-                      }`}
-                    >
+                    <span className="block truncate font-mono text-[10px] leading-tight text-zinc-400">
                       {item.sub}
                     </span>
                   </span>
@@ -135,14 +132,14 @@ export default function Sidebar() {
         </div>
 
         {/* สถานะระบบ */}
-        <div className="relative mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+        <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
           <div className="flex items-center gap-2.5">
-            <span className="nav-status-ping h-2 w-2 rounded-full bg-emerald-400 text-emerald-400" />
-            <span className="text-xs font-semibold text-slate-100">
+            <span className="nav-status-ping h-2 w-2 rounded-full bg-zinc-900 text-zinc-900" />
+            <span className="text-xs font-semibold text-zinc-900">
               System Online
             </span>
           </div>
-          <p className="mt-2 font-mono text-[10px] text-slate-400">
+          <p className="mt-2 font-mono text-[10px] text-zinc-500">
             Role: {roleLabel}
           </p>
         </div>
