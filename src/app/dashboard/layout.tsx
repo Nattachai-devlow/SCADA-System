@@ -2,6 +2,7 @@
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import ToastHost from "@/components/Toast";
+import DashboardGuard from "@/components/DashboardGuard";
 
 export default function DashboardLayout({
   children,
@@ -9,6 +10,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
+    <DashboardGuard>
     <div className="flex min-h-screen bg-zinc-50 text-zinc-900">
       {/* 1. Sidebar ด้านข้าง */}
       <Sidebar />
@@ -24,5 +26,6 @@ export default function DashboardLayout({
       {/* 3. ป๊อปอัปแจ้งเตือน ครอบคลุมทุกหน้าใน dashboard */}
       <ToastHost />
     </div>
+    </DashboardGuard>
   );
 }

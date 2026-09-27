@@ -291,9 +291,17 @@ export default function AlarmPage() {
                           <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                           IN PROGRESS
                         </span>
-                      ) : (
+                      ) : a.status === "Closed" ? (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                           ✓ CLOSED
+                        </span>
+                      ) : (
+                        /* ค่าที่ไม่อยู่ใน 3 สถานะนี้ ต้องไม่ถูกแสดงเป็น "ปิดแล้ว" */
+                        <span
+                          title={`สถานะนี้ไม่อยู่ในระบบ: ${a.status}`}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-700 border border-zinc-300"
+                        >
+                          ⚠ {a.status}
                         </span>
                       )}
                     </td>

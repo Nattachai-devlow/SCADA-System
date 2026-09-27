@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY,
   email TEXT NOT NULL,
   full_name TEXT,
-  role TEXT CHECK (role IN ('admin', 'technician')) DEFAULT 'technician',
+  -- 'pending' คือผู้สมัครใหม่ที่ยังรอผู้ดูแลระบบอนุมัติสิทธิ์ จึงยังไม่มีสิทธิ์ใช้งาน
+  role TEXT CHECK (role IN ('admin', 'technician', 'pending')) DEFAULT 'pending',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
 
