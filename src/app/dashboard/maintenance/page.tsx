@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "@/components/Toast";
 
 const MACHINE_STATUSES = [
   "Maintenance",
@@ -62,12 +63,6 @@ export default function MaintenancePage() {
     details: "",
     maintenance_date: new Date().toISOString().split("T")[0],
   });
-
-  // ผลลัพธ์ของการเปลี่ยนสถานะเครื่องจักรหลังบันทึก
-  const [statusNotice, setStatusNotice] = useState<{
-    kind: "ok" | "warn";
-    text: string;
-  } | null>(null);
 
   const supabase = createClient();
 
@@ -248,15 +243,14 @@ export default function MaintenancePage() {
       .eq("id", machineId);
 
     if (error) {
-      setStatusNotice({
-        kind: "warn",
-        text: `บันทึกรายการซ่อมสำเร็จ แต่เปลี่ยนสถานะ ${machineLabel} เป็น "${STATUS_LABEL[status] ?? status}" ไม่สำเร็จ: ${error.message} (ต้องมีสิทธิ์ผู้ดูแลระบบ)`,
-      });
+      toast.error(
+        `บันทึกรายการซ่อมสำเร็จ แต่เปลี่ยนสถานะ ${machineLabel} เป็น "${STATUS_LABEL[status] ?? status}" ไม่สำเร็จ: ${error.message} (ต้องมีสิทธิ์ผู้ดูแลระบบ)`,
+        8000,
+      );
     } else {
-      setStatusNotice({
-        kind: "ok",
-        text: `บันทึกรายการซ่อมและตั้งสถานะ ${machineLabel} เป็น "${STATUS_LABEL[status] ?? status}" เรียบร้อย`,
-      });
+      toast.success(
+        `บันทึกรายการซ่อมและตั้งสถานะ ${machineLabel} เป็น "${STATUS_LABEL[status] ?? status}" เรียบร้อย`,
+      );
     }
   };
 
@@ -270,8 +264,6 @@ export default function MaintenancePage() {
     const machineLabel = machine
       ? `[${machine.machine_id}] ${machine.machine_name}`
       : "เครื่องจักร";
-
-    setStatusNotice(null);
 
     if (editingRecord) {
       const payload = {
@@ -287,7 +279,7 @@ export default function MaintenancePage() {
         .eq("id", editingRecord.id);
 
       if (error) {
-        alert(`เกิดข้อผิดพลาดในการแก้ไข: ${error.message}`);
+        toast.error(`เกิดข้อผิดพลาดในการแก้ไข: ${error.message}`);
         return;
       }
 
@@ -311,7 +303,7 @@ export default function MaintenancePage() {
         .insert([payload]);
 
       if (error) {
-        alert(`เกิดข้อผิดพลาดในการบันทึก: ${error.message}`);
+        toast.error(`เกิดข้อผิดพลาดในการบันทึก: ${error.message}`);
         return;
       }
 
@@ -335,7 +327,7 @@ export default function MaintenancePage() {
         .eq("id", id);
 
       if (error) {
-        alert(`ไม่สามารถลบได้: ${error.message}`);
+        toast.error(`ไม่สามารถลบได้: ${error.message}`);
       } else {
         refreshRecords();
       }
@@ -370,30 +362,6 @@ export default function MaintenancePage() {
           <span>บันทึกการซ่อมบำรุงใหม่</span>
         </button>
       </div>
-
-      {/* ผลลัพธ์การเปลี่ยนสถานะเครื่องจักร */}
-      {statusNotice && (
-        <div
-          role="status"
-          className={`flex items-start gap-2.5 rounded-xl border px-4 py-3 text-sm ${
-            statusNotice.kind === "ok"
-              ? "border-green-200 bg-green-50 text-green-800"
-              : "border-amber-200 bg-amber-50 text-amber-800"
-          }`}
-        >
-          <span aria-hidden="true">
-            {statusNotice.kind === "ok" ? "✅" : "⚠️"}
-          </span>
-          <p className="flex-1">{statusNotice.text}</p>
-          <button
-            onClick={() => setStatusNotice(null)}
-            aria-label="ปิดข้อความแจ้งเตือน"
-            className="shrink-0 opacity-60 hover:opacity-100 transition"
-          >
-            ✕
-          </button>
-        </div>
-      )}
 
       {/* --- Search & Filter Bar --- */}
       <div className="bg-white border border-zinc-200 rounded-xl p-4 shadow-sm space-y-3">

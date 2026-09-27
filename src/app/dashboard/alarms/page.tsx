@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "@/components/Toast";
 import {
   ALARM_TEMPLATES,
   type AlarmTemplate,
@@ -43,7 +44,6 @@ export default function AlarmPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"ALL" | "OPEN">("OPEN");
   const [simulating, setSimulating] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
 
   const supabase = createClient();
 
@@ -91,9 +91,8 @@ export default function AlarmPage() {
       .eq("id", alarmId);
 
     if (error) {
-      setNotice(`แก้ไขไม่สำเร็จ: ${error.message}`);
+      toast.error(`แก้ไขไม่สำเร็จ: ${error.message}`);
     } else {
-      setNotice(null);
       refreshAlarms();
     }
   };
@@ -106,9 +105,8 @@ export default function AlarmPage() {
       .eq("id", alarmId);
 
     if (error) {
-      setNotice(`ปิดไม่สำเร็จ: ${error.message}`);
+      toast.error(`ปิดไม่สำเร็จ: ${error.message}`);
     } else {
-      setNotice(null);
       refreshAlarms();
     }
   };
@@ -127,12 +125,11 @@ export default function AlarmPage() {
 
   const handleSimulate = async () => {
     if (machines.length === 0) {
-      setNotice("ยังไม่มีเครื่องจักรในระบบ กรุณาเพิ่มเครื่องก่อน");
+      toast.error("ยังไม่มีเครื่องจักรในระบบ กรุณาเพิ่มเครื่องก่อน");
       return;
     }
 
     setSimulating(true);
-    setNotice(null);
 
     // สุ่มแม่แบบ แล้วสร้าง 3 รายการ เพื่อให้เห็นการกระจายตัวของเหตุการณ์
     const picks = Array.from({ length: 3 }, () => {
@@ -156,9 +153,9 @@ export default function AlarmPage() {
     const { error } = await supabase.from("alarms").insert(rows);
 
     if (error) {
-      setNotice(`เพิ่มข้อมูลไม่สำเร็จ: ${error.message}`);
+      toast.error(`เพิ่มข้อมูลไม่สำเร็จ: ${error.message}`);
     } else {
-      setNotice(`เพิ่ม alarm จำลอง ${rows.length} รายการแล้ว`);
+      toast.success(`เพิ่ม alarm จำลอง ${rows.length} รายการแล้ว`);
       refreshAlarms();
     }
     setSimulating(false);
@@ -218,19 +215,6 @@ export default function AlarmPage() {
           </div>
         </div>
       </div>
-
-      {notice && (
-        <div className="rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-xs text-zinc-700 flex items-center justify-between gap-3">
-          <span>{notice}</span>
-          <button
-            onClick={() => setNotice(null)}
-            className="text-zinc-400 hover:text-zinc-700 font-bold"
-            aria-label="ปิดข้อความ"
-          >
-            ✕
-          </button>
-        </div>
-      )}
 
       {/* Alarm Table */}
       <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">

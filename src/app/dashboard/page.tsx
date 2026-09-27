@@ -54,11 +54,15 @@ export default function DashboardOverviewPage() {
         .from("machines")
         .select("*");
 
-      // 2. ดึงจำนวน Alarm ค้างแก้ไข (status = Open)
+      // 2. นับ Alarm ที่ยังไม่ปิด ให้ตรงกับแท็บ "รอดำเนินการ" ในหน้า Alarms
+      //    กรองฝั่ง client แบบเดียวกันเป๊ะ เพราะถ้าใช้ .neq() ฝั่ง server
+      //    แถวที่ status เป็น NULL จะถูกตัดทิ้ง ทำให้สองหน้าไม่ตรงกัน
       const { data: alarmsData } = await supabase
         .from("alarms")
-        .select("*")
-        .eq("status", "Open");
+        .select("*");
+      const openAlarmCount = (alarmsData ?? []).filter(
+        (a) => a.status !== "Closed",
+      ).length;
 
       // 3. ดึงข้อมูลระบบย้อนหลังทั้งหมดจากตาราง system_telemetry
       const { data: telemetryData } = await supabase
@@ -69,7 +73,7 @@ export default function DashboardOverviewPage() {
 
       if (isMounted) {
         if (machinesData) setMachines(machinesData);
-        if (alarmsData) setAlarmCount(alarmsData.length);
+        setAlarmCount(openAlarmCount);
         if (telemetryData) {
           const formatted = telemetryData.map((item) => ({
             ...item,
@@ -167,7 +171,7 @@ export default function DashboardOverviewPage() {
         </div>
         <div className="bg-white border border-zinc-200 p-5 rounded-xl border-l-4 border-l-rose-500">
           <p className="text-zinc-600 text-sm">
-            Alarm ค้างแก้ไข (Open Alarms)
+            Alarm ค้างแก้ไข (ยังไม่ปิด)
           </p>
           <p className="text-3xl font-bold text-rose-700 mt-2">{alarmCount}</p>
         </div>

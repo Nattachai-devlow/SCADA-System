@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "@/components/Toast";
 
 type Machine = {
   id: string;
@@ -101,7 +102,7 @@ export default function MachineMasterPage() {
         .eq("id", editingMachine.id);
 
       if (error) {
-        alert(`เกิดข้อผิดพลาดในการแก้ไข: ${error.message}`);
+        toast.error(`เกิดข้อผิดพลาดในการแก้ไข: ${error.message}`);
       } else {
         setIsModalOpen(false);
         refreshMachines();
@@ -111,7 +112,7 @@ export default function MachineMasterPage() {
       const { error } = await supabase.from("machines").insert([formData]);
 
       if (error) {
-        alert(`เกิดข้อผิดพลาดในการเพิ่ม: ${error.message}`);
+        toast.error(`เกิดข้อผิดพลาดในการเพิ่ม: ${error.message}`);
       } else {
         setIsModalOpen(false);
         refreshMachines();
@@ -124,7 +125,7 @@ export default function MachineMasterPage() {
     if (confirm(`คุณต้องการลบเครื่องจักร ${machineId} ใช่หรือไม่?`)) {
       const { error } = await supabase.from("machines").delete().eq("id", id);
       if (error) {
-        alert(`ไม่สามารถลบได้: ${error.message}`);
+        toast.error(`ไม่สามารถลบได้: ${error.message}`);
       } else {
         refreshMachines();
       }
@@ -142,7 +143,7 @@ export default function MachineMasterPage() {
       .eq("id", machine.id);
 
     if (error) {
-      alert(`อัปเดตสถานะไม่สำเร็จ: ${error.message}`);
+      toast.error(`อัปเดตสถานะไม่สำเร็จ: ${error.message}`);
     } else {
       refreshMachines();
     }

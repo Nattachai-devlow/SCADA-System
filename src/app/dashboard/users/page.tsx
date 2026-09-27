@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { toast } from "@/components/Toast";
 
 type UserProfile = {
   id: string;
@@ -134,10 +135,10 @@ export default function UserManagementPage() {
       .eq("id", profile.id);
 
     if (error) {
-      alert("เกิดข้อผิดพลาดในการอนุมัติสิทธิ์: " + error.message);
+      toast.error("เกิดข้อผิดพลาดในการอนุมัติสิทธิ์: " + error.message);
     } else {
-      alert(
-        `อนุมัติสิทธิ์ให้ "${profile.full_name || profile.email}" เป็น ${targetRole} เรียบร้อยแล้ว!`,
+      toast.success(
+        `อนุมัติสิทธิ์ให้ "${profile.full_name || profile.email}" เป็น ${targetRole} เรียบร้อยแล้ว`,
       );
       await fetchProfilesData();
     }
@@ -160,7 +161,7 @@ export default function UserManagementPage() {
     });
 
     if (signUpError) {
-      alert("เกิดข้อผิดพลาดในการสร้างบัญชี: " + signUpError.message);
+      toast.error("เกิดข้อผิดพลาดในการสร้างบัญชี: " + signUpError.message);
       setActionLoading(false);
       return;
     }
@@ -174,9 +175,9 @@ export default function UserManagementPage() {
       });
 
       if (profileError) {
-        alert("เกิดข้อผิดพลาดในการบันทึกโปรไฟล์: " + profileError.message);
+        toast.error("เกิดข้อผิดพลาดในการบันทึกโปรไฟล์: " + profileError.message);
       } else {
-        alert("เพิ่มผู้ใช้งานเรียบร้อยแล้ว!");
+        toast.success("เพิ่มผู้ใช้งานเรียบร้อยแล้ว");
         setIsAddModalOpen(false);
         setFormData({
           email: "",
@@ -216,9 +217,9 @@ export default function UserManagementPage() {
       .eq("id", editingProfile.id);
 
     if (error) {
-      alert("เกิดข้อผิดพลาดในการอัปเดต: " + error.message);
+      toast.error("เกิดข้อผิดพลาดในการอัปเดต: " + error.message);
     } else {
-      alert("อัปเดตข้อมูลผู้ใช้งานเรียบร้อยแล้ว!");
+      toast.success("อัปเดตข้อมูลผู้ใช้งานเรียบร้อยแล้ว");
       setIsEditModalOpen(false);
       setEditingProfile(null);
       await fetchProfilesData();
@@ -229,7 +230,7 @@ export default function UserManagementPage() {
   // --- 4. ฟังก์ชันลบผู้ใช้งาน (Delete User) ---
   const handleDeleteUser = async (profile: UserProfile) => {
     if (profile.id === currentUserId) {
-      alert("คุณไม่สามารถลบบัญชีของตนเองขณะใช้งานอยู่ได้!");
+      toast.error("คุณไม่สามารถลบบัญชีของตนเองขณะใช้งานอยู่ได้");
       return;
     }
 
@@ -249,9 +250,9 @@ export default function UserManagementPage() {
       .eq("id", profile.id);
 
     if (error) {
-      alert("เกิดข้อผิดพลาดในการลบผู้ใช้งาน: " + error.message);
+      toast.error("เกิดข้อผิดพลาดในการลบผู้ใช้งาน: " + error.message);
     } else {
-      alert("ลบผู้ใช้งานเรียบร้อยแล้ว");
+      toast.success("ลบผู้ใช้งานเรียบร้อยแล้ว");
       setProfiles((prev) => prev.filter((p) => p.id !== profile.id));
     }
   };

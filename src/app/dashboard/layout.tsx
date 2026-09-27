@@ -1,6 +1,7 @@
 // src/app/dashboard/layout.tsx
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
+import ToastHost from "@/components/Toast";
 
 export default function DashboardLayout({
   children,
@@ -19,6 +20,9 @@ export default function DashboardLayout({
         {/* ส่วนที่จะเปลี่ยนไปตามแต่ละ Page เช่น /dashboard/scada */}
         <main className="p-6 flex-1 overflow-y-auto">{children}</main>
       </div>
+
+      {/* 3. ป๊อปอัปแจ้งเตือน ครอบคลุมทุกหน้าใน dashboard */}
+      <ToastHost />
     </div>
   );
 }
