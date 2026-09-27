@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# automation-web-app
+
+Web application สำหรับระบบ SCADA / Factory Automation — หน้า Dashboard, Machines,
+Alarms, Maintenance และหน้า SCADA Diagram
+
+Built with [Next.js](https://nextjs.org) (App Router) + [Supabase](https://supabase.com)
++ Tailwind CSS
+
+## Features
+
+- **Authentication** — ลงทะเบียน / เข้าสู่ระบบด้วย Supabase Auth (อีเมล + รหัสผ่าน)
+- **Role-based access** — ผู้ใช้ใหม่เข้าสถานะ `pending` และรอ Admin อนุมัติก่อนเข้าใช้งานได้
+- **Dashboard** — ภาพรวมสถานะเครื่องจักร, Alarm, Maintenance
+- **Machines** — CRUD ข้อมูลเครื่องจักร
+- **Alarms** — บันทึกและติดตามสถานะ Alarm
+- **Maintenance** — บันทึกประวัติการบำรุงรักษา
+- **SCADA Diagram** — แผนผังกระบวนการแบบ interactive
+- **User management** — Admin จัดการสิทธิ์ผู้ใช้
+- **Charts** — กราฟสถิติด้วย Recharts
+
+## Tech Stack
+
+| Layer     | Technology                          |
+| --------- | ----------------------------------- |
+| Framework | Next.js 16 (App Router)             |
+| UI        | React 19, Tailwind CSS 4            |
+| Backend   | Supabase (PostgreSQL + Auth + RLS)  |
+| Charts    | Recharts                            |
+| Icons     | lucide-react                        |
 
 ## Getting Started
 
-First, run the development server:
+### 1. ติดตั้ง dependencies
+
+```bash
+npm install
+```
+
+### 2. ตั้งค่า environment variables
+
+คัดลอกไฟล์ตัวอย่างแล้วกรอกค่าจาก Supabase Dashboard (Project Settings → API)
+
+```bash
+cp .env.example .env.local
+```
+
+ตัวแปรที่จำเป็น:
+
+| Variable                       | คำอธิบาย                        |
+| ------------------------------ | ------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`     | Supabase project URL            |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon / publishable key |
+
+> `.env.local` ถูก exclude ออกจาก git แล้ว — **อย่า commit ไฟล์นี้**
+
+### 3. สร้างตารางในฐานข้อมูล
+
+รันไฟล์ SQL ตามลำดับใน Supabase SQL Editor:
+
+1. `src/supabase/01_init.sql` — สร้างตาราง (profiles, machines, alarms, maintenance_records)
+2. `src/supabase/RLS.sql` — เปิด Row Level Security และนิยาม policy
+
+### 4. เริ่ม dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+เปิด [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev     # เริ่ม dev server
+npm run build   # build สำหรับ production
+npm run start   # รัน production server
+npm run lint    # eslint
+```
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/
+│   ├── auth/signout/    # route handler สำหรับออกจากระบบ
+│   ├── dashboard/       # หน้าหลักของระบบ
+│   │   ├── machines/     # จัดการเครื่องจักร
+│   │   ├── alarms/       # จัดการ Alarm
+│   │   ├── maintenance/  # บันทึกการบำรุงรักษา
+│   │   ├── scada/        # แผนผัง SCADA
+│   │   └── users/        # จัดการผู้ใช้ (Admin)
+│   ├── login/            # หน้าเข้าสู่ระบบ / ลงทะเบียน
+│   ├── pending/          # หน้ารอผู้ดูแลอนุมัติสิทธิ์
+│   └── layout.tsx
+├── components/           # Navbar, Sidebar, ScadaDiagram
+├── lib/supabase/        # Supabase client (browser + server)
+└── supabase/            # SQL scripts (schema + RLS)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Roles
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Role        | คำอธิบาย                                  |
+| ----------- | ----------------------------------------- |
+| `pending`   | ลงทะเบียนแล้ว รอ Admin อนุมัติ             |
+| `technician`| เข้าใช้งานระบบได้ตามปกติ                  |
+| `admin`     | มีสิทธิ์จัดการผู้ใช้และข้อมูลทั้งหมด      |
 
-## Deploy on Vercel
+## Docker
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+มี `Dockerfile` (multi-stage, ใช้ `output: "standalone"`) และ `docker-compose.yaml`
+สำหรับรัน Postgres ในเครื่องควบคู่กับแอป
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+docker compose up --build
+```
+
+> **หมายเหตุ:** ค่า Supabase ใน `docker-compose.yaml` เป็นค่าจำลองสำหรับ local
+> เท่านั้น — ต้องเปลี่ยนเป็นค่าจริงก่อนนำไปใช้งาน
+
+## License
+
+Private — all rights reserved
