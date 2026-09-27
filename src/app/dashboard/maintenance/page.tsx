@@ -3,10 +3,25 @@
 import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+const MACHINE_STATUSES = [
+  "Maintenance",
+  "Running",
+  "Stop",
+  "Alarm",
+] as const;
+
+const STATUS_LABEL: Record<string, string> = {
+  Maintenance: "กำลังซ่อมบำรุง",
+  Running: "ทำงาน",
+  Stop: "หยุดทำงาน",
+  Alarm: "มีคำเตือน",
+};
+
 type MachineOption = {
   id: string;
   machine_id: string;
   machine_name: string;
+  status: string;
 };
 
 type MaintenanceRecord = {
@@ -42,10 +57,17 @@ export default function MaintenancePage() {
   );
   const [formData, setFormData] = useState({
     machine_id: "",
+    machine_status: "Maintenance" as string,
     title: "",
     details: "",
     maintenance_date: new Date().toISOString().split("T")[0],
   });
+
+  // ผลลัพธ์ของการเปลี่ยนสถานะเครื่องจักรหลังบันทึก
+  const [statusNotice, setStatusNotice] = useState<{
+    kind: "ok" | "warn";
+    text: string;
+  } | null>(null);
 
   const supabase = createClient();
 
@@ -93,7 +115,7 @@ export default function MaintenancePage() {
 
       const { data: mData } = await supabase
         .from("machines")
-        .select("id, machine_id, machine_name");
+        .select("id, machine_id, machine_name, status");
 
       if (mData && isMounted) {
         setMachinesList(mData);
@@ -129,6 +151,12 @@ export default function MaintenancePage() {
       isMounted = false;
     };
   }, [supabase]);
+
+  // เครื่องจักรที่เลือกอยู่ในฟอร์ม (ใช้แสดงสถานะปัจจุบัน)
+  const selectedMachine = useMemo(
+    () => machinesList.find((m) => m.id === formData.machine_id),
+    [machinesList, formData.machine_id],
+  );
 
   // --- Logic การกรองข้อมูล (Filter Process) ---
   const filteredRecords = useMemo(() => {
@@ -181,6 +209,11 @@ export default function MaintenancePage() {
       setEditingRecord(record);
       setFormData({
         machine_id: record.machine_id,
+        // แก้ไขรายการเดิม: เริ่มจากสถานะจริงของเครื่อง ไม่ใช่ค่าเริ่มต้น
+        // บันทึกทับโดยไม่ตั้งใจจนกว่าผู้ใช้จะเลือกเอง
+        machine_status:
+          machinesList.find((m) => m.id === record.machine_id)?.status ||
+          "Maintenance",
         title: record.title,
         details: record.details || "",
         maintenance_date: record.maintenance_date
@@ -191,6 +224,8 @@ export default function MaintenancePage() {
       setEditingRecord(null);
       setFormData({
         machine_id: machinesList[0]?.id || "",
+        // งานใหม่ = เครื่องกำลังซ่อม
+        machine_status: "Maintenance",
         title: "",
         details: "",
         maintenance_date: new Date().toISOString().split("T")[0],
@@ -199,9 +234,44 @@ export default function MaintenancePage() {
     setIsModalOpen(true);
   };
 
+  // เปลี่ยนสถานะเครื่องจักรให้ตรงกับผลของงานซ่อม
+  const applyMachineStatus = async (
+    machineId: string,
+    status: string,
+    machineLabel: string,
+  ) => {
+    if (!machineId || !status) return;
+
+    const { error } = await supabase
+      .from("machines")
+      .update({ status })
+      .eq("id", machineId);
+
+    if (error) {
+      setStatusNotice({
+        kind: "warn",
+        text: `บันทึกรายการซ่อมสำเร็จ แต่เปลี่ยนสถานะ ${machineLabel} เป็น "${STATUS_LABEL[status] ?? status}" ไม่สำเร็จ: ${error.message} (ต้องมีสิทธิ์ผู้ดูแลระบบ)`,
+      });
+    } else {
+      setStatusNotice({
+        kind: "ok",
+        text: `บันทึกรายการซ่อมและตั้งสถานะ ${machineLabel} เป็น "${STATUS_LABEL[status] ?? status}" เรียบร้อย`,
+      });
+    }
+  };
+
   // บันทึกข้อมูล
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const machine = machinesList.find(
+      (m) => m.id === formData.machine_id,
+    );
+    const machineLabel = machine
+      ? `[${machine.machine_id}] ${machine.machine_name}`
+      : "เครื่องจักร";
+
+    setStatusNotice(null);
 
     if (editingRecord) {
       const payload = {
@@ -218,10 +288,14 @@ export default function MaintenancePage() {
 
       if (error) {
         alert(`เกิดข้อผิดพลาดในการแก้ไข: ${error.message}`);
-      } else {
-        setIsModalOpen(false);
-        refreshRecords();
+        return;
       }
+
+      await applyMachineStatus(
+        formData.machine_id,
+        formData.machine_status,
+        machineLabel,
+      );
     } else {
       const currentDate = new Date().toISOString().split("T")[0];
       const payload = {
@@ -238,16 +312,18 @@ export default function MaintenancePage() {
 
       if (error) {
         alert(`เกิดข้อผิดพลาดในการบันทึก: ${error.message}`);
-      } else {
-        await supabase
-          .from("machines")
-          .update({ status: "Maintenance" })
-          .eq("id", formData.machine_id);
-
-        setIsModalOpen(false);
-        refreshRecords();
+        return;
       }
+
+      await applyMachineStatus(
+        formData.machine_id,
+        formData.machine_status,
+        machineLabel,
+      );
     }
+
+    setIsModalOpen(false);
+    refreshRecords();
   };
 
   // ลบรายการ
@@ -294,6 +370,30 @@ export default function MaintenancePage() {
           <span>บันทึกการซ่อมบำรุงใหม่</span>
         </button>
       </div>
+
+      {/* ผลลัพธ์การเปลี่ยนสถานะเครื่องจักร */}
+      {statusNotice && (
+        <div
+          role="status"
+          className={`flex items-start gap-2.5 rounded-xl border px-4 py-3 text-sm ${
+            statusNotice.kind === "ok"
+              ? "border-green-200 bg-green-50 text-green-800"
+              : "border-amber-200 bg-amber-50 text-amber-800"
+          }`}
+        >
+          <span aria-hidden="true">
+            {statusNotice.kind === "ok" ? "✅" : "⚠️"}
+          </span>
+          <p className="flex-1">{statusNotice.text}</p>
+          <button
+            onClick={() => setStatusNotice(null)}
+            aria-label="ปิดข้อความแจ้งเตือน"
+            className="shrink-0 opacity-60 hover:opacity-100 transition"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* --- Search & Filter Bar --- */}
       <div className="bg-white border border-zinc-200 rounded-xl p-4 shadow-sm space-y-3">
@@ -469,12 +569,28 @@ export default function MaintenancePage() {
               <div>
                 <label className="block text-xs font-semibold text-zinc-600 mb-1">
                   เครื่องจักร
+                  {selectedMachine && (
+                    <span className="ml-2 font-normal text-zinc-500">
+                      สถานะปัจจุบัน:{" "}
+                      {STATUS_LABEL[selectedMachine.status] ??
+                        selectedMachine.status}
+                    </span>
+                  )}
                 </label>
                 <select
                   value={formData.machine_id}
-                  onChange={(e) =>
-                    setFormData({ ...formData, machine_id: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const next = machinesList.find(
+                      (m) => m.id === e.target.value,
+                    );
+                    setFormData({
+                      ...formData,
+                      machine_id: e.target.value,
+                      // เปลี่ยนเครื่องแล้วเริ่มจากสถานะจริงของเครื่องนั้น
+                      machine_status:
+                        next?.status ?? formData.machine_status,
+                    });
+                  }}
                   className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
                 >
                   {machinesList.map((m) => (
@@ -483,6 +599,33 @@ export default function MaintenancePage() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                  ตั้งสถานะเครื่องจักรหลังบันทึก
+                </label>
+                <select
+                  value={formData.machine_status}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      machine_status: e.target.value,
+                    })
+                  }
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
+                >
+                  {MACHINE_STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {STATUS_LABEL[s]} ({s})
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500">
+                  เลือก &quot;ทำงาน (Running)&quot; เมื่อซ่อมเสร็จแล้ว
+                  เครื่องจะกลับไปเดินเครื่องและไฟในหน้า SCADA
+                  จะกลับมาเป็นสีเขียวโดยอัตโนมัติ
+                </p>
               </div>
 
               <div>
