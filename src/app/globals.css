@@ -18,3 +18,59 @@ body {
   font-family: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI",
     sans-serif;
 }
+
+/* Water tank animation. Every rule animates transform only, so the
+   browser composites on the GPU instead of repainting each frame. */
+@keyframes tank-wave {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes tank-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1.5px);
+  }
+}
+
+@keyframes tank-sheen {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(320%);
+  }
+}
+
+.tank-wave {
+  animation: tank-wave linear infinite;
+}
+
+.tank-bob {
+  animation: tank-bob ease-in-out infinite;
+}
+
+.tank-sheen {
+  animation: tank-sheen ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.45),
+    transparent
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tank-wave,
+  .tank-bob,
+  .tank-sheen {
+    animation: none;
+  }
+}

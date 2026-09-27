@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import WaterTank3D from "@/components/WaterTank3D";
+
+/* ความจุถังน้ำ (ลิตร) — ปรับตามขนาดถังจริงของหน้างาน */
+const TANK_CAPACITY_L = 75000;
 
 type Machine = {
   id: string;
@@ -156,15 +160,18 @@ export default function ScadaPage() {
 
       {/* Industrial P&ID Board */}
       <div className="bg-zinc-100 border border-zinc-300 rounded-xl p-8 relative overflow-x-auto min-h-[520px] shadow-inner">
-        {/* Pool Tank Top (ดึงค่าปริมาณน้ำแบบ Dynamic) */}
-        <div className="absolute top-6 left-1/4 w-1/2 h-28 bg-gradient-to-b from-sky-400 to-sky-600 rounded border-2 border-zinc-300 shadow-md flex items-center justify-center">
-          <div className="bg-white/90 px-4 py-1 rounded shadow text-zinc-800 font-bold font-mono text-sm">
-            {Number(telemetry.water_level_liters).toLocaleString()} L
-          </div>
+        {/* Pool Tank (3D + animation) */}
+        <div className="absolute top-5 left-1/4 w-1/2 min-w-[260px] max-w-[420px]">
+          <WaterTank3D
+            liters={Number(telemetry.water_level_liters)}
+            capacity={TANK_CAPACITY_L}
+            running={pump01?.status === "Running"}
+            label="POOL"
+          />
         </div>
 
         {/* Process Flow Diagram / Interactive Area */}
-        <div className="relative pt-36 flex items-center justify-between gap-4 max-w-5xl mx-auto">
+        <div className="relative pt-44 flex items-center justify-between gap-4 max-w-5xl mx-auto">
           {/* Water Inlet / Supply */}
           <div className="flex flex-col items-center">
             <span className="bg-white px-2 py-0.5 rounded border border-zinc-300 text-xs font-semibold text-zinc-500 mb-2">
