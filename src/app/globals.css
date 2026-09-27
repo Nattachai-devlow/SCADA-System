@@ -177,6 +177,126 @@ body {
   transition: transform 400ms ease;
 }
 
+/* ============================================================================
+   Navigation sidebar
+   ========================================================================== */
+
+/* เมนูไหลเข้าทีละรายการ ด้วย delay ที่กำหนดจาก index ใน JSX */
+@keyframes nav-item-in {
+  from {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.nav-item-in {
+  animation: nav-item-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* แถบเน้นด้านซ้ายของเมนูที่ active ยืดจากกลางออกสู่ปลาย */
+@keyframes nav-accent-in {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.nav-accent {
+  transform: scaleY(0);
+  transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-item-active .nav-accent {
+  animation: nav-accent-in 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* แสงวิ่งผ่านคำว่า SCADA */
+@keyframes brand-shine {
+  0% {
+    transform: translateX(-120%);
+  }
+  55%,
+  100% {
+    transform: translateX(340%);
+  }
+}
+
+.nav-brand {
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-brand::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 75%
+  );
+  transform: translateX(-120%);
+  animation: brand-shine 4.5s ease-in-out infinite;
+}
+
+@keyframes nav-dot-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.65;
+  }
+  70%,
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+/* วงแหวนที่ขยายออกจากจุดสถานะ ใช้ ::before เพราะตัวจุดต้องเป็นวงกลมเต็ม */
+.nav-status-ping {
+  position: relative;
+}
+
+.nav-status-ping::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: currentColor;
+  animation: nav-dot-ping 2s ease-out infinite;
+}
+
+/* ไอคอนหมุน/ขยายตอนเมาส์ผ่าน ใช้ :hover แทน JS เพื่อไม่ให้ re-render */
+.nav-icon {
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-item:hover .nav-icon {
+  transform: scale(1.18) rotate(-6deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-accent {
+    transform: scaleY(1);
+    transition: none;
+  }
+
+  .nav-icon {
+    transition: none;
+  }
+
+  .nav-item:hover .nav-icon {
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .machine-spin,
   .machine-spin-fast,
@@ -192,6 +312,13 @@ body {
   }
 
   .toast-enter {
+    animation: none;
+  }
+
+  .nav-item-in,
+  .nav-brand::after,
+  .nav-status-ping::before,
+  .nav-item-active .nav-accent {
     animation: none;
   }
 }

@@ -16,7 +16,7 @@ export default function DashboardLayout({
       <Sidebar />
 
       {/* 2. พื้นที่ฝั่งขวา (Navbar + Content ของแต่ละหน้า) */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-72">
         <Navbar />
 
         {/* ส่วนที่จะเปลี่ยนไปตามแต่ละ Page เช่น /dashboard/scada */}

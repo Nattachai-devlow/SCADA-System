@@ -25,10 +25,11 @@ export default function Navbar() {
   };
 
   return (
-    <header className="h-16 border-b border-zinc-200 bg-white/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-40">
+    <header className="h-16 border-b border-zinc-200 bg-white/80 backdrop-blur-md pl-16 pr-4 sm:pr-6 lg:pl-6 flex items-center justify-between sticky top-0 z-40">
       {/* Title / Search */}
       <div className="flex items-center gap-3">
-        <span className="text-zinc-800 text-sm font-semibold">SCADA System Control Panel</span>
+        <span className="hidden sm:inline text-zinc-800 text-sm font-semibold">SCADA System Control Panel</span>
+        <span className="sm:hidden text-zinc-800 text-sm font-semibold">SCADA Control</span>
       </div>
 
       {/* User Info & Actions */}
