@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import WaterTank3D from "@/components/WaterTank3D";
-import Pump3D from "@/components/Pump3D";
-import FilterTank3D from "@/components/FilterTank3D";
-import HeatExchanger3D from "@/components/HeatExchanger3D";
+import { getMachineVisual } from "@/components/machine-visuals";
 
 /* ความจุถังน้ำ (ลิตร) — ปรับตามขนาดถังจริงของหน้างาน */
 const TANK_CAPACITY_L = 75000;
+
+/* ลำดับการแสดงผลตามกระบวนการ น้ำไหลจากปั๊ม → กรอง → ทำน้ำร้อน */
+const TYPE_ORDER = ["pump", "filter", "heater", "sensor", "valve"];
 
 type Machine = {
   id: string;
@@ -84,13 +85,23 @@ export default function ScadaPage() {
         "postgres_changes",
         { event: "*", schema: "public", table: "machines" },
         (payload) => {
-          if (payload.new && isMounted) {
-            const updatedMachine = payload.new as Machine;
+          if (!isMounted) return;
+
+          if (payload.eventType === "INSERT" && payload.new) {
+            const added = payload.new as Machine;
             setMachines((prev) =>
-              prev.map((m) =>
-                m.id === updatedMachine.id ? updatedMachine : m,
-              ),
+              prev.some((m) => m.id === added.id) ? prev : [...prev, added],
             );
+          } else if (payload.eventType === "UPDATE" && payload.new) {
+            const updated = payload.new as Machine;
+            setMachines((prev) =>
+              prev.map((m) => (m.id === updated.id ? updated : m)),
+            );
+          } else if (payload.eventType === "DELETE") {
+            const removedId = (payload.old as { id?: string } | undefined)?.id;
+            if (removedId) {
+              setMachines((prev) => prev.filter((m) => m.id !== removedId));
+            }
           }
         },
       )
@@ -126,9 +137,20 @@ export default function ScadaPage() {
     setUpdatingId(null);
   };
 
-  const pump01 = machines.find((m) => m.machine_id === "PUMP-01");
-  const heat01 = machines.find((m) => m.machine_id === "HEAT-01");
-  const flt01 = machines.find((m) => m.machine_id === "FLT-01");
+  /* เรียงตามลำดับกระบวนการ เครื่องที่เพิ่มเข้ามาใหม่จะต่อท้ายตามประเภท */
+  const orderedMachines = [...machines].sort((a, b) => {
+    const ia = TYPE_ORDER.indexOf(a.machine_type.trim().toLowerCase());
+    const ib = TYPE_ORDER.indexOf(b.machine_type.trim().toLowerCase());
+    if (ia !== ib) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+    return a.machine_id.localeCompare(b.machine_id);
+  });
+
+  /* ปั๊มตัวไหนก็ได้ที่กำลังทำงาน ถือว่ามีการสูบน้ำเข้าระบบ */
+  const anyPumpRunning = machines.some(
+    (m) =>
+      m.machine_type.trim().toLowerCase() === "pump" &&
+      m.status === "Running",
+  );
 
   if (loading)
     return <div className="p-6 text-zinc-500">Loading SCADA Diagram...</div>;
@@ -162,106 +184,100 @@ export default function ScadaPage() {
       </div>
 
       {/* Industrial P&ID Board */}
-      <div className="bg-zinc-100 border border-zinc-300 rounded-xl p-8 relative overflow-x-auto min-h-[520px] shadow-inner">
+      <div className="bg-zinc-100 border border-zinc-300 rounded-xl p-6 sm:p-8 shadow-inner">
         {/* Pool Tank (3D + animation) */}
-        <div className="absolute top-5 left-1/4 w-1/2 min-w-[260px] max-w-[420px]">
+        <div className="mx-auto w-full max-w-[420px] min-w-[260px]">
           <WaterTank3D
             liters={Number(telemetry.water_level_liters)}
             capacity={TANK_CAPACITY_L}
-            running={pump01?.status === "Running"}
+            running={anyPumpRunning}
             label="POOL"
           />
         </div>
 
-        {/* Process Flow Diagram / Interactive Area */}
-        <div className="relative pt-44 flex items-center justify-between gap-4 max-w-5xl mx-auto">
-          {/* Water Inlet / Supply */}
-          <div className="flex flex-col items-center">
-            <span className="bg-white px-2 py-0.5 rounded border border-zinc-300 text-xs font-semibold text-zinc-500 mb-2">
+        {/* Supply header — doubles as the main header rail */}
+        <div className="mt-8 max-w-5xl mx-auto">
+          <div className="flex items-center gap-3">
+            <span className="bg-white px-2 py-0.5 rounded border border-zinc-300 text-xs font-semibold text-zinc-500 whitespace-nowrap">
               Water Supply
             </span>
-            <div className="w-16 h-8 bg-gradient-to-r from-zinc-200 via-zinc-50 to-zinc-300 border border-zinc-400 rounded-sm flex items-center justify-center shadow">
-              <span className="text-[10px] text-zinc-500 font-bold">
-                INLET
-              </span>
+            <div className="flex-1 h-3 bg-gradient-to-b from-zinc-200 via-zinc-50 to-zinc-300 border-y border-zinc-400 relative rounded-sm">
+              {anyPumpRunning && (
+                <div className="absolute inset-0 bg-sky-400/60 animate-pulse" />
+              )}
             </div>
+            <span className="bg-white px-2 py-0.5 rounded border border-zinc-300 text-xs font-semibold text-zinc-500 whitespace-nowrap">
+              {machines.length} unit{machines.length === 1 ? "" : "s"}
+            </span>
           </div>
 
-          {/* Pipe 1 */}
-          <div className="flex-1 h-3 bg-gradient-to-b from-zinc-200 via-zinc-50 to-zinc-300 border-y border-zinc-400 relative">
-            {pump01?.status === "Running" && (
-              <div className="absolute inset-0 bg-sky-400/60 animate-pulse" />
-            )}
-          </div>
+          {/* Machine grid — grows to fit every machine in the table */}
+          {orderedMachines.length === 0 ? (
+            <div className="mt-8 rounded-lg border border-dashed border-zinc-300 bg-white/60 py-12 text-center">
+              <p className="text-sm font-semibold text-zinc-600">
+                No machines yet
+              </p>
+              <p className="mt-1 text-xs text-zinc-500">
+                Add one under Machines and it will appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4">
+              {orderedMachines.map((machine) => {
+                const Visual = getMachineVisual(machine.machine_type);
+                const running = machine.status === "Running";
+                const isHeater =
+                  machine.machine_type.trim().toLowerCase() === "heater";
 
-          {/* Machine 1: Industrial Water Pump */}
-          <div className="flex flex-col items-center">
-            <Pump3D
-              id={pump01?.machine_id || "PUMP-01"}
-              name={pump01?.machine_name || "Main Pump"}
-              running={pump01?.status === "Running"}
-            />
-            {pump01 && (
-              <button
-                onClick={() => toggleStatus(pump01)}
-                disabled={updatingId === pump01.id}
-                className={`mt-2 px-3 py-1 text-xs font-bold rounded shadow transition ${
-                  pump01.status === "Running"
-                    ? "bg-rose-600 hover:bg-rose-700 text-white"
-                    : "bg-emerald-600 hover:bg-emerald-700 text-white"
-                }`}
-              >
-                {pump01.status === "Running" ? "STOP PUMP" : "START PUMP"}
-              </button>
-            )}
-          </div>
+                return (
+                  <div
+                    key={machine.id}
+                    className="flex flex-col items-center"
+                  >
+                    {/* Drop leg connecting the unit to the rail above */}
+                    <div className="h-4 w-2 bg-gradient-to-r from-zinc-200 via-zinc-50 to-zinc-300 border-x border-zinc-400 rounded-b-sm" />
 
-          {/* Pipe 2 */}
-          <div className="flex-1 h-3 bg-gradient-to-b from-zinc-200 via-zinc-50 to-zinc-300 border-y border-zinc-400 relative">
-            {pump01?.status === "Running" && (
-              <div className="absolute inset-0 bg-sky-400/60 animate-pulse" />
-            )}
-          </div>
+                    <Visual
+                      id={machine.machine_id}
+                      name={machine.machine_name}
+                      running={running}
+                    />
 
-          {/* Machine 2: Sand Filter Tank */}
-          <div className="flex flex-col items-center">
-            <FilterTank3D
-              id={flt01?.machine_id || "FLT-01"}
-              name={flt01?.machine_name || "Filter Tank"}
-              running={flt01?.status === "Running"}
-            />
-            {/* ช่องว่างสมมลิขนาดปุ่มของเครื่องอื่น เพื่อให้กราฟิกทั้งสามตรงกัน */}
-            <div className="mt-2 h-6" aria-hidden="true" />
-          </div>
+                    {/* Maintenance / Alarm ยังกดสตาร์ท-หยุดได้เหมือนเดิม
+                        แต่ต้องมีป้ายบอกสถานะให้ operator เห็นชัด */}
+                    {machine.status === "Maintenance" ||
+                    machine.status === "Alarm" ? (
+                      <span
+                        className={`mt-2 px-2.5 py-0.5 text-[10px] font-bold rounded border ${
+                          machine.status === "Alarm"
+                            ? "bg-rose-50 border-rose-300 text-rose-700"
+                            : "bg-amber-50 border-amber-300 text-amber-700"
+                        }`}
+                      >
+                        {machine.status === "Alarm" ? "ALARM" : "MAINTENANCE"}
+                      </span>
+                    ) : null}
 
-          {/* Pipe 3 */}
-          <div className="flex-1 h-3 bg-gradient-to-b from-zinc-200 via-zinc-50 to-zinc-300 border-y border-zinc-400 relative">
-            {pump01?.status === "Running" && (
-              <div className="absolute inset-0 bg-sky-400/60 animate-pulse" />
-            )}
-          </div>
-
-          {/* Machine 3: Heat Pump / Heater Unit */}
-          <div className="flex flex-col items-center">
-            <HeatExchanger3D
-              id={heat01?.machine_id || "HEAT-01"}
-              name={heat01?.machine_name || "Heat Exchanger"}
-              running={heat01?.status === "Running"}
-            />
-            {heat01 && (
-              <button
-                onClick={() => toggleStatus(heat01)}
-                disabled={updatingId === heat01.id}
-                className={`mt-2 px-3 py-1 text-xs font-bold rounded shadow transition ${
-                  heat01.status === "Running"
-                    ? "bg-zinc-900 hover:bg-zinc-700 text-white"
-                    : "bg-orange-500 hover:bg-orange-600 text-white"
-                }`}
-              >
-                {heat01.status === "Running" ? "OFF HEATER" : "ON HEATER"}
-              </button>
-            )}
-          </div>
+                    <button
+                      onClick={() => toggleStatus(machine)}
+                      disabled={updatingId === machine.id}
+                      className={`mt-2 px-3 py-1 text-[11px] font-bold rounded shadow transition ${
+                        running
+                          ? isHeater
+                            ? "bg-zinc-900 hover:bg-zinc-700 text-white"
+                            : "bg-rose-600 hover:bg-rose-700 text-white"
+                          : isHeater
+                            ? "bg-orange-500 hover:bg-orange-600 text-white"
+                            : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                      }`}
+                    >
+                      {running ? (isHeater ? "OFF" : "STOP") : isHeater ? "ON" : "START"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
