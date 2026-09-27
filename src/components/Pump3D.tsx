@@ -7,16 +7,18 @@ const BLADES = [0, 72, 144, 216, 288];
 type Machine3DProps = {
   id: string;
   name: string;
-  running: boolean;
+  status: string;
 };
 
-export default function Pump3D({ id, name, running }: Machine3DProps) {
+export default function Pump3D({ id, name, status }: Machine3DProps) {
+  const running = status === "Running";
+
   return (
     <div className="flex flex-col items-center gap-1.5">
       <div
         className="relative w-28 h-28"
         role="img"
-        aria-label={`${name} ${id}, ${running ? "running" : "stopped"}`}
+        aria-label={`${name} ${id}, status ${status}`}
       >
         {/* ฐานเหล็ก */}
         <div
@@ -87,7 +89,7 @@ export default function Pump3D({ id, name, running }: Machine3DProps) {
           style={{ background: STEEL_H }}
         />
         <div
-          className="absolute bottom-[6.6rem] left-[1.35rem] h-3.5 w-4 rounded-t-sm border border-zinc-500"
+          className="absolute bottom-[5.75rem] left-[1.35rem] h-3.5 w-4 rounded-t-sm border border-zinc-500"
           style={{ background: STEEL_H }}
         />
 

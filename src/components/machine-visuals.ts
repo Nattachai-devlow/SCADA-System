@@ -9,7 +9,7 @@ import GenericMachine3D from "./GenericMachine3D";
 export type MachineVisualProps = {
   id: string;
   name: string;
-  running: boolean;
+  status: string;
 };
 
 /* machines.machine_type is a free-text column with no CHECK constraint,

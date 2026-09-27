@@ -240,7 +240,7 @@ export default function ScadaPage() {
                     <Visual
                       id={machine.machine_id}
                       name={machine.machine_name}
-                      running={running}
+                      status={machine.status}
                     />
 
                     {/* Maintenance / Alarm ยังกดสตาร์ท-หยุดได้เหมือนเดิม

@@ -5,18 +5,20 @@ import { STEEL_H, STEEL_V, STEEL_DOME } from "@/lib/scada-theme";
 type Machine3DProps = {
   id: string;
   name: string;
-  running: boolean;
+  status: string;
 };
 
 /** Probe-style sensor: domed head with a lens, a readout window and
  *  two immersion prongs. The lens pulses and ripples when it is live. */
-export default function Sensor3D({ id, name, running }: Machine3DProps) {
+export default function Sensor3D({ id, name, status }: Machine3DProps) {
+  const running = status === "Running";
+
   return (
     <div className="flex flex-col items-center gap-1.5">
       <div
         className="relative w-24 h-28"
         role="img"
-        aria-label={`${name} ${id}, ${running ? "online" : "offline"}`}
+        aria-label={`${name} ${id}, sensor ${running ? "online" : "offline"}`}
       >
         {/* สัญญาณที่กระจายออกจากหัวเซ็นเซอร์ */}
         {running && (

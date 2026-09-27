@@ -5,16 +5,18 @@ import { STEEL_H, STEEL_V, STEEL_DOME } from "@/lib/scada-theme";
 type Machine3DProps = {
   id: string;
   name: string;
-  running: boolean;
+  status: string;
 };
 
-export default function FilterTank3D({ id, name, running }: Machine3DProps) {
+export default function FilterTank3D({ id, name, status }: Machine3DProps) {
+  const running = status === "Running";
+
   return (
     <div className="flex flex-col items-center gap-1.5">
       <div
         className="relative w-24 h-28"
         role="img"
-        aria-label={`${name} ${id}, ${running ? "running" : "stopped"}`}
+        aria-label={`${name} ${id}, status ${status}`}
       >
         {/* ฝาบนโค้ง */}
         <div

@@ -5,19 +5,21 @@ import { STEEL_H, STEEL_V } from "@/lib/scada-theme";
 type Machine3DProps = {
   id: string;
   name: string;
-  running: boolean;
+  status: string;
 };
 
 /** Butterfly valve seen from the side. The disc sits across the bore
  *  when stopped and turns parallel to it when running, so the open or
  *  closed state is readable at a glance. */
-export default function Valve3D({ id, name, running }: Machine3DProps) {
+export default function Valve3D({ id, name, status }: Machine3DProps) {
+  const running = status === "Running";
+
   return (
     <div className="flex flex-col items-center gap-1.5">
       <div
         className="relative w-28 h-28"
         role="img"
-        aria-label={`${name} ${id}, ${running ? "open" : "closed"}`}
+        aria-label={`${name} ${id}, valve ${running ? "open" : "closed"}`}
       >
         {/* ท่อผ่านตัววาล์ว์ */}
         <div
