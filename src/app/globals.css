@@ -74,3 +74,61 @@ body {
     animation: none;
   }
 }
+
+/* Machine animation. Transform and opacity only, so nothing here
+   triggers a repaint per frame. */
+@keyframes machine-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes machine-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes machine-glow {
+  0%,
+  100% {
+    opacity: 0.26;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.machine-spin {
+  animation: machine-spin 0.9s linear infinite;
+}
+
+.machine-spin-fast {
+  animation: machine-spin 0.35s linear infinite;
+}
+
+.machine-blink {
+  animation: machine-blink 1.4s ease-in-out infinite;
+}
+
+.machine-glow {
+  animation: machine-glow 1.8s ease-in-out infinite;
+  background: linear-gradient(
+    180deg,
+    rgba(251, 146, 60, 0.55),
+    rgba(234, 88, 12, 0.5)
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .machine-spin,
+  .machine-spin-fast,
+  .machine-blink,
+  .machine-glow {
+    animation: none;
+  }
+}

@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import WaterTank3D from "@/components/WaterTank3D";
+import Pump3D from "@/components/Pump3D";
+import FilterTank3D from "@/components/FilterTank3D";
+import HeatExchanger3D from "@/components/HeatExchanger3D";
 
 /* ความจุถังน้ำ (ลิตร) — ปรับตามขนาดถังจริงของหน้างาน */
 const TANK_CAPACITY_L = 75000;
@@ -193,31 +196,11 @@ export default function ScadaPage() {
 
           {/* Machine 1: Industrial Water Pump */}
           <div className="flex flex-col items-center">
-            <div
-              className={`p-4 rounded-lg border-2 shadow-sm transition-all ${
-                pump01?.status === "Running"
-                  ? "bg-emerald-600 border-emerald-700 text-white"
-                  : "bg-zinc-200 border-zinc-300 text-zinc-700"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <span
-                  className={`text-2xl ${
-                    pump01?.status === "Running" ? "animate-spin" : ""
-                  }`}
-                >
-                  ⚙️
-                </span>
-                <div>
-                  <div className="text-xs font-bold font-mono">
-                    {pump01?.machine_id || "PUMP-01"}
-                  </div>
-                  <div className="text-[10px]">
-                    {pump01?.machine_name || "Main Pump"}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Pump3D
+              id={pump01?.machine_id || "PUMP-01"}
+              name={pump01?.machine_name || "Main Pump"}
+              running={pump01?.status === "Running"}
+            />
             {pump01 && (
               <button
                 onClick={() => toggleStatus(pump01)}
@@ -242,15 +225,13 @@ export default function ScadaPage() {
 
           {/* Machine 2: Sand Filter Tank */}
           <div className="flex flex-col items-center">
-            <div className="w-24 h-28 bg-gradient-to-b from-zinc-100 via-zinc-50 to-zinc-200 border-2 border-zinc-400 rounded-b-2xl rounded-t-lg shadow-md flex flex-col items-center justify-between p-2">
-              <div className="w-full bg-zinc-200 rounded text-[9px] text-center font-bold text-zinc-500 py-0.5">
-                FILTER TANK
-              </div>
-              <span className="text-2xl">🛢️</span>
-              <span className="text-[10px] font-mono font-bold text-zinc-700">
-                {flt01?.machine_id || "FLT-01"}
-              </span>
-            </div>
+            <FilterTank3D
+              id={flt01?.machine_id || "FLT-01"}
+              name={flt01?.machine_name || "Filter Tank"}
+              running={flt01?.status === "Running"}
+            />
+            {/* ช่องว่างสมมลิขนาดปุ่มของเครื่องอื่น เพื่อให้กราฟิกทั้งสามตรงกัน */}
+            <div className="mt-2 h-6" aria-hidden="true" />
           </div>
 
           {/* Pipe 3 */}
@@ -262,33 +243,11 @@ export default function ScadaPage() {
 
           {/* Machine 3: Heat Pump / Heater Unit */}
           <div className="flex flex-col items-center">
-            <div
-              className={`p-4 rounded-xl border-2 shadow-sm transition-all ${
-                heat01?.status === "Running"
-                  ? "bg-white border-orange-500 text-orange-600"
-                  : "bg-white border-zinc-300 text-zinc-600"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-10 h-10 rounded-full border-2 border-zinc-300 flex items-center justify-center ${
-                    heat01?.status === "Running"
-                      ? "bg-orange-100 animate-pulse"
-                      : "bg-zinc-100"
-                  }`}
-                >
-                  <span className="text-xl">🔥</span>
-                </div>
-                <div>
-                  <div className="text-xs font-bold font-mono">
-                    {heat01?.machine_id || "HEAT-01"}
-                  </div>
-                  <div className="text-[10px] font-semibold text-zinc-500">
-                    {heat01?.machine_name || "Heat Exchanger"}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <HeatExchanger3D
+              id={heat01?.machine_id || "HEAT-01"}
+              name={heat01?.machine_name || "Heat Exchanger"}
+              running={heat01?.status === "Running"}
+            />
             {heat01 && (
               <button
                 onClick={() => toggleStatus(heat01)}
