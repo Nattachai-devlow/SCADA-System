@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { Download, Loader2 } from "lucide-react";
+import writeXlsxFile from "write-excel-file/browser";
 import { createClient } from "@/lib/supabase/client";
 import { useTheme } from "@/components/ThemeProvider";
 import {
@@ -162,6 +164,127 @@ export default function DashboardOverviewPage() {
   const maintenance = machines.filter((m) => m.status === "Maintenance").length;
   const waitingPart = machines.filter((m) => m.status === "Waiting Part").length;
 
+  const [exporting, setExporting] = useState(false);
+
+  /** เอาไฟล์ออกมาแบบ sheet ต่อ section เพื่อให้ตรงกับลำดับบนหน้าจอ */
+  const handleExportExcel = useCallback(async () => {
+    if (exporting) return;
+    setExporting(true);
+
+    try {
+      const head = (value: string, backgroundColor = "#3F3F46") => ({
+        value,
+        fontWeight: "bold" as const,
+        color: "#FFFFFF",
+        backgroundColor,
+      });
+      const title = (text: string) => [
+        {
+          value: text,
+          fontWeight: "bold" as const,
+          fontSize: 14,
+        },
+      ];
+
+      // 1) ภาพรวม = metric cards
+      const overview = [
+        title("ภาพรวมระบบ (Dashboard Overview)"),
+        [],
+        [head("ตัวชี้วัด"), head("จำนวน")],
+        ["เครื่องจักรทั้งหมด", { value: total, type: Number }],
+        ["กำลังทำงาน (Running)", { value: running, type: Number }],
+        ["หยุดทำงาน (Stop)", { value: stop, type: Number }],
+        ["ซ่อมบำรุง (Maintenance)", { value: maintenance, type: Number }],
+        ["รออะไหล่ (Waiting Part)", { value: waitingPart, type: Number }],
+        ["Alarm ค้างแก้ไข (ยังไม่ปิด)", { value: alarmCount, type: Number }],
+      ];
+
+      // 2) ข้อมูลหลังบ้านของกราฟเส้น/พื้นที่/แท่ง
+      const telemetry = [
+        title("ข้อมูล Telemetry (ข้อมูลตามเวลา)"),
+        [],
+        [
+          head("เวลา"),
+          head("อุณหภูมินอก (°C)"),
+          head("อุณหภูมิเป้าหมาย (°C)"),
+          head("อุณหภูมิสระ (°C)"),
+          head("ระดับน้ำ (ลิตร)"),
+          head("อัตราการหยุดปั๊ม (%)"),
+        ],
+        ...telemetryLogs.map((t) => [
+          t.time ?? t.updated_at,
+          { value: t.outdoor_temp, type: Number },
+          { value: t.target_temp, type: Number },
+          { value: t.pool_temp, type: Number },
+          { value: t.water_level_liters, type: Number },
+          { value: t.pump_stop_rate ?? 0, type: Number },
+        ]),
+      ];
+
+      // 3) กราฟจำนวน Alarm แยกตามสถานะ
+      const byStatus = [
+        title("จำนวน Alarm แยกตามสถานะ (Alarm by Status)"),
+        [],
+        [
+          head("สถานะ"),
+          head("จำนวน"),
+        ],
+        ...alarmByStatus.map((row) => [
+          { value: row.status, backgroundColor: ALARM_STATUS_COLOR[row.status] },
+          { value: row.count, type: Number },
+        ]),
+      ];
+
+      // 4) กราฟเครื่องที่สร้าง Alarm มากที่สุด
+      const topSources = [
+        title("เครื่องจักรที่สร้าง Alarm มากที่สุด (Top Alarm Sources)"),
+        [],
+        [
+          head("เครื่องจักร"),
+          head("จำนวน"),
+        ],
+        ...alarmsByMachine.map((row) => [row.machine, { value: row.count, type: Number }]),
+      ];
+
+      // 5) ตารางสถานะเครื่องจักร
+      const statusTable = [
+        title("สถานะเครื่องจักรล่าสุด"),
+        [],
+        [
+          head("ID"),
+          head("ชื่อเครื่องจักร"),
+          head("ประเภท"),
+          head("สถานที่"),
+          head("สถานะ"),
+        ],
+        ...machines.map((m) => [
+          m.machine_id,
+          m.machine_name,
+          m.machine_type,
+          m.location || "-",
+          m.status,
+        ]),
+      ];
+
+      const stamp = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace(/[:T]/g, "-");
+
+      await writeXlsxFile([
+        { sheet: "ภาพรวม", data: overview, columns: [{ width: 32 }, { width: 14 }] },
+        { sheet: "Telemetry", data: telemetry, columns: [{ width: 22 }, ...Array(5).fill({ width: 22 })] },
+        { sheet: "Alarm by Status", data: byStatus, columns: [{ width: 20 }, { width: 12 }] },
+        { sheet: "Top Alarm Sources", data: topSources, columns: [{ width: 20 }, { width: 12 }] },
+        { sheet: "สถานะเครื่องจักร", data: statusTable, columns: [{ width: 14 }, { width: 24 }, { width: 16 }, { width: 20 }, { width: 16 }] },
+      ]).toFile(`dashboard-${stamp}.xlsx`);
+    } catch (err) {
+      console.error("ส่งออกไฟล์ Excel ไม่สำเร็จ:", err);
+    } finally {
+      setExporting(false);
+    }
+  }, [exporting, total, running, stop, maintenance, waitingPart, alarmCount, telemetryLogs, alarmByStatus, alarmsByMachine, machines]);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Running":
@@ -202,9 +325,24 @@ export default function DashboardOverviewPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 dark:text-zinc-50">
-        ภาพรวมระบบ (Dashboard Overview)
-      </h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 dark:text-zinc-50">
+          ภาพรวมระบบ (Dashboard Overview)
+        </h1>
+        <button
+          type="button"
+          onClick={handleExportExcel}
+          disabled={exporting}
+          className="inline-flex items-center justify-center gap-2 self-start rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-zinc-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+        >
+          {exporting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
+          {exporting ? "กำลังส่งออก..." : "ส่งออกเป็น Excel"}
+        </button>
+      </div>
 
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
