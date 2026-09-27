@@ -186,15 +186,15 @@ export default function AlarmPage() {
   const openCount = alarms.filter((a) => a.status !== "Closed").length;
 
   if (loading) {
-    return <div className="text-zinc-600 p-6">กำลังโหลดข้อมูล Alarms...</div>;
+    return <div className="text-zinc-600 dark:text-zinc-400 p-6">กำลังโหลดข้อมูล Alarms...</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">Alarm Management</h1>
-          <p className="text-zinc-600 text-sm">
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Alarm Management</h1>
+          <p className="text-zinc-600 dark:text-zinc-400 text-sm">
             บันทึกและจัดการรายการแจ้งเตือนขัดข้องของระบบ
           </p>
         </div>
@@ -205,18 +205,18 @@ export default function AlarmPage() {
             <button
               onClick={handleSimulate}
               disabled={simulating}
-              className="px-3 py-1.5 text-xs font-bold rounded-md bg-zinc-900 text-white hover:bg-zinc-700 disabled:opacity-50 transition shadow-sm active:scale-95"
+              className="px-3 py-1.5 text-xs font-bold rounded-md bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-700 disabled:opacity-50 transition shadow-sm active:scale-95"
             >
               {simulating ? "กำลังเพิ่ม..." : "จำลอง 3 Alarm"}
             </button>
           )}
-          <div className="flex bg-white border border-zinc-200 rounded-lg p-1">
+          <div className="flex bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-1">
             <button
               onClick={() => setFilter("OPEN")}
               className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
                 filter === "OPEN"
-                  ? "bg-zinc-900 text-white"
-                  : "text-zinc-600 hover:text-zinc-800"
+                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:text-zinc-200"
               }`}
             >
               ⚠️ รอดำเนินการ ({openCount})
@@ -225,8 +225,8 @@ export default function AlarmPage() {
               onClick={() => setFilter("ALL")}
               className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
                 filter === "ALL"
-                  ? "bg-zinc-100 text-zinc-800 shadow"
-                  : "text-zinc-600 hover:text-zinc-800"
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 shadow"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:text-zinc-200"
               }`}
             >
               📋 ทั้งหมด ({alarms.length})
@@ -236,11 +236,11 @@ export default function AlarmPage() {
       </div>
 
       {/* Alarm Table */}
-      <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-zinc-50/60 border-b border-zinc-200 text-zinc-600 text-sm">
+              <tr className="bg-zinc-50/60 border-b border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 text-sm">
                 <th className="p-4">เวลาเกิดเหตุ</th>
                 <th className="p-4">เครื่องจักร</th>
                 <th className="p-4">รหัสข้อผิดพลาด</th>
@@ -252,54 +252,54 @@ export default function AlarmPage() {
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200 text-sm">
+            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 text-sm">
               {filteredAlarms.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-zinc-500">
+                  <td colSpan={7} className="p-8 text-center text-zinc-500 dark:text-zinc-400">
                     ไม่มีรายการแจ้งเตือนในขณะนี้
                   </td>
                 </tr>
               ) : (
                 filteredAlarms.map((a) => (
-                  <tr key={a.id} className="hover:bg-zinc-100/40 transition">
-                    <td className="p-4 text-zinc-600 font-mono text-xs">
+                  <tr key={a.id} className="hover:bg-zinc-100/40 dark:bg-zinc-800/40 transition">
+                    <td className="p-4 text-zinc-600 dark:text-zinc-400 font-mono text-xs">
                       {new Date(a.created_at).toLocaleString("th-TH")}
                     </td>
-                    <td className="p-4 font-semibold text-zinc-800">
+                    <td className="p-4 font-semibold text-zinc-800 dark:text-zinc-200">
                       {a.machines?.machine_name || "-"}
-                      <div className="text-[10px] text-zinc-600 font-mono">
+                      <div className="text-[10px] text-zinc-600 dark:text-zinc-400 font-mono">
                         {a.machines?.machine_id}
                       </div>
                     </td>
                     <td className="p-4 font-mono text-rose-700 font-semibold">
                       {a.alarm_code}
                     </td>
-                    <td className="p-4 text-zinc-800">
+                    <td className="p-4 text-zinc-800 dark:text-zinc-200">
                       {a.alarm_description}
                     </td>
-                    <td className="p-4 text-zinc-600 text-xs">
+                    <td className="p-4 text-zinc-600 dark:text-zinc-400 text-xs">
                       {a.cause || "-"}
                     </td>
                     <td className="p-4">
                       {a.status === "Open" ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 shadow-sm animate-pulse">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-900 shadow-sm animate-pulse">
                           <span className="w-2 h-2 rounded-full bg-rose-500"></span>
                           OPEN
                         </span>
                       ) : a.status === "In Progress" ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-900">
                           <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                           IN PROGRESS
                         </span>
                       ) : a.status === "Closed" ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900">
                           ✓ CLOSED
                         </span>
                       ) : (
                         /* ค่าที่ไม่อยู่ใน 3 สถานะนี้ ต้องไม่ถูกแสดงเป็น "ปิดแล้ว" */
                         <span
                           title={`สถานะนี้ไม่อยู่ในระบบ: ${a.status}`}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-700 border border-zinc-300"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700"
                         >
                           ⚠ {a.status}
                         </span>
@@ -317,7 +317,7 @@ export default function AlarmPage() {
                       {canManage && a.status === "In Progress" && (
                         <button
                           onClick={() => handleClose(a.id)}
-                          className="px-3 py-1 bg-zinc-800 hover:bg-zinc-900 text-white text-xs font-semibold rounded-lg transition shadow-sm active:scale-95"
+                          className="px-3 py-1 bg-zinc-800 hover:bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-xs font-semibold rounded-lg transition shadow-sm active:scale-95"
                         >
                           Close
                         </button>

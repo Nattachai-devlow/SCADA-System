@@ -173,7 +173,7 @@ export default function MachineMasterPage() {
 
   if (loading) {
     return (
-      <div className="text-zinc-600 p-6">
+      <div className="text-zinc-600 dark:text-zinc-400 p-6">
         กำลังโหลดข้อมูล Machine Master...
       </div>
     );
@@ -183,8 +183,8 @@ export default function MachineMasterPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">Machine Master</h1>
-          <p className="text-zinc-600 text-sm">
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Machine Master</h1>
+          <p className="text-zinc-600 dark:text-zinc-400 text-sm">
             จัดการข้อมูลและลงทะเบียนเครื่องจักรในระบบ
           </p>
         </div>
@@ -192,23 +192,23 @@ export default function MachineMasterPage() {
         {canManage ? (
           <button
             onClick={() => handleOpenModal()}
-            className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 text-white font-medium text-sm rounded-lg transition shadow-sm flex items-center gap-2"
+            className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white font-medium text-sm rounded-lg transition shadow-sm flex items-center gap-2"
           >
             ➕ เพิ่มเครื่องจักรใหม่
           </button>
         ) : (
-          <span className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-100 px-3 py-2 text-xs font-medium text-zinc-500">
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-800 px-3 py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
             🔒 โหมดดูอย่างเดียว
           </span>
         )}
       </div>
 
       {/* ตารางแสดงผลเครื่องจักร */}
-      <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-zinc-50/60 border-b border-zinc-200 text-zinc-600 text-sm">
+              <tr className="bg-zinc-50/60 dark:bg-zinc-950/60 border-b border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 text-sm">
                 <th className="p-4">Machine ID</th>
                 <th className="p-4">ชื่อเครื่องจักร</th>
                 <th className="p-4">ประเภท</th>
@@ -222,75 +222,85 @@ export default function MachineMasterPage() {
             <tbody className="divide-y divide-zinc-200 text-sm">
               {machines.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-6 text-center text-zinc-500">
+                  <td colSpan={6} className="p-6 text-center text-zinc-500 dark:text-zinc-400">
                     ยังไม่มีข้อมูลเครื่องจักรในระบบ
                   </td>
                 </tr>
               ) : (
                 machines.map((m) => (
                   <tr key={m.id} className="hover:bg-zinc-100/40 transition">
-                    <td className="p-4 font-mono font-semibold text-zinc-800">
+                    <td className="p-4 font-mono font-semibold text-zinc-800 dark:text-zinc-200">
                       {m.machine_id}
                     </td>
-                    <td className="p-4 text-zinc-800">{m.machine_name}</td>
-                    <td className="p-4 text-zinc-600">{m.machine_type}</td>
-                    <td className="p-4 text-zinc-600">{m.location || "-"}</td>
+                    <td className="p-4 text-zinc-800 dark:text-zinc-200">{m.machine_name}</td>
+                    <td className="p-4 text-zinc-600 dark:text-zinc-400">{m.machine_type}</td>
+                    <td className="p-4 text-zinc-600 dark:text-zinc-400">{m.location || "-"}</td>
 
                     {/* เปลี่ยนสถานะด่วนจากตาราง — เฉพาะแอดมิน */}
                     <td className="p-4">
                       {roleLoading ? (
-            <span className="w-28 h-9 rounded-lg bg-zinc-100 animate-pulse" />
+            <span className="w-28 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
           ) : canManage ? (
                       <select
                         value={m.status}
                         onChange={(e) =>
                           handleQuickStatusChange(m, e.target.value)
                         }
-                        className={`px-2.5 py-1 text-xs rounded-full font-medium bg-zinc-50 border focus:outline-none cursor-pointer ${
+                        className={`px-2.5 py-1 text-xs rounded-full font-medium bg-zinc-50 dark:bg-zinc-950 border focus:outline-none cursor-pointer ${
                           m.status === "Running"
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900"
                             : m.status === "Stop"
-                              ? "text-zinc-600 border-zinc-400/50"
+                              ? "text-zinc-600 dark:text-zinc-400 border-zinc-400/50 dark:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-900"
                               : m.status === "Maintenance"
-                                ? "bg-amber-50 text-amber-700 border-amber-200"
-                                : "bg-red-50 text-red-700 border-red-200"
+                                ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-900"
+                                : m.status === "Waiting Part"
+                                  ? "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950 dark:text-violet-300 dark:border-violet-900 dark:bg-violet-950 dark:text-violet-300 dark:border-violet-900"
+                                  : "bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-900 dark:bg-red-950 dark:text-red-300 dark:border-red-900"
                         }`}
                       >
                         <option
                           value="Stop"
-                          className="bg-white text-zinc-700"
+                          className="bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300"
                         >
                           Stop
                         </option>
                         <option
                           value="Running"
-                          className="bg-white text-emerald-700"
+                          className="bg-white dark:bg-zinc-900 text-emerald-700"
                         >
                           Running
                         </option>
                         <option
                           value="Maintenance"
-                          className="bg-white text-zinc-900"
+                          className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
                         >
                           Maintenance
                         </option>
                         <option
                           value="Alarm"
-                          className="bg-white text-red-700"
+                          className="bg-white dark:bg-zinc-900 text-red-700"
                         >
                           Alarm
+                        </option>
+                        <option
+                          value="Waiting Part"
+                          className="bg-white dark:bg-zinc-900 text-violet-700"
+                        >
+                          Waiting Part
                         </option>
                       </select>
                       ) : (
                         <span
                           className={`inline-block px-2.5 py-1 text-xs rounded-full font-medium border ${
                             m.status === "Running"
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900"
                               : m.status === "Stop"
-                                ? "text-zinc-600 border-zinc-400/50 bg-zinc-50"
+                                ? "text-zinc-600 dark:text-zinc-400 border-zinc-400/50 bg-zinc-50 dark:bg-zinc-950 dark:bg-zinc-900 dark:text-zinc-400 dark:border-zinc-700"
                                 : m.status === "Maintenance"
-                                  ? "bg-amber-50 text-amber-700 border-amber-200"
-                                  : "bg-red-50 text-red-700 border-red-200"
+                                  ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-900"
+                                  : m.status === "Waiting Part"
+                                    ? "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950 dark:text-violet-300 dark:border-violet-900 dark:bg-violet-950 dark:text-violet-300 dark:border-violet-900"
+                                    : "bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-900 dark:bg-red-950 dark:text-red-300 dark:border-red-900"
                           }`}
                         >
                           {m.status}
@@ -304,7 +314,7 @@ export default function MachineMasterPage() {
                         <>
                       <button
                         onClick={() => handleOpenModal(m)}
-                        className="px-2.5 py-1 text-xs bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded border border-zinc-300 transition"
+                        className="px-2.5 py-1 text-xs bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded border border-zinc-300 dark:border-zinc-700 transition"
                       >
                         ✏️ แก้ไข
                       </button>
@@ -328,8 +338,8 @@ export default function MachineMasterPage() {
       {/* Modal Form */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
-          <div className="bg-white border border-zinc-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-sm">
-            <h2 className="text-xl font-bold text-zinc-900">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-sm">
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
               {editingMachine
                 ? "แก้ไขข้อมูลเครื่องจักร"
                 : "เพิ่มเครื่องจักรใหม่"}
@@ -337,7 +347,7 @@ export default function MachineMasterPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
                   Machine ID
                 </label>
                 <input
@@ -348,12 +358,12 @@ export default function MachineMasterPage() {
                     setFormData({ ...formData, machine_id: e.target.value })
                   }
                   placeholder="เช่น PUMP-01, HEAT-01"
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
+                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2.5 text-sm text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
                   ชื่อเครื่องจักร
                 </label>
                 <input
@@ -364,12 +374,12 @@ export default function MachineMasterPage() {
                     setFormData({ ...formData, machine_name: e.target.value })
                   }
                   placeholder="เช่น Water Filter Pump 1"
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
+                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2.5 text-sm text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
                   ประเภทเครื่องจักร
                 </label>
                 <select
@@ -377,7 +387,7 @@ export default function MachineMasterPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, machine_type: e.target.value })
                   }
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
+                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2.5 text-sm text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-900"
                 >
                   <option value="Pump">Pump</option>
                   <option value="Filter">Filter</option>
@@ -388,7 +398,7 @@ export default function MachineMasterPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
                   สถานที่ติดตั้ง (Location)
                 </label>
                 <input
@@ -398,12 +408,12 @@ export default function MachineMasterPage() {
                     setFormData({ ...formData, location: e.target.value })
                   }
                   placeholder="เช่น Pump Room A"
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
+                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2.5 text-sm text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
                   สถานะ (Status)
                 </label>
                 <select
@@ -411,26 +421,27 @@ export default function MachineMasterPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
+                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2.5 text-sm text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-900"
                 >
                   <option value="Stop">Stop</option>
                   <option value="Running">Running</option>
                   <option value="Maintenance">Maintenance</option>
                   <option value="Alarm">Alarm</option>
+                  <option value="Waiting Part">Waiting Part</option>
                 </select>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200">
+              <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-medium rounded-lg transition"
+                  className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-sm font-medium rounded-lg transition"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 text-white text-sm font-medium rounded-lg transition"
+                  className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white text-sm font-medium rounded-lg transition"
                 >
                   บันทึกข้อมูล
                 </button>

@@ -11,7 +11,7 @@ export default function DashboardLayout({
 }) {
   return (
     <DashboardGuard>
-    <div className="flex min-h-screen bg-zinc-50 text-zinc-900">
+    <div className="flex min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
       {/* 1. Sidebar ด้านข้าง */}
       <Sidebar />
 

@@ -93,8 +93,8 @@ const STYLES: Record<ToastKind, { wrap: string; icon: string; mark: string }> = 
     mark: "bg-red-500",
   },
   info: {
-    wrap: "border-zinc-200",
-    icon: "text-zinc-600",
+    wrap: "border-zinc-200 dark:border-zinc-800",
+    icon: "text-zinc-600 dark:text-zinc-400",
     mark: "bg-zinc-400",
   },
 };
@@ -124,7 +124,7 @@ export default function ToastHost() {
               key={t.id}
               role="status"
               aria-live="polite"
-              className={`toast-enter pointer-events-auto relative flex w-full items-start gap-3 overflow-hidden rounded-xl border bg-white py-3 pl-4 pr-3 shadow-lg shadow-zinc-900/8 ring-1 ring-zinc-900/5 ${s.wrap}`}
+              className={`toast-enter pointer-events-auto relative flex w-full items-start gap-3 overflow-hidden rounded-xl border bg-white dark:bg-zinc-900 py-3 pl-4 pr-3 shadow-lg shadow-zinc-900/8 ring-1 ring-zinc-900/5 ${s.wrap}`}
             >
               <span aria-hidden="true" className={`mt-0.5 shrink-0 ${s.icon}`}>
                 <svg
@@ -140,14 +140,14 @@ export default function ToastHost() {
                 </svg>
               </span>
 
-              <p className="flex-1 text-sm leading-relaxed text-zinc-800">
+              <p className="flex-1 text-sm leading-relaxed text-zinc-800 dark:text-zinc-200">
                 {t.message}
               </p>
 
               <button
                 onClick={() => dismiss(t.id)}
                 aria-label="ปิดข้อความแจ้งเตือน"
-                className="shrink-0 rounded-md p-0.5 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700"
+                className="shrink-0 rounded-md p-0.5 text-zinc-400 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:text-zinc-300"
               >
                 <svg
                   viewBox="0 0 24 24"

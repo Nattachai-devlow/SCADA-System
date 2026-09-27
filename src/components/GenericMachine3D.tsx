@@ -50,8 +50,8 @@ export default function GenericMachine3D({ id, name, status }: Machine3DProps) {
       </div>
 
       <div className="text-center leading-tight">
-        <div className="font-mono text-[11px] font-bold text-zinc-800">{id}</div>
-        <div className="text-[10px] text-zinc-500">{name}</div>
+        <div className="font-mono text-[11px] font-bold text-zinc-800 dark:text-zinc-200">{id}</div>
+        <div className="text-[10px] text-zinc-500 dark:text-zinc-400">{name}</div>
       </div>
     </div>
   );

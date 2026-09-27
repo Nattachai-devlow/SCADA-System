@@ -107,11 +107,11 @@ export default function WaterTank3D({
 
       {/* ป้ายกำกับ */}
       <div className="pointer-events-none absolute inset-x-0 top-1/2 z-50 -translate-y-1/2 text-center">
-        <div className="inline-block rounded-md border border-zinc-300 bg-white/90 px-3 py-1 shadow-sm">
-          <div className="font-mono text-sm font-bold text-zinc-800">
+        <div className="inline-block rounded-md border border-zinc-300 bg-white/90 px-3 py-1 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/90">
+          <div className="font-mono text-sm font-bold text-zinc-800 dark:text-zinc-200">
             {safeLiters.toLocaleString()} L
           </div>
-          <div className="font-mono text-[10px] text-zinc-500">
+          <div className="font-mono text-[10px] text-zinc-500 dark:text-zinc-400">
             {label} · {pct.toFixed(0)}%
           </div>
         </div>

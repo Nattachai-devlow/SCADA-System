@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function PendingPage() {
   const [loading, setLoading] = useState(true);
@@ -85,15 +86,18 @@ export default function PendingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4 text-zinc-600 font-mono text-sm">
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4 text-zinc-600 dark:text-zinc-400 font-mono text-sm">
         กำลังตรวจสอบสถานะการอนุมัติ...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4 text-zinc-900">
-      <div className="w-full max-w-md bg-white p-8 rounded-xl border border-amber-200 shadow-sm text-center space-y-6">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4 text-zinc-900 dark:text-zinc-100">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      <div className="w-full max-w-md bg-white dark:bg-zinc-900 p-8 rounded-xl border border-amber-200 shadow-sm text-center space-y-6">
         {/* Icon & Animation */}
         <div className="relative w-20 h-20 mx-auto flex items-center justify-center bg-amber-50 rounded-full border border-amber-200">
           <span className="text-4xl animate-pulse">⏳</span>
@@ -101,23 +105,23 @@ export default function PendingPage() {
 
         {/* Status Header */}
         <div className="space-y-2">
-          <h1 className="text-xl font-bold text-zinc-900">
+          <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
             อยู่ระหว่างรอผู้ดูแลระบบอนุมัติสิทธิ์
           </h1>
-          <p className="text-xs text-zinc-600">
+          <p className="text-xs text-zinc-600 dark:text-zinc-400">
             สวัสดีคุณ{" "}
-            <span className="text-zinc-800 font-semibold">{userName}</span>
+            <span className="text-zinc-800 dark:text-zinc-200 font-semibold">{userName}</span>
           </p>
         </div>
 
         {/* Detailed Message */}
-        <div className="bg-zinc-50/60 p-4 rounded-lg border border-zinc-200 text-left text-xs text-zinc-700 leading-relaxed space-y-2">
+        <div className="bg-zinc-50/60 p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 text-left text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed space-y-2">
           <p>
             บัญชีของคุณลงทะเบียนเรียบร้อยแล้ว แต่ต้องได้รับการอนุมัติสิทธิ์จาก{" "}
-            <span className="text-zinc-900 font-medium">Admin</span>{" "}
+            <span className="text-zinc-900 dark:text-zinc-100 font-medium">Admin</span>{" "}
             ก่อนจึงจะสามารถเข้าใช้งานระบบ SCADA ได้
           </p>
-          <p className="text-zinc-600">
+          <p className="text-zinc-600 dark:text-zinc-400">
             โปรดติดต่อผู้ดูแลระบบของท่านเพื่อขอเปิดสิทธิ์การใช้งาน
             เมื่อได้รับการอนุมัติแล้วกดปุ่มตรวจสอบสถานะอีกครั้ง
           </p>
@@ -127,14 +131,14 @@ export default function PendingPage() {
         <div className="space-y-3 pt-2">
           <button
             onClick={handleCheckStatus}
-            className="w-full bg-zinc-900 hover:bg-zinc-700 text-white font-bold py-2.5 rounded-lg transition text-xs shadow-sm"
+            className="w-full bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white font-bold py-2.5 rounded-lg transition text-xs shadow-sm"
           >
             🔄 ตรวจสอบสถานะการอนุมัติอีกครั้ง
           </button>
 
           <button
             onClick={handleLogout}
-            className="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-medium py-2 rounded-lg transition text-xs border border-zinc-300"
+            className="w-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium py-2 rounded-lg transition text-xs border border-zinc-300 dark:border-zinc-700"
           >
             ออกจากระบบ
           </button>

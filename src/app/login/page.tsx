@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -98,8 +99,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4 text-zinc-900">
-      <div className="w-full max-w-md bg-white p-8 rounded-xl border border-zinc-200 shadow-sm">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4 text-zinc-900 dark:text-zinc-100">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      <div className="w-full max-w-md bg-white dark:bg-zinc-900 p-8 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
         {/* Header Branding */}
         <div className="text-center mb-6">
           {/* next/image ไม่รองรับไฟล์ .ico จึงต้องใช้ img ตรง ๆ */}
@@ -107,17 +111,17 @@ export default function LoginPage() {
           <img
             src="/favicon.ico"
             alt="SCADA System"
-            className="mx-auto mb-3 h-12 w-12 rounded-xl border border-zinc-200 bg-zinc-50 object-contain p-1"
+            className="mx-auto mb-3 h-12 w-12 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 object-contain p-1"
           />
-          <h1 className="text-xl font-bold text-zinc-900 tracking-wider">
+          <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-wider">
             SCADA System
           </h1>
-          <p className="text-xs text-zinc-600 font-mono mt-1">
+          <p className="text-xs text-zinc-600 dark:text-zinc-400 font-mono mt-1">
             Water Circulation Control
           </p>
         </div>
 
-        <h2 className="text-lg font-semibold text-zinc-800 mb-4 text-center">
+        <h2 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 mb-4 text-center">
           {isSignUp ? "สมัครสมาชิกผู้ใช้งาน" : "เข้าสู่ระบบ (System Login)"}
         </h2>
 
@@ -130,14 +134,14 @@ export default function LoginPage() {
         <form onSubmit={handleAuth} className="space-y-4">
           {isSignUp && (
             <div>
-              <label className="block text-xs text-zinc-600 mb-1">
+              <label className="block text-xs text-zinc-600 dark:text-zinc-400 mb-1">
                 ชื่อ-นามสกุล
               </label>
               <input
                 type="text"
                 required
                 placeholder="สมชาย ใจดี"
-                className="w-full p-2.5 rounded-lg bg-white border border-zinc-300 text-zinc-900 text-sm focus:outline-none focus:border-zinc-900"
+                className="w-full p-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 text-sm focus:outline-none focus:border-zinc-900"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
               />
@@ -145,26 +149,26 @@ export default function LoginPage() {
           )}
 
           <div>
-            <label className="block text-xs text-zinc-600 mb-1">อีเมล</label>
+            <label className="block text-xs text-zinc-600 dark:text-zinc-400 mb-1">อีเมล</label>
             <input
               type="email"
               required
               placeholder="user@example.com"
-              className="w-full p-2.5 rounded-lg bg-white border border-zinc-300 text-zinc-900 text-sm focus:outline-none focus:border-zinc-900 font-mono"
+              className="w-full p-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 text-sm focus:outline-none focus:border-zinc-900 font-mono"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-xs text-zinc-600 mb-1">
+            <label className="block text-xs text-zinc-600 dark:text-zinc-400 mb-1">
               รหัสผ่าน
             </label>
             <input
               type="password"
               required
               placeholder="••••••••"
-              className="w-full p-2.5 rounded-lg bg-white border border-zinc-300 text-zinc-900 text-sm focus:outline-none focus:border-zinc-900"
+              className="w-full p-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 text-sm focus:outline-none focus:border-zinc-900"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -173,7 +177,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-zinc-900 hover:bg-zinc-700 text-white font-bold py-2.5 rounded-lg transition duration-200 mt-2 text-sm disabled:opacity-50"
+            className="w-full bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white font-bold py-2.5 rounded-lg transition duration-200 mt-2 text-sm disabled:opacity-50"
           >
             {loading
               ? "กำลังประมวลผล..."
@@ -183,7 +187,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-6 text-center text-xs text-zinc-600">
+        <div className="mt-6 text-center text-xs text-zinc-600 dark:text-zinc-400">
           {isSignUp ? "มีบัญชีผู้ใช้แล้ว?" : "ยังไม่มีบัญชีผู้ใช้?"}{" "}
           <button
             type="button"
@@ -191,7 +195,7 @@ export default function LoginPage() {
               setIsSignUp(!isSignUp);
               setErrorMsg("");
             }}
-            className="text-zinc-900 underline hover:text-zinc-600 font-medium ml-1"
+            className="text-zinc-900 dark:text-zinc-100 underline hover:text-zinc-600 dark:hover:text-zinc-400 font-medium ml-1"
           >
             {isSignUp ? "เข้าสู่ระบบ" : "สมัครสมาชิกใหม่"}
           </button>

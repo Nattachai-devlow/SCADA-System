@@ -341,7 +341,7 @@ export default function MaintenancePage() {
 
   if (loading) {
     return (
-      <div className="text-zinc-600 p-6">
+      <div className="text-zinc-600 dark:text-zinc-400 p-6">
         กำลังโหลดข้อมูล Maintenance Records...
       </div>
     );
@@ -352,16 +352,16 @@ export default function MaintenancePage() {
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
             Maintenance Records
           </h1>
-          <p className="text-zinc-600 text-sm">
+          <p className="text-zinc-600 dark:text-zinc-400 text-sm">
             การวางแผน บันทึก ค้นหา และติดตามงานบำรุงรักษาเครื่องจักร
           </p>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-700 text-white font-medium text-xs rounded-xl transition shadow-sm flex items-center gap-2 self-start sm:self-auto"
+          className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white font-medium text-xs rounded-xl transition shadow-sm flex items-center gap-2 self-start sm:self-auto"
         >
           <span>🔧</span>
           <span>บันทึกการซ่อมบำรุงใหม่</span>
@@ -369,11 +369,11 @@ export default function MaintenancePage() {
       </div>
 
       {/* --- Search & Filter Bar --- */}
-      <div className="bg-white border border-zinc-200 rounded-xl p-4 shadow-sm space-y-3">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 shadow-sm space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
           {/* 1. ค้นหาคำค้นหลัก */}
           <div>
-            <label className="block text-zinc-600 mb-1 font-medium">
+            <label className="block text-zinc-600 dark:text-zinc-400 mb-1 font-medium">
               🔍 ค้นหา (Search)
             </label>
             <input
@@ -381,19 +381,19 @@ export default function MaintenancePage() {
               placeholder="ค้นหาหัวข้อ, รายละเอียด, รหัสเครื่อง..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-zinc-900"
+              className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 focus:outline-none focus:border-zinc-900"
             />
           </div>
 
           {/* 2. เลือกเครื่องจักร */}
           <div>
-            <label className="block text-zinc-600 mb-1 font-medium">
+            <label className="block text-zinc-600 dark:text-zinc-400 mb-1 font-medium">
               🏭 เลือกเครื่องจักร
             </label>
             <select
               value={selectedMachineFilter}
               onChange={(e) => setSelectedMachineFilter(e.target.value)}
-              className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-zinc-800 focus:outline-none focus:border-zinc-900"
+              className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-900"
             >
               <option value="ALL">เครื่องจักรทั้งหมด (All Machines)</option>
               {machinesList.map((m) => (
@@ -406,7 +406,7 @@ export default function MaintenancePage() {
 
           {/* 3. วันที่เริ่มต้น (พร้อม Placeholder dd/mm/yyyy) */}
           <div>
-            <label className="block text-zinc-600 mb-1 font-medium">
+            <label className="block text-zinc-600 dark:text-zinc-400 mb-1 font-medium">
               📅 ตั้งแต่วันที่
             </label>
             <input
@@ -418,13 +418,13 @@ export default function MaintenancePage() {
               }}
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-zinc-900"
+              className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 focus:outline-none focus:border-zinc-900"
             />
           </div>
 
           {/* 4. วันที่สิ้นสุด (พร้อม Placeholder dd/mm/yyyy) */}
           <div>
-            <label className="block text-zinc-600 mb-1 font-medium">
+            <label className="block text-zinc-600 dark:text-zinc-400 mb-1 font-medium">
               📅 ถึงวันที่
             </label>
             <input
@@ -436,21 +436,21 @@ export default function MaintenancePage() {
               }}
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-zinc-900"
+              className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 focus:outline-none focus:border-zinc-900"
             />
           </div>
         </div>
 
         {/* บาร์สรุปผลลัพธ์ & ปุ่ม Clear Filter */}
-        <div className="flex justify-between items-center pt-2 border-t border-zinc-200 text-xs">
-          <span className="text-zinc-600">
+        <div className="flex justify-between items-center pt-2 border-t border-zinc-200 dark:border-zinc-800 text-xs">
+          <span className="text-zinc-600 dark:text-zinc-400">
             พบรายการทั้งหมด{" "}
-            <strong className="text-zinc-900 font-semibold">
+            <strong className="text-zinc-900 dark:text-zinc-100 font-semibold">
               {filteredRecords.length}
             </strong>{" "}
             รายการ
             {filteredRecords.length !== records.length && (
-              <span className="text-zinc-500 ml-1">
+              <span className="text-zinc-500 dark:text-zinc-400 ml-1">
                 (จากทั้งหมด {records.length} รายการ)
               </span>
             )}
@@ -471,11 +471,11 @@ export default function MaintenancePage() {
       </div>
 
       {/* Maintenance Table */}
-      <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-zinc-50/60 border-b border-zinc-200 text-zinc-600 text-sm">
+              <tr className="bg-zinc-50/60 border-b border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 text-sm">
                 <th className="p-4">วันที่ดำเนินการ</th>
                 <th className="p-4">เครื่องจักร</th>
                 <th className="p-4">หัวข้องาน</th>
@@ -483,39 +483,39 @@ export default function MaintenancePage() {
                 <th className="p-4 text-right">การจัดการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200 text-sm">
+            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 text-sm">
               {filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-zinc-500">
+                  <td colSpan={5} className="p-8 text-center text-zinc-500 dark:text-zinc-400">
                     ไม่พบข้อมูลการซ่อมบำรุงที่ตรงกับเงื่อนไขการค้นหา
                   </td>
                 </tr>
               ) : (
                 filteredRecords.map((rec) => (
-                  <tr key={rec.id} className="hover:bg-zinc-100/40 transition">
-                    <td className="p-4 text-zinc-600 font-mono text-xs">
+                  <tr key={rec.id} className="hover:bg-zinc-100/40 dark:bg-zinc-800/40 transition">
+                    <td className="p-4 text-zinc-600 dark:text-zinc-400 font-mono text-xs">
                       {formatDateDDMMYYYY(rec.maintenance_date)}
                     </td>
-                    <td className="p-4 font-semibold text-zinc-800">
+                    <td className="p-4 font-semibold text-zinc-800 dark:text-zinc-200">
                       {rec.machines?.machine_name || "-"}
-                      <div className="text-[10px] text-zinc-600 font-mono">
+                      <div className="text-[10px] text-zinc-600 dark:text-zinc-400 font-mono">
                         {rec.machines?.machine_id}
                       </div>
                     </td>
-                    <td className="p-4 font-medium text-zinc-900">
+                    <td className="p-4 font-medium text-zinc-900 dark:text-zinc-100">
                       {rec.title}
                     </td>
-                    <td className="p-4 text-zinc-600">{rec.details || "-"}</td>
+                    <td className="p-4 text-zinc-600 dark:text-zinc-400">{rec.details || "-"}</td>
                     <td className="p-4 text-right space-x-2">
                       <button
                         onClick={() => handleOpenModal(rec)}
-                        className="px-2.5 py-1 text-xs bg-zinc-100 hover:bg-zinc-200 text-zinc-900 rounded border border-zinc-300 transition"
+                        className="px-2.5 py-1 text-xs bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 rounded border border-zinc-300 dark:border-zinc-700 transition"
                       >
                         ✏️ แก้ไข
                       </button>
                       <button
                         onClick={() => handleDelete(rec.id, rec.title)}
-                        className="px-2.5 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-700 rounded border border-red-200 transition"
+                        className="px-2.5 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300 rounded border border-red-200 transition"
                       >
                         🗑️ ลบ
                       </button>
@@ -531,8 +531,8 @@ export default function MaintenancePage() {
       {/* Modal Form */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white border border-zinc-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-sm">
-            <h2 className="text-xl font-bold text-zinc-900">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-sm">
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
               {editingRecord
                 ? "แก้ไขรายการซ่อมบำรุง"
                 : "สร้างรายการซ่อมบำรุงใหม่"}
@@ -540,10 +540,10 @@ export default function MaintenancePage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
                   เครื่องจักร
                   {selectedMachine && (
-                    <span className="ml-2 font-normal text-zinc-500">
+                    <span className="ml-2 font-normal text-zinc-500 dark:text-zinc-400">
                       สถานะปัจจุบัน:{" "}
                       {STATUS_LABEL[selectedMachine.status] ??
                         selectedMachine.status}
@@ -564,7 +564,7 @@ export default function MaintenancePage() {
                         next?.status ?? formData.machine_status,
                     });
                   }}
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
+                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2.5 text-sm text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-900"
                 >
                   {machinesList.map((m) => (
                     <option key={m.id} value={m.id}>
@@ -576,7 +576,7 @@ export default function MaintenancePage() {
 
               {canManage ? (
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                  <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
                     ตั้งสถานะเครื่องจักรหลังบันทึก
                   </label>
                   <select
@@ -587,7 +587,7 @@ export default function MaintenancePage() {
                         machine_status: e.target.value,
                       })
                     }
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
+                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2.5 text-sm text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-900"
                   >
                     {MACHINE_STATUSES.map((s) => (
                       <option key={s} value={s}>
@@ -595,7 +595,7 @@ export default function MaintenancePage() {
                       </option>
                     ))}
                   </select>
-                  <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500">
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">
                     เลือก &quot;ทำงาน (Running)&quot; เมื่อซ่อมเสร็จแล้ว
                     เครื่องจะกลับไปเดินเครื่องและไฟในหน้า SCADA
                     จะกลับมาเป็นสีเขียวโดยอัตโนมัติ
@@ -603,11 +603,11 @@ export default function MaintenancePage() {
                 </div>
               ) : (
                 !roleLoading && (
-                  <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5">
-                    <p className="text-xs font-semibold text-zinc-600">
+                  <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 px-3 py-2.5">
+                    <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">
                       🔒 เปลี่ยนสถานะเครื่องจักรไม่ได้
                     </p>
-                    <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">
+                    <p className="mt-1 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">
                       บันทึกงานซ่อมได้ตามปกติ
                       แต่การสลับเครื่องกลับไปทำงานต้องให้ผู้ดูแลระบบเป็นผู้กด
                     </p>
@@ -616,7 +616,7 @@ export default function MaintenancePage() {
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
                   หัวข้องาน (Title)
                 </label>
                 <input
@@ -627,12 +627,12 @@ export default function MaintenancePage() {
                   onChange={(e) =>
                     setFormData({ ...formData, title: e.target.value })
                   }
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
+                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2.5 text-sm text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
                   รายละเอียดการทำงาน (Details)
                 </label>
                 <textarea
@@ -642,33 +642,33 @@ export default function MaintenancePage() {
                   onChange={(e) =>
                     setFormData({ ...formData, details: e.target.value })
                   }
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
+                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2.5 text-sm text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
                   วันที่ดำเนินการ (อัตโนมัติ)
                 </label>
                 <input
                   type="date"
                   readOnly
                   value={formData.maintenance_date}
-                  className="w-full bg-zinc-50/60 border border-zinc-200/80 rounded-lg p-2.5 text-sm text-zinc-600 cursor-not-allowed opacity-70 focus:outline-none"
+                  className="w-full bg-zinc-50/60 border border-zinc-200/80 rounded-lg p-2.5 text-sm text-zinc-600 dark:text-zinc-400 cursor-not-allowed opacity-70 focus:outline-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200">
+              <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-medium rounded-lg transition"
+                  className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-sm font-medium rounded-lg transition"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 text-white text-sm font-medium rounded-lg transition"
+                  className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white text-sm font-medium rounded-lg transition"
                 >
                   บันทึกข้อมูล
                 </button>

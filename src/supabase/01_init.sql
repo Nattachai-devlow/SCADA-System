@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS public.machines (
   machine_name TEXT NOT NULL,
   machine_type TEXT NOT NULL,
   location TEXT,
-  status TEXT CHECK (status IN ('Running', 'Stop', 'Alarm', 'Maintenance')) DEFAULT 'Stop',
+  -- 'Waiting Part' = เรือมซ้องใหม่ของอะไหล่ จญุดและวไม่สามายเมื่อตัวเด์มีชื้นอีก
+  status TEXT CHECK (status IN ('Running', 'Stop', 'Alarm', 'Maintenance', 'Waiting Part')) DEFAULT 'Stop',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
 

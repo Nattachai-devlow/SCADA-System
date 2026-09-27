@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import WaterTank3D from "@/components/WaterTank3D";
 import { getMachineVisual } from "@/components/machine-visuals";
+import { useUserRole } from "@/hooks/useUserRole";
 
 /* ความจุถังน้ำ (ลิตร) — ปรับตามขนาดถังจริงของหน้างาน */
 const TANK_CAPACITY_L = 75000;
@@ -39,6 +40,7 @@ export default function ScadaPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const supabase = createClient();
+  const { canManage, loading: roleLoading } = useUserRole();
 
   useEffect(() => {
     let isMounted = true;
@@ -153,30 +155,30 @@ export default function ScadaPage() {
   );
 
   if (loading)
-    return <div className="p-6 text-zinc-500">Loading SCADA Diagram...</div>;
+    return <div className="p-6 text-zinc-500 dark:text-zinc-400">Loading SCADA Diagram...</div>;
 
   return (
     <div className="space-y-6">
       {/* Header Info Cards (ดึงข้อมูลแบบ Dynamic จาก Supabase) */}
       <div className="flex flex-wrap gap-4">
-        <div className="bg-white border border-zinc-300 rounded shadow-sm p-3 min-w-[140px]">
-          <div className="text-xs text-zinc-500 font-semibold">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded shadow-sm p-3 min-w-[140px]">
+          <div className="text-xs text-zinc-500 dark:text-zinc-400 font-semibold">
             Outdoor Temp
           </div>
-          <div className="text-lg font-bold text-zinc-800">
+          <div className="text-lg font-bold text-zinc-800 dark:text-zinc-200">
             {Number(telemetry.outdoor_temp).toFixed(1)} °C
           </div>
         </div>
-        <div className="bg-white border border-zinc-300 rounded shadow-sm p-3 min-w-[140px]">
-          <div className="text-xs text-zinc-500 font-semibold">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded shadow-sm p-3 min-w-[140px]">
+          <div className="text-xs text-zinc-500 dark:text-zinc-400 font-semibold">
             Target Temp
           </div>
           <div className="text-lg font-bold text-emerald-600">
             {Number(telemetry.target_temp).toFixed(1)} °C
           </div>
         </div>
-        <div className="bg-white border border-zinc-300 rounded shadow-sm p-3 min-w-[140px]">
-          <div className="text-xs text-zinc-500 font-semibold">Pool Temp</div>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded shadow-sm p-3 min-w-[140px]">
+          <div className="text-xs text-zinc-500 dark:text-zinc-400 font-semibold">Pool Temp</div>
           <div className="text-lg font-bold text-sky-600">
             {Number(telemetry.pool_temp).toFixed(1)} °C
           </div>
@@ -184,7 +186,7 @@ export default function ScadaPage() {
       </div>
 
       {/* Industrial P&ID Board */}
-      <div className="bg-zinc-100 border border-zinc-300 rounded-xl p-6 sm:p-8 shadow-inner">
+      <div className="bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-xl p-6 sm:p-8 shadow-inner">
         {/* Pool Tank (3D + animation) */}
         <div className="mx-auto w-full max-w-[420px] min-w-[260px]">
           <WaterTank3D
@@ -198,7 +200,7 @@ export default function ScadaPage() {
         {/* Supply header — doubles as the main header rail */}
         <div className="mt-8 max-w-5xl mx-auto">
           <div className="flex items-center gap-3">
-            <span className="bg-white px-2 py-0.5 rounded border border-zinc-300 text-xs font-semibold text-zinc-500 whitespace-nowrap">
+            <span className="bg-white dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-300 dark:border-zinc-700 text-xs font-semibold text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
               Water Supply
             </span>
             <div className="flex-1 h-3 bg-gradient-to-b from-zinc-200 via-zinc-50 to-zinc-300 border-y border-zinc-400 relative rounded-sm">
@@ -206,18 +208,18 @@ export default function ScadaPage() {
                 <div className="absolute inset-0 bg-sky-400/60 animate-pulse" />
               )}
             </div>
-            <span className="bg-white px-2 py-0.5 rounded border border-zinc-300 text-xs font-semibold text-zinc-500 whitespace-nowrap">
+            <span className="bg-white dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-300 dark:border-zinc-700 text-xs font-semibold text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
               {machines.length} unit{machines.length === 1 ? "" : "s"}
             </span>
           </div>
 
           {/* Machine grid — grows to fit every machine in the table */}
           {orderedMachines.length === 0 ? (
-            <div className="mt-8 rounded-lg border border-dashed border-zinc-300 bg-white/60 py-12 text-center">
-              <p className="text-sm font-semibold text-zinc-600">
+            <div className="mt-8 rounded-lg border border-dashed border-zinc-300 dark:border-zinc-700 bg-white/60 dark:bg-zinc-900/60 py-12 text-center">
+              <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
                 No machines yet
               </p>
-              <p className="mt-1 text-xs text-zinc-500">
+              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
                 Add one under Machines and it will appear here.
               </p>
             </div>
@@ -243,36 +245,52 @@ export default function ScadaPage() {
                       status={machine.status}
                     />
 
-                    {/* Maintenance / Alarm ยังกดสตาร์ท-หยุดได้เหมือนเดิม
-                        แต่ต้องมีป้ายบอกสถานะให้ operator เห็นชัด */}
-                    {machine.status === "Maintenance" ||
-                    machine.status === "Alarm" ? (
+                    {/* เครื่องที่ไม่ได้ทำงานปกติต้องมีป้ายบอก operator เห็นชัด
+                        Waiting Part แยกจาก Maintenance ตรงที่ยังไม่ได้ซ่อม
+                        แต่ยังไม่มีอะไหล่มาติดตั้ง */}
+                    {machine.status !== "Running" &&
+                    machine.status !== "Stop" ? (
                       <span
                         className={`mt-2 px-2.5 py-0.5 text-[10px] font-bold rounded border ${
                           machine.status === "Alarm"
-                            ? "bg-rose-50 border-rose-300 text-rose-700"
-                            : "bg-amber-50 border-amber-300 text-amber-700"
+                            ? "bg-rose-50 border-rose-300 text-rose-700 dark:bg-rose-950 dark:border-rose-800 dark:text-rose-300"
+                            : machine.status === "Waiting Part"
+                              ? "bg-violet-50 border-violet-300 text-violet-700 dark:bg-violet-950 dark:border-violet-800 dark:text-violet-300"
+                              : "bg-amber-50 border-amber-300 text-amber-700 dark:bg-amber-950 dark:border-amber-800 dark:text-amber-300"
                         }`}
                       >
-                        {machine.status === "Alarm" ? "ALARM" : "MAINTENANCE"}
+                        {machine.status.toUpperCase()}
                       </span>
                     ) : null}
 
-                    <button
-                      onClick={() => toggleStatus(machine)}
-                      disabled={updatingId === machine.id}
-                      className={`mt-2 px-3 py-1 text-[11px] font-bold rounded shadow transition ${
-                        running
+                    {/* เครื่องที่รออะไหล่ยังสตาร์ทไม่ได้จนกว่าจะได้ชิ้นส่วนมา
+                        ช่างเทคนิคดูได้แต่กดสั่งเครื่องไม่ได้ */}
+                    {canManage && !roleLoading && (
+                      <button
+                        onClick={() => toggleStatus(machine)}
+                        disabled={
+                          updatingId === machine.id ||
+                          machine.status === "Waiting Part"
+                        }
+                        className={`mt-2 px-3 py-1 text-[11px] font-bold rounded shadow transition disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none ${
+                          running
+                            ? isHeater
+                              ? "bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white dark:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-900 dark:text-zinc-100 dark:hover:bg-white dark:bg-zinc-900"
+                              : "bg-rose-600 hover:bg-rose-700 text-white"
+                            : isHeater
+                              ? "bg-orange-500 hover:bg-orange-600 text-white"
+                              : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                        }`}
+                      >
+                        {running
                           ? isHeater
-                            ? "bg-zinc-900 hover:bg-zinc-700 text-white"
-                            : "bg-rose-600 hover:bg-rose-700 text-white"
+                            ? "OFF"
+                            : "STOP"
                           : isHeater
-                            ? "bg-orange-500 hover:bg-orange-600 text-white"
-                            : "bg-emerald-600 hover:bg-emerald-700 text-white"
-                      }`}
-                    >
-                      {running ? (isHeater ? "OFF" : "STOP") : isHeater ? "ON" : "START"}
-                    </button>
+                            ? "ON"
+                            : "START"}
+                      </button>
+                    )}
                   </div>
                 );
               })}
