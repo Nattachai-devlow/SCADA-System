@@ -54,11 +54,11 @@ export default function DashboardOverviewPage() {
         .from("machines")
         .select("*");
 
-      // 2. ดึงจำนวน Alarm ที่ค้างแก้ไข (ACTIVE)
+      // 2. ดึงจำนวน Alarm ค้างแก้ไข (status = Open)
       const { data: alarmsData } = await supabase
         .from("alarms")
         .select("*")
-        .eq("status", "ACTIVE");
+        .eq("status", "Open");
 
       // 3. ดึงข้อมูลระบบย้อนหลังทั้งหมดจากตาราง system_telemetry
       const { data: telemetryData } = await supabase
