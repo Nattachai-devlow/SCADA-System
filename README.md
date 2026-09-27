@@ -59,6 +59,7 @@ cp .env.example .env.local
 
 1. `src/supabase/01_init.sql` — สร้างตาราง (profiles, machines, alarms, maintenance_records)
 2. `src/supabase/RLS.sql` — เปิด Row Level Security และนิยาม policy
+3. `src/supabase/02_seed_alarms.sql` — (ไม่บังคับ) ข้อมูล alarm ตัวอย่าง 10 รายการ รันซ้ำได้ไม่เกิดข้อมูลซ้ำ ต้องมีเครื่องจักรอยู่แล้ว
 
 ### 4. เริ่ม dev server
 
