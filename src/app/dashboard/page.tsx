@@ -105,28 +105,28 @@ export default function DashboardOverviewPage() {
     switch (status) {
       case "Running":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/40 shadow-sm shadow-emerald-950">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             Running
           </span>
         );
       case "Stop":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
-            <span className="w-2 h-2 rounded-full bg-slate-500" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-700 border border-zinc-300">
+            <span className="w-2 h-2 rounded-full bg-zinc-400" />
             Stop
           </span>
         );
       case "Maintenance":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/40">
-            <span className="w-2 h-2 rounded-full bg-amber-400" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+            <span className="w-2 h-2 rounded-full bg-amber-500" />
             Maintenance
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-600 border border-zinc-300">
             {status}
           </span>
         );
@@ -135,61 +135,61 @@ export default function DashboardOverviewPage() {
 
   if (loading) {
     return (
-      <div className="p-6 text-slate-400">กำลังโหลดข้อมูล Dashboard...</div>
+      <div className="p-6 text-zinc-600">กำลังโหลดข้อมูล Dashboard...</div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-cyan-400">
+      <h1 className="text-2xl font-bold text-zinc-900">
         ภาพรวมระบบ (Dashboard Overview)
       </h1>
 
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl">
-          <p className="text-slate-400 text-sm">เครื่องจักรทั้งหมด</p>
-          <p className="text-3xl font-bold text-white mt-2">{total}</p>
+        <div className="bg-white border border-zinc-200 p-5 rounded-xl">
+          <p className="text-zinc-600 text-sm">เครื่องจักรทั้งหมด</p>
+          <p className="text-3xl font-bold text-zinc-900 mt-2">{total}</p>
         </div>
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl border-l-4 border-l-emerald-500">
-          <p className="text-slate-400 text-sm">กำลังทำงาน (Running)</p>
-          <p className="text-3xl font-bold text-emerald-400 mt-2">{running}</p>
+        <div className="bg-white border border-zinc-200 p-5 rounded-xl border-l-4 border-l-emerald-500">
+          <p className="text-zinc-600 text-sm">กำลังทำงาน (Running)</p>
+          <p className="text-3xl font-bold text-emerald-700 mt-2">{running}</p>
         </div>
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl border-l-4 border-l-slate-600">
-          <p className="text-slate-400 text-sm">หยุดทำงาน (Stop)</p>
-          <p className="text-3xl font-bold text-slate-300 mt-2">{stop}</p>
+        <div className="bg-white border border-zinc-200 p-5 rounded-xl border-l-4 border-l-zinc-600">
+          <p className="text-zinc-600 text-sm">หยุดทำงาน (Stop)</p>
+          <p className="text-3xl font-bold text-zinc-700 mt-2">{stop}</p>
         </div>
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl border-l-4 border-l-amber-500">
-          <p className="text-slate-400 text-sm">ซ่อมบำรุง (Maintenance)</p>
-          <p className="text-3xl font-bold text-amber-400 mt-2">
+        <div className="bg-white border border-zinc-200 p-5 rounded-xl border-l-4 border-l-amber-500">
+          <p className="text-zinc-600 text-sm">ซ่อมบำรุง (Maintenance)</p>
+          <p className="text-3xl font-bold text-zinc-900 mt-2">
             {maintenance}
           </p>
         </div>
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl border-l-4 border-l-rose-500">
-          <p className="text-slate-400 text-sm">
+        <div className="bg-white border border-zinc-200 p-5 rounded-xl border-l-4 border-l-rose-500">
+          <p className="text-zinc-600 text-sm">
             Alarm ค้างแก้ไข (Open Alarms)
           </p>
-          <p className="text-3xl font-bold text-rose-400 mt-2">{alarmCount}</p>
+          <p className="text-3xl font-bold text-rose-700 mt-2">{alarmCount}</p>
         </div>
       </div>
 
       {/* Analytics Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* กราฟที่ 1: แนวโน้มอุณหภูมิ */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl lg:col-span-2 min-h-[360px]">
-          <h2 className="text-md font-bold text-slate-200 mb-4">
+        <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm lg:col-span-2 min-h-[360px]">
+          <h2 className="text-md font-bold text-zinc-800 mb-4">
             📈 แนวโน้มอุณหภูมิ (Temperature Trends)
           </h2>
           <div className="w-full h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={telemetryLogs}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="time" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" unit="°C" domain={[15, 45]} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
+                <XAxis dataKey="time" stroke="#71717a" />
+                <YAxis stroke="#71717a" unit="°C" domain={[15, 45]} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#0f172a",
-                    borderColor: "#334155",
+                    backgroundColor: "#18181b",
+                    borderColor: "#e4e4e7",
                     color: "#fff",
                   }}
                 />
@@ -198,7 +198,7 @@ export default function DashboardOverviewPage() {
                   type="monotone"
                   dataKey="outdoor_temp"
                   name="Outdoor Temp"
-                  stroke="#94a3b8"
+                  stroke="#71717a"
                   strokeWidth={2}
                   dot={{ r: 4 }}
                 />
@@ -224,8 +224,8 @@ export default function DashboardOverviewPage() {
         </div>
 
         {/* กราฟที่ 2: ปริมาณน้ำใน Tank */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl min-h-[320px]">
-          <h2 className="text-md font-bold text-slate-200 mb-4">
+        <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm min-h-[320px]">
+          <h2 className="text-md font-bold text-zinc-800 mb-4">
             💧 ปริมาณน้ำใน Tank (Water Level)
           </h2>
           <div className="w-full h-[260px]">
@@ -237,13 +237,13 @@ export default function DashboardOverviewPage() {
                     <stop offset="95%" stopColor="#0284c7" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="time" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" unit="L" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
+                <XAxis dataKey="time" stroke="#71717a" />
+                <YAxis stroke="#71717a" unit="L" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#0f172a",
-                    borderColor: "#334155",
+                    backgroundColor: "#18181b",
+                    borderColor: "#e4e4e7",
                     color: "#fff",
                   }}
                 />
@@ -251,7 +251,7 @@ export default function DashboardOverviewPage() {
                   type="monotone"
                   dataKey="water_level_liters"
                   name="ปริมาณน้ำ (ลิตร)"
-                  stroke="#38bdf8"
+                  stroke="#0ea5e9"
                   fillOpacity={1}
                   fill="url(#waterColor)"
                 />
@@ -261,20 +261,20 @@ export default function DashboardOverviewPage() {
         </div>
 
         {/* กราฟที่ 3: อัตราการหยุดทำงานของปั๊ม */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl min-h-[320px]">
-          <h2 className="text-md font-bold text-slate-200 mb-4">
+        <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm min-h-[320px]">
+          <h2 className="text-md font-bold text-zinc-800 mb-4">
             ⚠️ อัตราการที่ปั๊มหยุดทำงาน (Pump Downtime Rate)
           </h2>
           <div className="w-full h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={telemetryLogs}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="time" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" unit="%" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
+                <XAxis dataKey="time" stroke="#71717a" />
+                <YAxis stroke="#71717a" unit="%" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#0f172a",
-                    borderColor: "#334155",
+                    backgroundColor: "#18181b",
+                    borderColor: "#e4e4e7",
                     color: "#fff",
                   }}
                 />
@@ -291,14 +291,14 @@ export default function DashboardOverviewPage() {
       </div>
 
       {/* Machine Status Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl">
-        <h2 className="text-lg font-bold mb-4 text-slate-200">
+      <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
+        <h2 className="text-lg font-bold mb-4 text-zinc-800">
           สถานะเครื่องจักรล่าสุด
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 text-sm">
+              <tr className="border-b border-zinc-200 text-zinc-600 text-sm">
                 <th className="p-3">ID</th>
                 <th className="p-3">ชื่อเครื่องจักร</th>
                 <th className="p-3">ประเภท</th>
@@ -306,17 +306,17 @@ export default function DashboardOverviewPage() {
                 <th className="p-3">สถานะ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 text-sm">
+            <tbody className="divide-y divide-zinc-200 text-sm">
               {machines.map((m) => (
-                <tr key={m.id} className="hover:bg-slate-800/50 transition">
-                  <td className="p-3 font-mono text-cyan-400 font-medium">
+                <tr key={m.id} className="hover:bg-zinc-100/50 transition">
+                  <td className="p-3 font-mono text-zinc-800 font-medium">
                     {m.machine_id}
                   </td>
-                  <td className="p-3 font-medium text-slate-200">
+                  <td className="p-3 font-medium text-zinc-800">
                     {m.machine_name}
                   </td>
-                  <td className="p-3 text-slate-300">{m.machine_type}</td>
-                  <td className="p-3 text-slate-400">{m.location || "-"}</td>
+                  <td className="p-3 text-zinc-700">{m.machine_type}</td>
+                  <td className="p-3 text-zinc-600">{m.location || "-"}</td>
                   <td className="p-3">{getStatusBadge(m.status)}</td>
                 </tr>
               ))}

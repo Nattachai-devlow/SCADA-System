@@ -95,27 +95,27 @@ export default function AlarmPage() {
   });
 
   if (loading) {
-    return <div className="text-slate-400 p-6">กำลังโหลดข้อมูล Alarms...</div>;
+    return <div className="text-zinc-600 p-6">กำลังโหลดข้อมูล Alarms...</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-rose-400">Alarm Management</h1>
-          <p className="text-slate-400 text-sm">
+          <h1 className="text-2xl font-bold text-zinc-900">Alarm Management</h1>
+          <p className="text-zinc-600 text-sm">
             บันทึกและจัดการรายการแจ้งเตือนขัดข้องของระบบ
           </p>
         </div>
 
         {/* Filter Controls */}
-        <div className="flex bg-slate-900 border border-slate-800 rounded-lg p-1">
+        <div className="flex bg-white border border-zinc-200 rounded-lg p-1">
           <button
             onClick={() => setFilter("ACTIVE")}
             className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
               filter === "ACTIVE"
-                ? "bg-rose-600 text-white shadow shadow-rose-950"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-zinc-900 text-white"
+                : "text-zinc-600 hover:text-zinc-800"
             }`}
           >
             ⚠️ รอดำเนินการ ({alarms.filter((a) => a.status === "ACTIVE").length}
@@ -125,8 +125,8 @@ export default function AlarmPage() {
             onClick={() => setFilter("ALL")}
             className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
               filter === "ALL"
-                ? "bg-slate-800 text-slate-200 shadow"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-zinc-100 text-zinc-800 shadow"
+                : "text-zinc-600 hover:text-zinc-800"
             }`}
           >
             📋 ทั้งหมด ({alarms.length})
@@ -135,11 +135,11 @@ export default function AlarmPage() {
       </div>
 
       {/* Alarm Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+      <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-950/60 border-b border-slate-800 text-slate-400 text-sm">
+              <tr className="bg-zinc-50/60 border-b border-zinc-200 text-zinc-600 text-sm">
                 <th className="p-4">เวลาเกิดเหตุ</th>
                 <th className="p-4">เครื่องจักร</th>
                 <th className="p-4">รหัสข้อผิดพลาด</th>
@@ -149,42 +149,42 @@ export default function AlarmPage() {
                 <th className="p-4 text-right">การรับทราบ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 text-sm">
+            <tbody className="divide-y divide-zinc-200 text-sm">
               {filteredAlarms.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-500">
+                  <td colSpan={7} className="p-8 text-center text-zinc-500">
                     ไม่มีรายการแจ้งเตือนในขณะนี้
                   </td>
                 </tr>
               ) : (
                 filteredAlarms.map((a) => (
-                  <tr key={a.id} className="hover:bg-slate-800/40 transition">
-                    <td className="p-4 text-slate-400 font-mono text-xs">
+                  <tr key={a.id} className="hover:bg-zinc-100/40 transition">
+                    <td className="p-4 text-zinc-600 font-mono text-xs">
                       {new Date(a.created_at).toLocaleString("th-TH")}
                     </td>
-                    <td className="p-4 font-semibold text-slate-200">
+                    <td className="p-4 font-semibold text-zinc-800">
                       {a.machines?.machine_name || "-"}
-                      <div className="text-[10px] text-slate-400 font-mono">
+                      <div className="text-[10px] text-zinc-600 font-mono">
                         {a.machines?.machine_id}
                       </div>
                     </td>
-                    <td className="p-4 font-mono text-rose-400 font-semibold">
+                    <td className="p-4 font-mono text-rose-700 font-semibold">
                       {a.alarm_code}
                     </td>
-                    <td className="p-4 text-slate-200">
+                    <td className="p-4 text-zinc-800">
                       {a.alarm_description}
                     </td>
-                    <td className="p-4 text-slate-400 text-xs">
+                    <td className="p-4 text-zinc-600 text-xs">
                       {a.cause || "-"}
                     </td>
                     <td className="p-4">
                       {a.status === "ACTIVE" ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-sm shadow-rose-950 animate-pulse">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 shadow-sm animate-pulse">
                           <span className="w-2 h-2 rounded-full bg-rose-500"></span>
                           ACTIVE
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border-emerald-200">
                           ✓ ACKNOWLEDGED
                         </span>
                       )}
@@ -193,7 +193,7 @@ export default function AlarmPage() {
                       {a.status === "ACTIVE" && (
                         <button
                           onClick={() => handleAcknowledge(a.id)}
-                          className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg transition shadow-md shadow-emerald-950 active:scale-95"
+                          className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition shadow-sm active:scale-95"
                         >
                           Acknowledge
                         </button>

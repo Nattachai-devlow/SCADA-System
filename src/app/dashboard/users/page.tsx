@@ -260,20 +260,20 @@ export default function UserManagementPage() {
     switch (role) {
       case "admin":
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
             👑 Admin
           </span>
         );
       case "technician":
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-cyan-50 text-cyan-700 border border-cyan-200">
             🔧 Technician
           </span>
         );
       case "pending":
       default:
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/30 animate-pulse">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 animate-pulse">
             ⏳ รออนุมัติ (Pending)
           </span>
         );
@@ -282,7 +282,7 @@ export default function UserManagementPage() {
 
   if (loading) {
     return (
-      <div className="p-6 text-slate-400 font-mono text-sm">
+      <div className="p-6 text-zinc-600 font-mono text-sm">
         กำลังตรวจสอบสิทธิ์และโหลดข้อมูลผู้ใช้งาน...
       </div>
     );
@@ -297,10 +297,10 @@ export default function UserManagementPage() {
       {/* Header & Add Button */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-amber-400">
+          <h1 className="text-2xl font-bold text-zinc-900">
             👑 จัดการสิทธิ์ผู้ใช้งาน (User Roles)
           </h1>
-          <p className="text-slate-400 text-xs mt-1">
+          <p className="text-zinc-600 text-xs mt-1">
             ส่วนเฉพาะผู้ดูแลระบบ (Admin Only) สำหรับจัดการ เพิ่ม แก้ไข
             อนุมัติสิทธิ์ และลบบัญชีผู้ใช้
           </p>
@@ -316,7 +316,7 @@ export default function UserManagementPage() {
             });
             setIsAddModalOpen(true);
           }}
-          className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-lg shadow-amber-950/20"
+          className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-sm"
         >
           <span>➕</span>
           <span>เพิ่มผู้ใช้งานใหม่</span>
@@ -324,27 +324,27 @@ export default function UserManagementPage() {
       </div>
 
       {/* Users Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl">
+      <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+              <tr className="border-b border-zinc-200 text-zinc-600 text-xs font-semibold uppercase tracking-wider">
                 <th className="p-3">ชื่อ - นามสกุล</th>
                 <th className="p-3">อีเมล</th>
                 <th className="p-3">สิทธิ์ปัจจุบัน</th>
                 <th className="p-3 text-center">จัดการ / อนุมัติสิทธิ์</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 text-xs">
+            <tbody className="divide-y divide-zinc-200 text-xs">
               {profiles.map((profile) => (
                 <tr
                   key={profile.id}
-                  className="hover:bg-slate-800/50 transition"
+                  className="hover:bg-zinc-100/50 transition"
                 >
-                  <td className="p-3 font-medium text-slate-200">
+                  <td className="p-3 font-medium text-zinc-800">
                     {profile.full_name || "ไม่ระบุชื่อ"}
                   </td>
-                  <td className="p-3 font-mono text-slate-400">
+                  <td className="p-3 font-mono text-zinc-600">
                     {profile.email || "-"}
                   </td>
                   <td className="p-3">{renderRoleBadge(profile.role)}</td>
@@ -353,7 +353,7 @@ export default function UserManagementPage() {
                       <button
                         onClick={() => handleApproveUser(profile, "technician")}
                         disabled={actionLoading}
-                        className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 transition font-medium"
+                        className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200 transition font-medium"
                       >
                         ✅ อนุมัติสิทธิ์ (Technician)
                       </button>
@@ -361,7 +361,7 @@ export default function UserManagementPage() {
 
                     <button
                       onClick={() => handleOpenEditModal(profile)}
-                      className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+                      className="px-2.5 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border border-zinc-300 transition"
                     >
                       ✏️ แก้ไข
                     </button>
@@ -369,7 +369,7 @@ export default function UserManagementPage() {
                     <button
                       onClick={() => handleDeleteUser(profile)}
                       disabled={profile.id === currentUserId}
-                      className="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       🗑️ ลบ
                     </button>
@@ -383,21 +383,21 @@ export default function UserManagementPage() {
 
       {/* Modal 1: เพิ่มผู้ใช้งานใหม่ */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 w-full max-w-md shadow-2xl space-y-4">
-            <h2 className="text-lg font-bold text-amber-400">
+        <div className="fixed inset-0 bg-zinc-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white border border-zinc-200 rounded-xl p-6 w-full max-w-md shadow-sm space-y-4">
+            <h2 className="text-lg font-bold text-zinc-900">
               ➕ เพิ่มผู้ใช้งานใหม่
             </h2>
             <form onSubmit={handleAddUser} className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-400 mb-1">
+                <label className="block text-zinc-600 mb-1">
                   ชื่อ - นามสกุล
                 </label>
                 <input
                   type="text"
                   required
                   placeholder="สมชาย ใจดี"
-                  className="w-full p-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  className="w-full p-2.5 rounded-lg bg-white border border-zinc-300 text-zinc-900 focus:outline-none focus:border-zinc-900"
                   value={formData.full_name}
                   onChange={(e) =>
                     setFormData({ ...formData, full_name: e.target.value })
@@ -406,12 +406,12 @@ export default function UserManagementPage() {
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">อีเมล</label>
+                <label className="block text-zinc-600 mb-1">อีเมล</label>
                 <input
                   type="email"
                   required
                   placeholder="user@example.com"
-                  className="w-full p-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-amber-500 font-mono"
+                  className="w-full p-2.5 rounded-lg bg-white border border-zinc-300 text-zinc-900 focus:outline-none focus:border-zinc-900 font-mono"
                   value={formData.email}
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
@@ -420,12 +420,12 @@ export default function UserManagementPage() {
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">รหัสผ่าน</label>
+                <label className="block text-zinc-600 mb-1">รหัสผ่าน</label>
                 <input
                   type="password"
                   required
                   placeholder="••••••••"
-                  className="w-full p-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  className="w-full p-2.5 rounded-lg bg-white border border-zinc-300 text-zinc-900 focus:outline-none focus:border-zinc-900"
                   value={formData.password}
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
@@ -434,7 +434,7 @@ export default function UserManagementPage() {
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">
+                <label className="block text-zinc-600 mb-1">
                   สิทธิ์การใช้งาน (Role)
                 </label>
                 <select
@@ -442,7 +442,7 @@ export default function UserManagementPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, role: e.target.value })
                   }
-                  className="w-full p-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  className="w-full p-2.5 rounded-lg bg-white border border-zinc-300 text-zinc-900 focus:outline-none focus:border-zinc-900"
                 >
                   <option value="pending">⏳ รอการอนุมัติ (Pending)</option>
                   <option value="technician">
@@ -456,14 +456,14 @@ export default function UserManagementPage() {
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium"
+                  className="px-4 py-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-medium"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-700 text-white font-bold disabled:opacity-50"
                 >
                   {actionLoading ? "กำลังบันทึก..." : "ยืนยันเพิ่มผู้ใช้"}
                 </button>
@@ -475,32 +475,32 @@ export default function UserManagementPage() {
 
       {/* Modal 2: แก้ไขผู้ใช้งาน */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 w-full max-w-md shadow-2xl space-y-4">
-            <h2 className="text-lg font-bold text-amber-400">
+        <div className="fixed inset-0 bg-zinc-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white border border-zinc-200 rounded-xl p-6 w-full max-w-md shadow-sm space-y-4">
+            <h2 className="text-lg font-bold text-zinc-900">
               ✏️ แก้ไขข้อมูลผู้ใช้งาน
             </h2>
             <form onSubmit={handleUpdateUser} className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-400 mb-1">
+                <label className="block text-zinc-600 mb-1">
                   อีเมล (ไม่สามารถเปลี่ยนได้)
                 </label>
                 <input
                   type="email"
                   disabled
-                  className="w-full p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-500 font-mono cursor-not-allowed"
+                  className="w-full p-2.5 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-500 font-mono cursor-not-allowed"
                   value={formData.email}
                 />
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">
+                <label className="block text-zinc-600 mb-1">
                   ชื่อ - นามสกุล
                 </label>
                 <input
                   type="text"
                   required
-                  className="w-full p-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  className="w-full p-2.5 rounded-lg bg-white border border-zinc-300 text-zinc-900 focus:outline-none focus:border-zinc-900"
                   value={formData.full_name}
                   onChange={(e) =>
                     setFormData({ ...formData, full_name: e.target.value })
@@ -509,7 +509,7 @@ export default function UserManagementPage() {
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">
+                <label className="block text-zinc-600 mb-1">
                   สิทธิ์การใช้งาน (Role)
                 </label>
                 <select
@@ -517,7 +517,7 @@ export default function UserManagementPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, role: e.target.value })
                   }
-                  className="w-full p-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-amber-500"
+                  className="w-full p-2.5 rounded-lg bg-white border border-zinc-300 text-zinc-900 focus:outline-none focus:border-zinc-900"
                 >
                   <option value="pending">⏳ รอการอนุมัติ (Pending)</option>
                   <option value="technician">
@@ -531,14 +531,14 @@ export default function UserManagementPage() {
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium"
+                  className="px-4 py-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-medium"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-700 text-white font-bold disabled:opacity-50"
                 >
                   {actionLoading ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
                 </button>

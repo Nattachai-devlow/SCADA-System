@@ -61,14 +61,14 @@ export default function Sidebar() {
     : baseMenuItems;
 
   return (
-    <aside className="w-64 bg-slate-900 border-r border-slate-800 min-h-screen p-4 flex flex-col justify-between">
+    <aside className="w-64 bg-white border-r border-zinc-200 min-h-screen p-4 flex flex-col justify-between">
       <div className="space-y-6">
         {/* Brand Header */}
-        <div className="px-2 py-3 border-b border-slate-800">
-          <h1 className="text-lg font-bold text-amber-400 tracking-wider">
+        <div className="px-2 py-3 border-b border-zinc-200">
+          <h1 className="text-lg font-bold text-zinc-900 tracking-wider">
             SCADA System
           </h1>
-          <p className="text-[10px] text-slate-400 font-mono">
+          <p className="text-[10px] text-zinc-600 font-mono">
             Water Circulation Control
           </p>
         </div>
@@ -83,8 +83,8 @@ export default function Sidebar() {
                 href={item.path}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition ${
                   isActive
-                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-sm"
-                    : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
+                    ? "bg-zinc-900 text-white border border-zinc-900"
+                    : "text-zinc-600 hover:bg-zinc-100/60 hover:text-zinc-800"
                 }`}
               >
                 <span>{item.icon}</span>
@@ -96,12 +96,12 @@ export default function Sidebar() {
       </div>
 
       {/* Footer System Status */}
-      <div className="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl text-[11px] text-slate-400">
+      <div className="p-3 bg-zinc-50/60 border border-zinc-200/80 rounded-xl text-[11px] text-zinc-600">
         <div className="flex items-center gap-2 mb-1">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="font-semibold text-slate-300">System Online</span>
+          <span className="font-semibold text-zinc-700">System Online</span>
         </div>
-        <p className="text-[10px] font-mono text-slate-400">
+        <p className="text-[10px] font-mono text-zinc-600">
           Role: {userRole ? userRole : "Loading..."}
         </p>
       </div>

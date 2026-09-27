@@ -150,7 +150,7 @@ export default function MachineMasterPage() {
 
   if (loading) {
     return (
-      <div className="text-slate-400 p-6">
+      <div className="text-zinc-600 p-6">
         กำลังโหลดข้อมูล Machine Master...
       </div>
     );
@@ -160,26 +160,26 @@ export default function MachineMasterPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-cyan-400">Machine Master</h1>
-          <p className="text-slate-400 text-sm">
+          <h1 className="text-2xl font-bold text-zinc-900">Machine Master</h1>
+          <p className="text-zinc-600 text-sm">
             จัดการข้อมูลและลงทะเบียนเครื่องจักรในระบบ
           </p>
         </div>
 
         <button
           onClick={() => handleOpenModal()}
-          className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-sm rounded-lg transition shadow-lg shadow-cyan-950 flex items-center gap-2"
+          className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 text-white font-medium text-sm rounded-lg transition shadow-sm flex items-center gap-2"
         >
           ➕ เพิ่มเครื่องจักรใหม่
         </button>
       </div>
 
       {/* ตารางแสดงผลเครื่องจักร */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+      <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-950/60 border-b border-slate-800 text-slate-400 text-sm">
+              <tr className="bg-zinc-50/60 border-b border-zinc-200 text-zinc-600 text-sm">
                 <th className="p-4">Machine ID</th>
                 <th className="p-4">ชื่อเครื่องจักร</th>
                 <th className="p-4">ประเภท</th>
@@ -188,22 +188,22 @@ export default function MachineMasterPage() {
                 <th className="p-4 text-right">การจัดการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 text-sm">
+            <tbody className="divide-y divide-zinc-200 text-sm">
               {machines.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-6 text-center text-slate-500">
+                  <td colSpan={6} className="p-6 text-center text-zinc-500">
                     ยังไม่มีข้อมูลเครื่องจักรในระบบ
                   </td>
                 </tr>
               ) : (
                 machines.map((m) => (
-                  <tr key={m.id} className="hover:bg-slate-800/40 transition">
-                    <td className="p-4 font-mono font-semibold text-cyan-400">
+                  <tr key={m.id} className="hover:bg-zinc-100/40 transition">
+                    <td className="p-4 font-mono font-semibold text-zinc-800">
                       {m.machine_id}
                     </td>
-                    <td className="p-4 text-slate-200">{m.machine_name}</td>
-                    <td className="p-4 text-slate-400">{m.machine_type}</td>
-                    <td className="p-4 text-slate-400">{m.location || "-"}</td>
+                    <td className="p-4 text-zinc-800">{m.machine_name}</td>
+                    <td className="p-4 text-zinc-600">{m.machine_type}</td>
+                    <td className="p-4 text-zinc-600">{m.location || "-"}</td>
 
                     {/* เปลี่ยนสถานะด่วนจากตาราง */}
                     <td className="p-4">
@@ -212,37 +212,37 @@ export default function MachineMasterPage() {
                         onChange={(e) =>
                           handleQuickStatusChange(m, e.target.value)
                         }
-                        className={`px-2.5 py-1 text-xs rounded-full font-medium bg-slate-950 border focus:outline-none cursor-pointer ${
+                        className={`px-2.5 py-1 text-xs rounded-full font-medium bg-zinc-50 border focus:outline-none cursor-pointer ${
                           m.status === "Running"
-                            ? "text-emerald-400 border-emerald-500/50"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                             : m.status === "Stop"
-                              ? "text-slate-400 border-slate-500/50"
+                              ? "text-zinc-600 border-zinc-400/50"
                               : m.status === "Maintenance"
-                                ? "text-amber-400 border-amber-500/50"
-                                : "text-red-400 border-red-500/50"
+                                ? "bg-amber-50 text-amber-700 border-amber-200"
+                                : "bg-red-50 text-red-700 border-red-200"
                         }`}
                       >
                         <option
                           value="Stop"
-                          className="bg-slate-900 text-slate-300"
+                          className="bg-white text-zinc-700"
                         >
                           Stop
                         </option>
                         <option
                           value="Running"
-                          className="bg-slate-900 text-emerald-400"
+                          className="bg-white text-emerald-700"
                         >
                           Running
                         </option>
                         <option
                           value="Maintenance"
-                          className="bg-slate-900 text-amber-400"
+                          className="bg-white text-zinc-900"
                         >
                           Maintenance
                         </option>
                         <option
                           value="Alarm"
-                          className="bg-slate-900 text-red-400"
+                          className="bg-white text-red-700"
                         >
                           Alarm
                         </option>
@@ -253,13 +253,13 @@ export default function MachineMasterPage() {
                     <td className="p-4 text-right space-x-2">
                       <button
                         onClick={() => handleOpenModal(m)}
-                        className="px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded border border-slate-700 transition"
+                        className="px-2.5 py-1 text-xs bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded border border-zinc-300 transition"
                       >
                         ✏️ แก้ไข
                       </button>
                       <button
                         onClick={() => handleDelete(m.id, m.machine_id)}
-                        className="px-2.5 py-1 text-xs bg-red-950/40 hover:bg-red-900/60 text-red-400 rounded border border-red-800/50 transition"
+                        className="px-2.5 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-700 rounded border border-red-200 transition"
                       >
                         🗑️ ลบ
                       </button>
@@ -275,8 +275,8 @@ export default function MachineMasterPage() {
       {/* Modal Form */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <h2 className="text-xl font-bold text-cyan-400">
+          <div className="bg-white border border-zinc-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-sm">
+            <h2 className="text-xl font-bold text-zinc-900">
               {editingMachine
                 ? "แก้ไขข้อมูลเครื่องจักร"
                 : "เพิ่มเครื่องจักรใหม่"}
@@ -284,7 +284,7 @@ export default function MachineMasterPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">
                   Machine ID
                 </label>
                 <input
@@ -295,12 +295,12 @@ export default function MachineMasterPage() {
                     setFormData({ ...formData, machine_id: e.target.value })
                   }
                   placeholder="เช่น PUMP-01, HEAT-01"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">
                   ชื่อเครื่องจักร
                 </label>
                 <input
@@ -311,12 +311,12 @@ export default function MachineMasterPage() {
                     setFormData({ ...formData, machine_name: e.target.value })
                   }
                   placeholder="เช่น Water Filter Pump 1"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">
                   ประเภทเครื่องจักร
                 </label>
                 <select
@@ -324,7 +324,7 @@ export default function MachineMasterPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, machine_type: e.target.value })
                   }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
                 >
                   <option value="Pump">Pump</option>
                   <option value="Filter">Filter</option>
@@ -335,7 +335,7 @@ export default function MachineMasterPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">
                   สถานที่ติดตั้ง (Location)
                 </label>
                 <input
@@ -345,12 +345,12 @@ export default function MachineMasterPage() {
                     setFormData({ ...formData, location: e.target.value })
                   }
                   placeholder="เช่น Pump Room A"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">
                   สถานะ (Status)
                 </label>
                 <select
@@ -358,7 +358,7 @@ export default function MachineMasterPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
                 >
                   <option value="Stop">Stop</option>
                   <option value="Running">Running</option>
@@ -367,17 +367,17 @@ export default function MachineMasterPage() {
                 </select>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+              <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-lg transition"
+                  className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-medium rounded-lg transition"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium rounded-lg transition"
+                  className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 text-white text-sm font-medium rounded-lg transition"
                 >
                   บันทึกข้อมูล
                 </button>

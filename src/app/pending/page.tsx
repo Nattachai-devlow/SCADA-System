@@ -85,39 +85,39 @@ export default function PendingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 text-slate-400 font-mono text-sm">
+      <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4 text-zinc-600 font-mono text-sm">
         กำลังตรวจสอบสถานะการอนุมัติ...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 text-white">
-      <div className="w-full max-w-md bg-slate-900 p-8 rounded-xl border border-amber-500/30 shadow-2xl text-center space-y-6">
+    <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4 text-zinc-900">
+      <div className="w-full max-w-md bg-white p-8 rounded-xl border border-amber-200 shadow-sm text-center space-y-6">
         {/* Icon & Animation */}
-        <div className="relative w-20 h-20 mx-auto flex items-center justify-center bg-amber-500/10 rounded-full border border-amber-500/30">
+        <div className="relative w-20 h-20 mx-auto flex items-center justify-center bg-amber-50 rounded-full border border-amber-200">
           <span className="text-4xl animate-pulse">⏳</span>
         </div>
 
         {/* Status Header */}
         <div className="space-y-2">
-          <h1 className="text-xl font-bold text-amber-400">
+          <h1 className="text-xl font-bold text-zinc-900">
             อยู่ระหว่างรอผู้ดูแลระบบอนุมัติสิทธิ์
           </h1>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-zinc-600">
             สวัสดีคุณ{" "}
-            <span className="text-slate-200 font-semibold">{userName}</span>
+            <span className="text-zinc-800 font-semibold">{userName}</span>
           </p>
         </div>
 
         {/* Detailed Message */}
-        <div className="bg-slate-950/60 p-4 rounded-lg border border-slate-800 text-left text-xs text-slate-300 leading-relaxed space-y-2">
+        <div className="bg-zinc-50/60 p-4 rounded-lg border border-zinc-200 text-left text-xs text-zinc-700 leading-relaxed space-y-2">
           <p>
             บัญชีของคุณลงทะเบียนเรียบร้อยแล้ว แต่ต้องได้รับการอนุมัติสิทธิ์จาก{" "}
-            <span className="text-amber-400 font-medium">Admin</span>{" "}
+            <span className="text-zinc-900 font-medium">Admin</span>{" "}
             ก่อนจึงจะสามารถเข้าใช้งานระบบ SCADA ได้
           </p>
-          <p className="text-slate-400">
+          <p className="text-zinc-600">
             โปรดติดต่อผู้ดูแลระบบของท่านเพื่อขอเปิดสิทธิ์การใช้งาน
             เมื่อได้รับการอนุมัติแล้วกดปุ่มตรวจสอบสถานะอีกครั้ง
           </p>
@@ -127,14 +127,14 @@ export default function PendingPage() {
         <div className="space-y-3 pt-2">
           <button
             onClick={handleCheckStatus}
-            className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg transition text-xs shadow-lg shadow-amber-950/20"
+            className="w-full bg-zinc-900 hover:bg-zinc-700 text-white font-bold py-2.5 rounded-lg transition text-xs shadow-sm"
           >
             🔄 ตรวจสอบสถานะการอนุมัติอีกครั้ง
           </button>
 
           <button
             onClick={handleLogout}
-            className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-2 rounded-lg transition text-xs border border-slate-700"
+            className="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-medium py-2 rounded-lg transition text-xs border border-zinc-300"
           >
             ออกจากระบบ
           </button>

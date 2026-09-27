@@ -124,30 +124,30 @@ export default function ScadaPage() {
   const flt01 = machines.find((m) => m.machine_id === "FLT-01");
 
   if (loading)
-    return <div className="p-6 text-slate-500">Loading SCADA Diagram...</div>;
+    return <div className="p-6 text-zinc-500">Loading SCADA Diagram...</div>;
 
   return (
     <div className="space-y-6">
       {/* Header Info Cards (ดึงข้อมูลแบบ Dynamic จาก Supabase) */}
       <div className="flex flex-wrap gap-4">
-        <div className="bg-white border border-slate-300 rounded shadow-sm p-3 min-w-[140px]">
-          <div className="text-xs text-slate-500 font-semibold">
+        <div className="bg-white border border-zinc-300 rounded shadow-sm p-3 min-w-[140px]">
+          <div className="text-xs text-zinc-500 font-semibold">
             Outdoor Temp
           </div>
-          <div className="text-lg font-bold text-slate-800">
+          <div className="text-lg font-bold text-zinc-800">
             {Number(telemetry.outdoor_temp).toFixed(1)} °C
           </div>
         </div>
-        <div className="bg-white border border-slate-300 rounded shadow-sm p-3 min-w-[140px]">
-          <div className="text-xs text-slate-500 font-semibold">
+        <div className="bg-white border border-zinc-300 rounded shadow-sm p-3 min-w-[140px]">
+          <div className="text-xs text-zinc-500 font-semibold">
             Target Temp
           </div>
           <div className="text-lg font-bold text-emerald-600">
             {Number(telemetry.target_temp).toFixed(1)} °C
           </div>
         </div>
-        <div className="bg-white border border-slate-300 rounded shadow-sm p-3 min-w-[140px]">
-          <div className="text-xs text-slate-500 font-semibold">Pool Temp</div>
+        <div className="bg-white border border-zinc-300 rounded shadow-sm p-3 min-w-[140px]">
+          <div className="text-xs text-zinc-500 font-semibold">Pool Temp</div>
           <div className="text-lg font-bold text-sky-600">
             {Number(telemetry.pool_temp).toFixed(1)} °C
           </div>
@@ -155,10 +155,10 @@ export default function ScadaPage() {
       </div>
 
       {/* Industrial P&ID Board */}
-      <div className="bg-[#e9ecef] border border-slate-300 rounded-xl p-8 relative overflow-x-auto min-h-[520px] shadow-inner">
+      <div className="bg-zinc-100 border border-zinc-300 rounded-xl p-8 relative overflow-x-auto min-h-[520px] shadow-inner">
         {/* Pool Tank Top (ดึงค่าปริมาณน้ำแบบ Dynamic) */}
-        <div className="absolute top-6 left-1/4 w-1/2 h-28 bg-gradient-to-b from-sky-400 to-sky-600 rounded border-2 border-slate-600 shadow-md flex items-center justify-center">
-          <div className="bg-white/90 px-4 py-1 rounded shadow text-slate-800 font-bold font-mono text-sm">
+        <div className="absolute top-6 left-1/4 w-1/2 h-28 bg-gradient-to-b from-sky-400 to-sky-600 rounded border-2 border-zinc-300 shadow-md flex items-center justify-center">
+          <div className="bg-white/90 px-4 py-1 rounded shadow text-zinc-800 font-bold font-mono text-sm">
             {Number(telemetry.water_level_liters).toLocaleString()} L
           </div>
         </div>
@@ -167,18 +167,18 @@ export default function ScadaPage() {
         <div className="relative pt-36 flex items-center justify-between gap-4 max-w-5xl mx-auto">
           {/* Water Inlet / Supply */}
           <div className="flex flex-col items-center">
-            <span className="bg-white px-2 py-0.5 rounded border border-slate-300 text-xs font-semibold text-slate-600 mb-2">
+            <span className="bg-white px-2 py-0.5 rounded border border-zinc-300 text-xs font-semibold text-zinc-500 mb-2">
               Water Supply
             </span>
-            <div className="w-16 h-8 bg-gradient-to-r from-slate-300 via-slate-100 to-slate-400 border border-slate-500 rounded-sm flex items-center justify-center shadow">
-              <span className="text-[10px] text-slate-600 font-bold">
+            <div className="w-16 h-8 bg-gradient-to-r from-zinc-200 via-zinc-50 to-zinc-300 border border-zinc-400 rounded-sm flex items-center justify-center shadow">
+              <span className="text-[10px] text-zinc-500 font-bold">
                 INLET
               </span>
             </div>
           </div>
 
           {/* Pipe 1 */}
-          <div className="flex-1 h-3 bg-gradient-to-b from-slate-300 via-slate-100 to-slate-400 border-y border-slate-500 relative">
+          <div className="flex-1 h-3 bg-gradient-to-b from-zinc-200 via-zinc-50 to-zinc-300 border-y border-zinc-400 relative">
             {pump01?.status === "Running" && (
               <div className="absolute inset-0 bg-sky-400/60 animate-pulse" />
             )}
@@ -187,10 +187,10 @@ export default function ScadaPage() {
           {/* Machine 1: Industrial Water Pump */}
           <div className="flex flex-col items-center">
             <div
-              className={`p-4 rounded-lg border-2 shadow-lg transition-all ${
+              className={`p-4 rounded-lg border-2 shadow-sm transition-all ${
                 pump01?.status === "Running"
-                  ? "bg-emerald-600 border-emerald-800 text-white"
-                  : "bg-slate-700 border-slate-900 text-slate-300"
+                  ? "bg-emerald-600 border-emerald-700 text-white"
+                  : "bg-zinc-200 border-zinc-300 text-zinc-700"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -227,7 +227,7 @@ export default function ScadaPage() {
           </div>
 
           {/* Pipe 2 */}
-          <div className="flex-1 h-3 bg-gradient-to-b from-slate-300 via-slate-100 to-slate-400 border-y border-slate-500 relative">
+          <div className="flex-1 h-3 bg-gradient-to-b from-zinc-200 via-zinc-50 to-zinc-300 border-y border-zinc-400 relative">
             {pump01?.status === "Running" && (
               <div className="absolute inset-0 bg-sky-400/60 animate-pulse" />
             )}
@@ -235,19 +235,19 @@ export default function ScadaPage() {
 
           {/* Machine 2: Sand Filter Tank */}
           <div className="flex flex-col items-center">
-            <div className="w-24 h-28 bg-gradient-to-b from-slate-200 via-slate-100 to-slate-300 border-2 border-slate-500 rounded-b-2xl rounded-t-lg shadow-md flex flex-col items-center justify-between p-2">
-              <div className="w-full bg-slate-300 rounded text-[9px] text-center font-bold text-slate-600 py-0.5">
+            <div className="w-24 h-28 bg-gradient-to-b from-zinc-100 via-zinc-50 to-zinc-200 border-2 border-zinc-400 rounded-b-2xl rounded-t-lg shadow-md flex flex-col items-center justify-between p-2">
+              <div className="w-full bg-zinc-200 rounded text-[9px] text-center font-bold text-zinc-500 py-0.5">
                 FILTER TANK
               </div>
               <span className="text-2xl">🛢️</span>
-              <span className="text-[10px] font-mono font-bold text-slate-700">
+              <span className="text-[10px] font-mono font-bold text-zinc-700">
                 {flt01?.machine_id || "FLT-01"}
               </span>
             </div>
           </div>
 
           {/* Pipe 3 */}
-          <div className="flex-1 h-3 bg-gradient-to-b from-slate-300 via-slate-100 to-slate-400 border-y border-slate-500 relative">
+          <div className="flex-1 h-3 bg-gradient-to-b from-zinc-200 via-zinc-50 to-zinc-300 border-y border-zinc-400 relative">
             {pump01?.status === "Running" && (
               <div className="absolute inset-0 bg-sky-400/60 animate-pulse" />
             )}
@@ -256,18 +256,18 @@ export default function ScadaPage() {
           {/* Machine 3: Heat Pump / Heater Unit */}
           <div className="flex flex-col items-center">
             <div
-              className={`p-4 rounded-xl border-2 shadow-lg transition-all ${
+              className={`p-4 rounded-xl border-2 shadow-sm transition-all ${
                 heat01?.status === "Running"
                   ? "bg-white border-orange-500 text-orange-600"
-                  : "bg-white border-slate-300 text-slate-400"
+                  : "bg-white border-zinc-300 text-zinc-600"
               }`}
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-10 h-10 rounded-full border-2 border-slate-300 flex items-center justify-center ${
+                  className={`w-10 h-10 rounded-full border-2 border-zinc-300 flex items-center justify-center ${
                     heat01?.status === "Running"
                       ? "bg-orange-100 animate-pulse"
-                      : "bg-slate-100"
+                      : "bg-zinc-100"
                   }`}
                 >
                   <span className="text-xl">🔥</span>
@@ -276,7 +276,7 @@ export default function ScadaPage() {
                   <div className="text-xs font-bold font-mono">
                     {heat01?.machine_id || "HEAT-01"}
                   </div>
-                  <div className="text-[10px] font-semibold text-slate-500">
+                  <div className="text-[10px] font-semibold text-zinc-500">
                     {heat01?.machine_name || "Heat Exchanger"}
                   </div>
                 </div>
@@ -288,7 +288,7 @@ export default function ScadaPage() {
                 disabled={updatingId === heat01.id}
                 className={`mt-2 px-3 py-1 text-xs font-bold rounded shadow transition ${
                   heat01.status === "Running"
-                    ? "bg-slate-700 hover:bg-slate-800 text-white"
+                    ? "bg-zinc-900 hover:bg-zinc-700 text-white"
                     : "bg-orange-500 hover:bg-orange-600 text-white"
                 }`}
               >
