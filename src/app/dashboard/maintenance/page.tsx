@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/components/Toast";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const MACHINE_STATUSES = [
   "Maintenance",
@@ -65,6 +66,7 @@ export default function MaintenancePage() {
   });
 
   const supabase = createClient();
+  const { canManage, loading: roleLoading } = useUserRole();
 
   // ฟังก์ชันแปลงวันที่แสดงผลเป็น dd/mm/yyyy แบบปลอดภัยจาก Timezone Offset
   const formatDateDDMMYYYY = (dateString: string) => {
@@ -235,6 +237,9 @@ export default function MaintenancePage() {
     status: string,
     machineLabel: string,
   ) => {
+    // ช่างเปลี่ยนสถานะเครื่องไม่ได้ (RLS อนุญาตเฉพาะแอดมิน)
+    // ข้ามไปเลยแทนที่จะยิงคิวรีที่ต้องล้มเหลวทุกครั้ง
+    if (!canManage) return;
     if (!machineId || !status) return;
 
     const { error } = await supabase
@@ -569,32 +574,46 @@ export default function MaintenancePage() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-zinc-600 mb-1">
-                  ตั้งสถานะเครื่องจักรหลังบันทึก
-                </label>
-                <select
-                  value={formData.machine_status}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      machine_status: e.target.value,
-                    })
-                  }
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
-                >
-                  {MACHINE_STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {STATUS_LABEL[s]} ({s})
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500">
-                  เลือก &quot;ทำงาน (Running)&quot; เมื่อซ่อมเสร็จแล้ว
-                  เครื่องจะกลับไปเดินเครื่องและไฟในหน้า SCADA
-                  จะกลับมาเป็นสีเขียวโดยอัตโนมัติ
-                </p>
-              </div>
+              {canManage ? (
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                    ตั้งสถานะเครื่องจักรหลังบันทึก
+                  </label>
+                  <select
+                    value={formData.machine_status}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        machine_status: e.target.value,
+                      })
+                    }
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-800 focus:outline-none focus:border-zinc-900"
+                  >
+                    {MACHINE_STATUSES.map((s) => (
+                      <option key={s} value={s}>
+                        {STATUS_LABEL[s]} ({s})
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500">
+                    เลือก &quot;ทำงาน (Running)&quot; เมื่อซ่อมเสร็จแล้ว
+                    เครื่องจะกลับไปเดินเครื่องและไฟในหน้า SCADA
+                    จะกลับมาเป็นสีเขียวโดยอัตโนมัติ
+                  </p>
+                </div>
+              ) : (
+                !roleLoading && (
+                  <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5">
+                    <p className="text-xs font-semibold text-zinc-600">
+                      🔒 เปลี่ยนสถานะเครื่องจักรไม่ได้
+                    </p>
+                    <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">
+                      บันทึกงานซ่อมได้ตามปกติ
+                      แต่การสลับเครื่องกลับไปทำงานต้องให้ผู้ดูแลระบบเป็นผู้กด
+                    </p>
+                  </div>
+                )
+              )}
 
               <div>
                 <label className="block text-xs font-semibold text-zinc-600 mb-1">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/components/Toast";
+import { useUserRole } from "@/hooks/useUserRole";
 
 type Machine = {
   id: string;
@@ -29,6 +30,7 @@ export default function MachineMasterPage() {
   });
 
   const supabase = createClient();
+  const { canManage, loading: roleLoading } = useUserRole();
 
   // ฟังก์ชันดึงข้อมูลใหม่เพื่อรีเฟรชตาราง (เรียกใช้หลัง เพิ่ม/ลบ/แก้ไข)
   const refreshMachines = async () => {
@@ -68,6 +70,11 @@ export default function MachineMasterPage() {
 
   // เปิด Modal สำหรับ เพิ่ม หรือ แก้ไข
   const handleOpenModal = (machine?: Machine) => {
+    if (!canManage) {
+      toast.error("เฉพาะผู้ดูแลระบบเท่านั้นที่จัดการข้อมูลเครื่องจักรได้");
+      return;
+    }
+
     if (machine) {
       setEditingMachine(machine);
       setFormData({
@@ -93,6 +100,11 @@ export default function MachineMasterPage() {
   // บันทึกการ เพิ่ม หรือ แก้ไข ข้อมูล
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!canManage) {
+      toast.error("เฉพาะผู้ดูแลระบบเท่านั้นที่จัดการข้อมูลเครื่องจักรได้");
+      return;
+    }
 
     if (editingMachine) {
       // Update ข้อมูลเดิม
@@ -122,6 +134,11 @@ export default function MachineMasterPage() {
 
   // ลบรายการเครื่องจักร
   const handleDelete = async (id: string, machineId: string) => {
+    if (!canManage) {
+      toast.error("เฉพาะผู้ดูแลระบบเท่านั้นที่ลบเครื่องจักรได้");
+      return;
+    }
+
     if (confirm(`คุณต้องการลบเครื่องจักร ${machineId} ใช่หรือไม่?`)) {
       const { error } = await supabase.from("machines").delete().eq("id", id);
       if (error) {
@@ -137,6 +154,11 @@ export default function MachineMasterPage() {
     machine: Machine,
     newStatus: string,
   ) => {
+    if (!canManage) {
+      toast.error("เฉพาะผู้ดูแลระบบเท่านั้นที่เปลี่ยนสถานะเครื่องจักรได้");
+      return;
+    }
+
     const { error } = await supabase
       .from("machines")
       .update({ status: newStatus })
@@ -167,12 +189,18 @@ export default function MachineMasterPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => handleOpenModal()}
-          className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 text-white font-medium text-sm rounded-lg transition shadow-sm flex items-center gap-2"
-        >
-          ➕ เพิ่มเครื่องจักรใหม่
-        </button>
+        {canManage ? (
+          <button
+            onClick={() => handleOpenModal()}
+            className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 text-white font-medium text-sm rounded-lg transition shadow-sm flex items-center gap-2"
+          >
+            ➕ เพิ่มเครื่องจักรใหม่
+          </button>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-100 px-3 py-2 text-xs font-medium text-zinc-500">
+            🔒 โหมดดูอย่างเดียว
+          </span>
+        )}
       </div>
 
       {/* ตารางแสดงผลเครื่องจักร */}
@@ -186,7 +214,9 @@ export default function MachineMasterPage() {
                 <th className="p-4">ประเภท</th>
                 <th className="p-4">สถานที่ติดตั้ง</th>
                 <th className="p-4">สถานะ (Status)</th>
-                <th className="p-4 text-right">การจัดการ</th>
+                {canManage && !roleLoading && (
+                  <th className="p-4 text-right">การจัดการ</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200 text-sm">
@@ -206,8 +236,11 @@ export default function MachineMasterPage() {
                     <td className="p-4 text-zinc-600">{m.machine_type}</td>
                     <td className="p-4 text-zinc-600">{m.location || "-"}</td>
 
-                    {/* เปลี่ยนสถานะด่วนจากตาราง */}
+                    {/* เปลี่ยนสถานะด่วนจากตาราง — เฉพาะแอดมิน */}
                     <td className="p-4">
+                      {roleLoading ? (
+            <span className="w-28 h-9 rounded-lg bg-zinc-100 animate-pulse" />
+          ) : canManage ? (
                       <select
                         value={m.status}
                         onChange={(e) =>
@@ -248,10 +281,27 @@ export default function MachineMasterPage() {
                           Alarm
                         </option>
                       </select>
+                      ) : (
+                        <span
+                          className={`inline-block px-2.5 py-1 text-xs rounded-full font-medium border ${
+                            m.status === "Running"
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              : m.status === "Stop"
+                                ? "text-zinc-600 border-zinc-400/50 bg-zinc-50"
+                                : m.status === "Maintenance"
+                                  ? "bg-amber-50 text-amber-700 border-amber-200"
+                                  : "bg-red-50 text-red-700 border-red-200"
+                          }`}
+                        >
+                          {m.status}
+                        </span>
+                      )}
                     </td>
 
-                    {/* ปุ่มจัดการ */}
+                    {/* ปุ่มจัดการ — เฉพาะแอดมิน */}
                     <td className="p-4 text-right space-x-2">
+                      {canManage && !roleLoading && (
+                        <>
                       <button
                         onClick={() => handleOpenModal(m)}
                         className="px-2.5 py-1 text-xs bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded border border-zinc-300 transition"
@@ -264,6 +314,8 @@ export default function MachineMasterPage() {
                       >
                         🗑️ ลบ
                       </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))

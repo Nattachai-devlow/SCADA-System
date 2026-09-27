@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/components/Toast";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   ALARM_TEMPLATES,
   type AlarmTemplate,
@@ -46,6 +47,7 @@ export default function AlarmPage() {
   const [simulating, setSimulating] = useState(false);
 
   const supabase = createClient();
+  const { canManage, loading: roleLoading } = useUserRole();
 
   // ฟังก์ชันรีเฟรชข้อมูล Alarms
   const refreshAlarms = async () => {
@@ -85,6 +87,11 @@ export default function AlarmPage() {
 
   // รับทราบเหตุการณ์: Open -> In Progress
   const handleAcknowledge = async (alarmId: string) => {
+    if (!canManage) {
+      toast.error("เฉพาะผู้ดูแลระบบเท่านั้นที่จัดการสถานะ Alarm ได้");
+      return;
+    }
+
     const { error } = await supabase
       .from("alarms")
       .update({ status: "In Progress" })
@@ -99,6 +106,11 @@ export default function AlarmPage() {
 
   // ปิดเหตุการณ์: In Progress -> Closed
   const handleClose = async (alarmId: string) => {
+    if (!canManage) {
+      toast.error("เฉพาะผู้ดูแลระบบเท่านั้นที่จัดการสถานะ Alarm ได้");
+      return;
+    }
+
     const { error } = await supabase
       .from("alarms")
       .update({ status: "Closed" })
@@ -124,6 +136,11 @@ export default function AlarmPage() {
   };
 
   const handleSimulate = async () => {
+    if (!canManage) {
+      toast.error("เฉพาะผู้ดูแลระบบเท่านั้นที่จำลอง Alarm ได้");
+      return;
+    }
+
     if (machines.length === 0) {
       toast.error("ยังไม่มีเครื่องจักรในระบบ กรุณาเพิ่มเครื่องก่อน");
       return;
@@ -184,13 +201,15 @@ export default function AlarmPage() {
 
         {/* Filter Controls + Simulate */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <button
-            onClick={handleSimulate}
-            disabled={simulating}
-            className="px-3 py-1.5 text-xs font-bold rounded-md bg-zinc-900 text-white hover:bg-zinc-700 disabled:opacity-50 transition shadow-sm active:scale-95"
-          >
-            {simulating ? "กำลังเพิ่ม..." : "จำลอง 3 Alarm"}
-          </button>
+          {!roleLoading && canManage && (
+            <button
+              onClick={handleSimulate}
+              disabled={simulating}
+              className="px-3 py-1.5 text-xs font-bold rounded-md bg-zinc-900 text-white hover:bg-zinc-700 disabled:opacity-50 transition shadow-sm active:scale-95"
+            >
+              {simulating ? "กำลังเพิ่ม..." : "จำลอง 3 Alarm"}
+            </button>
+          )}
           <div className="flex bg-white border border-zinc-200 rounded-lg p-1">
             <button
               onClick={() => setFilter("OPEN")}
@@ -228,7 +247,9 @@ export default function AlarmPage() {
                 <th className="p-4">รายละเอียด</th>
                 <th className="p-4">สาเหตุสันนิษฐาน</th>
                 <th className="p-4">สถานะ</th>
-                <th className="p-4 text-right">การรับทราบ</th>
+                {canManage && (
+                  <th className="p-4 text-right">การรับทราบ</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200 text-sm">
@@ -277,7 +298,7 @@ export default function AlarmPage() {
                       )}
                     </td>
                     <td className="p-4 text-right">
-                      {a.status === "Open" && (
+                      {canManage && a.status === "Open" && (
                         <button
                           onClick={() => handleAcknowledge(a.id)}
                           className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition shadow-sm active:scale-95"
@@ -285,7 +306,7 @@ export default function AlarmPage() {
                           Acknowledge
                         </button>
                       )}
-                      {a.status === "In Progress" && (
+                      {canManage && a.status === "In Progress" && (
                         <button
                           onClick={() => handleClose(a.id)}
                           className="px-3 py-1 bg-zinc-800 hover:bg-zinc-900 text-white text-xs font-semibold rounded-lg transition shadow-sm active:scale-95"

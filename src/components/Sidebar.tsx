@@ -1,41 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const supabase = createClient();
-
-  useEffect(() => {
-    async function getUserRole() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user) {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .maybeSingle();
-
-        if (error) {
-          console.error("Error fetching user role:", error.message);
-        }
-
-        if (data && data.role) {
-          // แปลงเป็นตัวพิมพ์เล็กทั้งหมดเพื่อป้องกันปัญหา Admin vs admin
-          setUserRole(data.role.trim().toLowerCase());
-        }
-      }
-    }
-
-    getUserRole();
-  }, [supabase]);
+  const { isAdmin, role, loading: roleLoading } = useUserRole();
 
   // เมนูพื้นฐานสำหรับทุกคน
   const baseMenuItems = [
@@ -45,9 +16,6 @@ export default function Sidebar() {
     { name: "จัดการสถานะ Alarm", path: "/dashboard/alarms", icon: "🚨" },
     { name: "บันทึกการซ่อมบำรุง", path: "/dashboard/maintenance", icon: "🔧" },
   ];
-
-  // เช็คว่าเป็น admin หรือไม่ (รองรับพิมพ์เล็ก/พิมพ์ใหญ่)
-  const isAdmin = userRole === "admin";
 
   const menuItems = isAdmin
     ? [
@@ -102,7 +70,7 @@ export default function Sidebar() {
           <span className="font-semibold text-zinc-700">System Online</span>
         </div>
         <p className="text-[10px] font-mono text-zinc-600">
-          Role: {userRole ? userRole : "Loading..."}
+          Role: {roleLoading ? "Loading..." : (role ?? "unknown")}
         </p>
       </div>
     </aside>
