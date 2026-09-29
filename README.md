@@ -1,126 +1,188 @@
-# automation-web-app
+<div align="center">
 
-Web application สำหรับระบบ SCADA / Factory Automation — หน้า Dashboard, Machines,
-Alarms, Maintenance และหน้า SCADA Diagram
+# 🌊 SCADA Water Pump Automation & Monitoring System
 
-Built with [Next.js](https://nextjs.org) (App Router) + [Supabase](https://supabase.com)
-+ Tailwind CSS
+[![Build Status](https://img.shields.io/github/actions/workflow/status/username/repository/main.yml?branch=main&style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/username/repository/actions)
+[![Version](https://img.shields.io/badge/version-1.0.0--beta-blue?style=for-the-badge&logo=semver)](https://github.com/username/repository/releases)
+[![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
+[![Supabase](https://img.shields.io/badge/Backend-Supabase-emerald?style=for-the-badge&logo=supabase)](https://supabase.com)
 
-## Features
+**ระบบควบคุมและเฝ้าระวังการทำงานของปั๊มน้ำอุตสาหกรรมแบบเรียลไทม์ผ่านเว็บอินเทอร์เฟซ (Virtual SCADA System)**
 
-- **Authentication** — ลงทะเบียน / เข้าสู่ระบบด้วย Supabase Auth (อีเมล + รหัสผ่าน)
-- **Role-based access** — ผู้ใช้ใหม่เข้าสถานะ `pending` และรอ Admin อนุมัติก่อนเข้าใช้งานได้
-- **Dashboard** — ภาพรวมสถานะเครื่องจักร, Alarm, Maintenance
-- **Machines** — CRUD ข้อมูลเครื่องจักร
-- **Alarms** — บันทึกและติดตามสถานะ Alarm
-- **Maintenance** — บันทึกประวัติการบำรุงรักษา
-- **SCADA Diagram** — แผนผังกระบวนการแบบ interactive
-- **User management** — Admin จัดการสิทธิ์ผู้ใช้
-- **Charts** — กราฟสถิติด้วย Recharts
+[Explore Documentation](#5-manual--operating-guide) · [Report Bug](https://github.com/username/repository/issues) · [Request Feature](https://github.com/username/repository/issues)
 
-## Tech Stack
+</div>
 
-| Layer     | Technology                          |
-| --------- | ----------------------------------- |
-| Framework | Next.js 16 (App Router)             |
-| UI        | React 19, Tailwind CSS 4            |
-| Backend   | Supabase (PostgreSQL + Auth + RLS)  |
-| Charts    | Recharts                            |
-| Icons     | lucide-react                        |
+---
 
-## Getting Started
+## 📌 1. Header & System Overview
 
-### 1. ติดตั้ง dependencies
+### 📖 บทนำ (Description)
+**SCADA Water Pump Automation & Monitoring System** คือระบบจำลองการจัดการและควบคุมปั๊มน้ำอุตสาหกรรมด้วยสถาปัตยกรรมระดับโมเดิร์น ออกแบบขึ้นเพื่อจำลองการทำงานของระบบ SCADA (Supervisory Control and Data Acquisition) จริง โดยใช้ **Supabase Cloud** ทำหน้าที่เป็นโครงข่ายสัญญาณจำลองเสมือน **PLC (Programmable Logic Controller)** เพื่อส่งถ่ายข้อมูลสถานะของระบบแบบ Real-time เช่น แรงดันน้ำ, ระดับน้ำ และสถานะการทำงานของปั๊ม พร้อมระบบแจ้งเตือนเมื่อเกิดเหตุขัดข้อง
 
-```bash
-npm install
-```
+---
 
-### 2. ตั้งค่า environment variables
+### 🖥️ System Screenshot
 
-คัดลอกไฟล์ตัวอย่างแล้วกรอกค่าจาก Supabase Dashboard (Project Settings → API)
+<div align="center">
 
-```bash
-cp .env.example .env.local
-```
+#### 📊 Main Monitoring Dashboard
+![Main Dashboard](https://via.placeholder.com/1000x500/0f172a/38bdf8?text=SCADA+Water+Pump+Main+Dashboard+UI)
 
-ตัวแปรที่จำเป็น:
+#### 🎛️ Control Panel & Alarm Center
+| Pump Control Panel | Real-time Trending & Alarms |
+| :---: | :---: |
+| ![Control Panel](https://via.placeholder.com/480x300/0f172a/34d399?text=Pump+Control+Panel) | ![Trending Graph](https://via.placeholder.com/480x300/0f172a/f87171?text=Real-time+Analytics+%26+Alarms) |
 
-| Variable                       | คำอธิบาย                        |
-| ------------------------------ | ------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`     | Supabase project URL            |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon / publishable key |
+</div>
 
-> `.env.local` ถูก exclude ออกจาก git แล้ว — **อย่า commit ไฟล์นี้**
+---
 
-### 3. สร้างตารางในฐานข้อมูล
+## ✨ 2. Key Features
 
-รันไฟล์ SQL ตามลำดับใน Supabase SQL Editor:
+- ⚡ **Real-time Monitoring:** 
+  - ติดตามสถานะปั๊มน้ำได้ทันที: `RUN` (กำลังทำงาน), `STOP` (หยุดทำงาน), `FAULT` (เกิดข้อผิดพลาด)
+  - แสดงค่าแรงดันน้ำ (Pressure - BAR) และระดับน้ำในถัง (Water Level - Meters/%) แบบไดนามิก
+- 🎛️ **Pump Control Modes:**
+  - **Auto Mode:** ควบคุมการเปิด-ปิดปั๊มน้ำอัตโนมัติตาม Threshold ของแรงดันและระดับน้ำ
+  - **Manual Mode:** ควบคุมเปิด-ปิดด้วยตนเองผ่าน UI หน้าตู้ควบคุมจำลอง
+  - **Remote Control:** คำสั่งควบคุมทางไกลผ่านระบบ Cloud
+- 🚨 **Alarm & Event Management:**
+  - ระบบบันทึกและแจ้งเตือนเหตุการณ์ผิดปกติ (เช่น High Pressure, Low Water Level, Pump Overload)
+  - รองรับการกดยืนยันการรับทราบคำเตือน (Acknowledge Alarms)
+- 📈 **Data Logging & Trending:**
+  - แสดงกราฟอนุกรมเวลา (Time-series Graph) สำหรับวิเคราะห์แนวโน้มแรงดันและระดับน้ำ
+  - บันทึกประวัติการทำงานย้อนหลัง (Historical Data Logs) สำหรับนำไปวิเคราะห์ผลต่อ
 
-1. `src/supabase/01_init.sql` — สร้างตาราง (profiles, machines, alarms, maintenance_records)
-2. `src/supabase/RLS.sql` — เปิด Row Level Security และนิยาม policy
-3. `src/supabase/02_seed_alarms.sql` — (ไม่บังคับ) ข้อมูล alarm ตัวอย่าง 10 รายการ รันซ้ำได้ไม่เกิดข้อมูลซ้ำ ต้องมีเครื่องจักรอยู่แล้ว
-4. `src/supabase/03_fix_legacy_alarm_status.sql` — (ไม่บังคับ) แก้ค่า alarm status ที่เป็นตัวพิมพ์เล็กให้ตรงกับ CHECK constraint
-5. `src/supabase/04_add_waiting_part_status.sql` — (ไม่บังคับ) เพิ่มสถานะเครื่องจักร `Waiting Part`
-6. `src/supabase/05_machine_history.sql` — (ไม่บังคับ) ตาราง `machine_history` + trigger บันทึกประวัติการเพิ่ม/แก้ไข/ลบเครื่องจักรอัตโนมัติ **ต้องรันไฟล์นี้ถ้าต้องการใช้หน้า Machine History**
+---
 
-### 4. เริ่ม dev server
-
-```bash
-npm run dev
-```
-
-เปิด [http://localhost:3000](http://localhost:3000)
-
-## Scripts
-
-```bash
-npm run dev     # เริ่ม dev server
-npm run build   # build สำหรับ production
-npm run start   # รัน production server
-npm run lint    # eslint
-```
-
-## Project Structure
+## 🏗️ 3. Tech Stack & Architecture
 
 ```
-src/
-├── app/
-│   ├── auth/signout/    # route handler สำหรับออกจากระบบ
-│   ├── dashboard/       # หน้าหลักของระบบ
-│   │   ├── machines/     # จัดการเครื่องจักร
-│   │   ├── alarms/       # จัดการ Alarm
-│   │   ├── maintenance/  # บันทึกการบำรุงรักษา
-│   │   ├── scada/        # แผนผัง SCADA
-│   │   └── users/        # จัดการผู้ใช้ (Admin)
-│   ├── login/            # หน้าเข้าสู่ระบบ / ลงทะเบียน
-│   ├── pending/          # หน้ารอผู้ดูแลอนุมัติสิทธิ์
-│   └── layout.tsx
-├── components/           # Navbar, Sidebar, ScadaDiagram
-├── lib/supabase/        # Supabase client (browser + server)
-└── supabase/            # SQL scripts (schema + RLS)
++---------------------------------------------------------------+
+|                      User Interface (UI)                      |
+|             (React.js / Next.js + Tailwind CSS)               |
++------------------------------+--------------------------------+
+                               | Realtime Websocket
+                               v
++---------------------------------------------------------------+
+|                 Supabase Cloud (Virtual PLC)                  |
+|    +-------------------+             +-------------------+    |
+|    |  Database (PgSQL) | <---------> |  Realtime Engine  |    |
+|    +-------------------+             +-------------------+    |
++---------------------------------------------------------------+
+                               | (Future Implementation)
+                               v
++---------------------------------------------------------------+
+|             Physical Devices / TCP/IP Protocol                |
+|               (Modbus TCP / MQTT Gateway)                     |
++---------------------------------------------------------------+
 ```
 
-## Roles
+* **Hardware / PLC:** จำลองประมวลผลสัญญาณ I/O และ State Logic ผ่าน **Supabase Cloud (Virtual PLC)**
+* **Software:** React.js / Next.js, Tailwind CSS, Lucide Icons, Recharts (หรือ Chart.js)
+* **Database:** PostgreSQL (Managed by Supabase)
+* **Communication Protocol:** 
+  - *Current:* WebSocket / REST API via Supabase Realtime Engine
+  - *Future Plan:* Industrial TCP/IP Protocols (Modbus TCP, MQTT Gateway)
 
-| Role        | คำอธิบาย                                  |
-| ----------- | ----------------------------------------- |
-| `pending`   | ลงทะเบียนแล้ว รอ Admin อนุมัติ             |
-| `technician`| เข้าใช้งานระบบได้ตามปกติ                  |
-| `admin`     | มีสิทธิ์จัดการผู้ใช้และข้อมูลทั้งหมด      |
+---
 
-## Docker
+## 🚀 4. Quick Start & Installation
 
-มี `Dockerfile` (multi-stage, ใช้ `output: "standalone"`) และ `docker-compose.yaml`
-สำหรับรัน Postgres ในเครื่องควบคู่กับแอป
+### 📋 Prerequisites
+* [Node.js](https://nodejs.org/) (v18.0.0 หรือใหม่กว่า)
+* [npm](https://www.npmjs.com/) หรือ [yarn](https://yarnpkg.com/)
+* บัญชีใช้งาน [Supabase Cloud](https://supabase.com/)
 
-```bash
-docker compose up --build
+### 🛠️️ Step-by-Step Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/username/scada-water-pump-system.git
+   cd scada-water-pump-system
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment Variables**
+   สร้างไฟล์ `.env.local` ที่ Root Directory แล้วระบุค่าตั้งค่าดังนี้:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+   ```
+
+4. **Run the Development Server**
+   ```bash
+   npm run dev
+   ```
+   เปิดเบราว์เซอร์ไปที่ `http://localhost:3000` เพื่อดูผลลัพธ์
+
+---
+
+## 📘 5. Manual & Operating Guide
+
+### 🗄️ Supabase Schema (Virtualize PLC Engine)
+
+เพื่อจำลองการทำงานของ PLC เราใช้ PostgreSQL Table บน Supabase เป็นตัวเก็บ State ของระบบ I/O สามารถนำ SQL Script ด้านล่างไปสร้างใน Supabase SQL Editor ได้ทันที:
+
+```sql
+-- 1. Table for Real-time Sensors & Pump Status (Virtual I/O)
+CREATE TABLE pump_telemetry (
+    id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    pump_id VARCHAR(50) NOT NULL DEFAULT 'PUMP-01',
+    status VARCHAR(20) CHECK (status IN ('RUN', 'STOP', 'FAULT')) DEFAULT 'STOP',
+    mode VARCHAR(20) CHECK (mode IN ('AUTO', 'MANUAL', 'REMOTE')) DEFAULT 'MANUAL',
+    pressure_bar NUMERIC(5,2) DEFAULT 0.00,
+    water_level_m NUMERIC(5,2) DEFAULT 0.00,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+-- 2. Table for Alarm & Event Logs
+CREATE TABLE alarm_logs (
+    id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    alarm_type VARCHAR(50) NOT NULL,
+    severity VARCHAR(20) CHECK (severity IN ('INFO', 'WARNING', 'CRITICAL')),
+    message TEXT NOT NULL,
+    is_acknowledged BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+-- Enable Realtime for Telemetry Table
+ALTER PUBLICATION supabase_realtime ADD TABLE pump_telemetry;
 ```
 
-> **หมายเหตุ:** ค่า Supabase ใน `docker-compose.yaml` เป็นค่าจำลองสำหรับ local
-> เท่านั้น — ต้องเปลี่ยนเป็นค่าจริงก่อนนำไปใช้งาน
+---
 
-## License
+## 📊 6. Report & Project Summary
 
-Private — all rights reserved
+### 📅 Project Timeline & Plan
+
+| Phase / Task | Planned Date | Actual Date | Status |
+| :--- | :---: | :---: | :---: |
+| Requirements & Architecture Design | 01 Oct 2026 - 05 Oct 2026 | 01 Oct 2026 - 04 Oct 2026 | Completed |
+| Supabase Virtual PLC Schema Setup | 06 Oct 2026 - 10 Oct 2026 | 05 Oct 2026 - 09 Oct 2026 | Completed |
+| Frontend SCADA Dashboard Development | 11 Oct 2026 - 20 Oct 2026 | 10 Oct 2026 - 22 Oct 2026 | Completed |
+| Real-time Alarm & Trend Logging | 21 Oct 2026 - 25 Oct 2026 | 23 Oct 2026 - 26 Oct 2026 | Completed |
+| System Testing & Documentation | 26 Oct 2026 - 30 Oct 2026 | 27 Oct 2026 - 30 Oct 2026 | Completed |
+
+### 🔄 Development Cycle & Scope Limit
+* **Development Methodology:** ใช้แนวคิด **Agile / Iterative Development** โดยแบ่งรอบ Sprint สั้นๆ เพื่อทดสอบระบบ Real-time Data Transfer และปรับปรุง UI ตาม Feedback
+* **Scope Disclaimer:** โครงงานนี้จัดทำขึ้นเพื่อ **"จำลองการทำงาน (Simulation)"** สัญญาณและสถาปัตยกรรมของระบบ SCADA ผ่าน Cloud โดยใช้ Supabase เป็น Virtual PLC **ไม่ใช่การเชื่อมต่อกับอุปกรณ์ฮาร์ดแวร์ PLC หรือปั๊มน้ำจริงในอุตสาหกรรม**
+
+### 🤖 AI Usage Report
+ในการพัฒนาระบบนี้ มีการประยุกต์ใช้ AI ในขั้นตอนต่างๆ ดังนี้:
+1. **Architecture & Schema Design:** ใช้ Generative AI ช่วยออกแบบโครงสร้าง Supabase Table (Virtual PLC) และปรับแต่ง RLS (Row Level Security)
+2. **UI Component Optimization:** ใช้ AI ช่วยสร้าง Tailwinds CSS Layout สำหรับ Dashboard ให้มีความเป็น Industrial SCADA Style
+3. **Logic Simulation Scripts:** ใช้ AI ช่วยเขียน ฟังก์ชันสำหรับสุ่ม/จำลองค่าแรงดันน้ำและระดับน้ำ (Mock Telemetry Generator) เพื่อทดสอบสตรีมข้อมูล Real-time
+
+---
+
+<div align="center">
+
+Developed with ❤️ for SCADA Simulation & Learning Purposes
+
+</div>
