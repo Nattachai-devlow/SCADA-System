@@ -160,6 +160,146 @@
 
 ## 📘 5. Manual & Operating Guide
 
+### Schema Visualizer
+## Table `profiles`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `email` | `text` |  |
+| `full_name` | `text` |  Nullable |
+| `role` | `text` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `machines`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `machine_id` | `text` |  Unique |
+| `machine_name` | `text` |  |
+| `machine_type` | `text` |  |
+| `location` | `text` |  Nullable |
+| `status` | `text` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `alarms`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `machine_id` | `uuid` |  |
+| `alarm_code` | `text` |  |
+| `alarm_description` | `text` |  |
+| `cause` | `text` |  Nullable |
+| `status` | `text` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `maintenance_records`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `machine_id` | `uuid` |  |
+| `technician_id` | `uuid` |  Nullable |
+| `title` | `text` |  |
+| `details` | `text` |  Nullable |
+| `maintenance_date` | `timestamptz` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `system_telemetry`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `outdoor_temp` | `numeric` |  Nullable |
+| `target_temp` | `numeric` |  Nullable |
+| `pool_temp` | `numeric` |  Nullable |
+| `water_level_liters` | `numeric` |  Nullable |
+| `updated_at` | `timestamptz` |  Nullable |
+| `pump_stop_rate` | `numeric` |  Nullable |
+
+## Table `machine_history`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `machine_uuid` | `uuid` |  Nullable |
+| `machine_code` | `text` |  |
+| `machine_name` | `text` |  |
+| `action` | `text` |  |
+| `before_data` | `jsonb` |  Nullable |
+| `after_data` | `jsonb` |  Nullable |
+| `performed_by` | `uuid` |  Nullable |
+| `performed_by_name` | `text` |  Nullable |
+| `performed_by_email` | `text` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## RLS Policies
+
+### `profiles`
+
+| Policy | Command | Roles | Action | USING | WITH CHECK |
+|--------|---------|-------|--------|-------|------------|
+| `Only admin can delete profiles` | DELETE | authenticated | PERMISSIVE | `is_admin()` | — |
+| `Only admin can update profiles` | UPDATE | authenticated | PERMISSIVE | `is_admin()` | `is_admin()` |
+| `Profiles - Delete Policy` | DELETE | authenticated | PERMISSIVE | `is_admin()` | — |
+| `Profiles - Insert Policy` | INSERT | authenticated | PERMISSIVE | — | `((auth.uid() = id) OR is_admin())` |
+| `Profiles - Select Policy` | SELECT | authenticated | PERMISSIVE | `true` | — |
+| `Profiles - Update Policy` | UPDATE | authenticated | PERMISSIVE | `((auth.uid() = id) OR is_admin())` | — |
+| `Users can create own profile` | INSERT | authenticated | PERMISSIVE | — | `(id = auth.uid())` |
+| `Users can read own profile` | SELECT | authenticated | PERMISSIVE | `((id = auth.uid()) OR is_admin())` | — |
+
+### `machines`
+
+| Policy | Command | Roles | Action | USING | WITH CHECK |
+|--------|---------|-------|--------|-------|------------|
+| `Active users can view machines` | SELECT | authenticated | PERMISSIVE | `is_active_user()` | — |
+| `Allow public read machines` | SELECT | public | PERMISSIVE | `true` | — |
+| `Only admin can insert/update/delete machines` | ALL | authenticated | PERMISSIVE | `is_admin()` | `is_admin()` |
+
+### `alarms`
+
+| Policy | Command | Roles | Action | USING | WITH CHECK |
+|--------|---------|-------|--------|-------|------------|
+| `Active users can view alarms` | SELECT | authenticated | PERMISSIVE | `is_active_user()` | — |
+| `Allow public read alarms` | SELECT | public | PERMISSIVE | `true` | — |
+| `Only admin can insert/update/delete alarms` | ALL | authenticated | PERMISSIVE | `is_admin()` | `is_admin()` |
+
+### `maintenance_records`
+
+| Policy | Command | Roles | Action | USING | WITH CHECK |
+|--------|---------|-------|--------|-------|------------|
+| `Active users can manage maintenance` | ALL | authenticated | PERMISSIVE | `is_active_user()` | `is_active_user()` |
+| `Allow public read maintenance` | SELECT | public | PERMISSIVE | `true` | — |
+
+### `system_telemetry`
+
+| Policy | Command | Roles | Action | USING | WITH CHECK |
+|--------|---------|-------|--------|-------|------------|
+| `Active users can view telemetry` | SELECT | authenticated | PERMISSIVE | `is_active_user()` | — |
+| `Allow insert telemetry` | INSERT | public | PERMISSIVE | — | `(auth.role() = 'authenticated'::text)` |
+| `Allow public read telemetry` | SELECT | public | PERMISSIVE | `true` | — |
+| `Allow update telemetry` | UPDATE | public | PERMISSIVE | `(auth.role() = 'authenticated'::text)` | — |
+
+### `machine_history`
+
+| Policy | Command | Roles | Action | USING | WITH CHECK |
+|--------|---------|-------|--------|-------|------------|
+| `Only admin can view machine history` | SELECT | authenticated | PERMISSIVE | `(EXISTS ( SELECT 1    FROM profiles   WHERE ((profiles.id = auth.uid()) AND (lower(TRIM(BOTH FROM profiles.role)) = 'admin'::text))))` | — |
+
 ### 🗄️ Supabase Schema (Virtualize PLC Engine)
 
 เพื่อจำลองการทำงานของ PLC เราใช้ PostgreSQL Table บน Supabase เป็นตัวเก็บ State ของระบบ I/O สามารถนำ SQL Script ด้านล่างไปสร้างใน Supabase SQL Editor ได้ทันที:
