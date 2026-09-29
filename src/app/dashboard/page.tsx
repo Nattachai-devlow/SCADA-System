@@ -1,7 +1,19 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Download, Loader2 } from "lucide-react";
+import {
+  Droplet,
+  Download,
+  Factory,
+  Loader2,
+  Package,
+  Pause,
+  Play,
+  Siren,
+  TrendingUp,
+  TriangleAlert,
+  Wrench,
+} from "lucide-react";
 import writeXlsxFile from "write-excel-file/browser";
 import { createClient } from "@/lib/supabase/client";
 import { useTheme } from "@/components/ThemeProvider";
@@ -84,13 +96,9 @@ export default function DashboardOverviewPage() {
       // 2. นับ Alarm ที่ยังไม่ปิด ให้ตรงกับแท็บ "รอดำเนินการ" ในหน้า Alarms
       //    กรองฝั่ง client แบบเดียวกันเป๊ะ เพราะถ้าใช้ .neq() ฝั่ง server
       //    แถวที่ status เป็น NULL จะถูกตัดทิ้ง ทำให้สองหน้าไม่ตรงกัน
-      const { data: alarmsData } = await supabase
-        .from("alarms")
-        .select("*");
+      const { data: alarmsData } = await supabase.from("alarms").select("*");
       const alarms = alarmsData ?? [];
-      const openAlarmCount = alarms.filter(
-        (a) => a.status !== "Closed",
-      ).length;
+      const openAlarmCount = alarms.filter((a) => a.status !== "Closed").length;
 
       /* แยกตามสถานะ เพื่อวาดกราฟแท่ง — คีย์ต้องตรงกับค่าใน DB
          ถ้ามีค่าใหม่ที่ไม่รู้จักจะถูกรวมเข้าหมวด "อื่น ๆ" แทนที่จะหายไป */
@@ -106,7 +114,10 @@ export default function DashboardOverviewPage() {
          alarms.machine_id เก็บ UUID ของ machines.id ไม่ใช่รหัสอย่าง PUMP-01
          จึงต้องแปลงกลับเป็นรหัสที่คนอ่านเข้าใจก่อนนำไปพล็อต */
       const machineLabel = new Map<string, string>(
-        (machinesData ?? []).map((m) => [m.id as string, m.machine_id as string]),
+        (machinesData ?? []).map((m) => [
+          m.id as string,
+          m.machine_id as string,
+        ]),
       );
       const perMachine = new Map<string, number>();
       for (const a of alarms) {
@@ -162,7 +173,105 @@ export default function DashboardOverviewPage() {
   const running = machines.filter((m) => m.status === "Running").length;
   const stop = machines.filter((m) => m.status === "Stop").length;
   const maintenance = machines.filter((m) => m.status === "Maintenance").length;
-  const waitingPart = machines.filter((m) => m.status === "Waiting Part").length;
+  const waitingPart = machines.filter(
+    (m) => m.status === "Waiting Part",
+  ).length;
+
+  /* เครื่องที่มีสถานะนอกเหนือจาก 4 สถานะหลัก (เช่น Alarm) ต้องไม่ถูกทิ้งหายไป
+     จึงเก็บไว้ในกลุ่ม "อื่น ๆ" เพื่อให้ผลรวมเท่ากับ All Machinery เสมอ */
+  const otherStatus = Math.max(
+    0,
+    total - running - stop - maintenance - waitingPart,
+  );
+
+  const totalAlarms = alarmByStatus.reduce((sum, row) => sum + row.count, 0);
+  const closedAlarms =
+    alarmByStatus.find((row) => row.status === "Closed")?.count ?? 0;
+
+  const toPercent = (value: number) =>
+    total > 0 ? Math.round((value / total) * 100) : 0;
+
+  /* สีของแต่ละสถานะใช้ร่วมกันทั้งการ์ดและแถบสัดส่วน ต้องประกาศเป็นค่าคงที่
+     ไม่งั้น Tailwind จะมองไม่เห็นคลาสที่ถูกประกอบขึ้นตอน runtime */
+  const STATUS_STYLE = {
+    emerald: {
+      value: "text-emerald-700 dark:text-emerald-400",
+      chip: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400",
+      bar: "bg-emerald-500",
+    },
+    zinc: {
+      value: "text-zinc-700 dark:text-zinc-300",
+      chip: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300",
+      bar: "bg-zinc-500",
+    },
+    amber: {
+      value: "text-amber-700 dark:text-amber-400",
+      chip: "bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400",
+      bar: "bg-amber-500",
+    },
+    violet: {
+      value: "text-violet-700 dark:text-violet-400",
+      chip: "bg-violet-50 text-violet-600 dark:bg-violet-950/60 dark:text-violet-400",
+      bar: "bg-violet-500",
+    },
+    rose: {
+      value: "text-rose-700 dark:text-rose-400",
+      chip: "bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400",
+      bar: "bg-rose-500",
+    },
+  } as const;
+
+  const statusCards = [
+    {
+      key: "Running",
+      label: "Running",
+      sub: "กำลังทำงาน",
+      value: running,
+      tone: "emerald",
+      Icon: Play,
+    },
+    {
+      key: "Stop",
+      label: "Stop",
+      sub: "หยุดทำงาน",
+      value: stop,
+      tone: "zinc",
+      Icon: Pause,
+    },
+    {
+      key: "Maintenance",
+      label: "Maintenance",
+      sub: "กำลังซ่อมบำรุง",
+      value: maintenance,
+      tone: "amber",
+      Icon: Wrench,
+    },
+    {
+      key: "Waiting Part",
+      label: "Waiting Part",
+      sub: "รออะไหล่",
+      value: waitingPart,
+      tone: "violet",
+      Icon: Package,
+    },
+  ] as const;
+
+  /* แถบสัดส่วนต้องรวมทั้ง 4 สถานะหลักและ "อื่น ๆ" เสมอ
+     ไม่งั้นผลรวมของแถบจะไม่เท่ากับ All Machinery */
+  const distribution = [
+    ...statusCards.map((card) => ({
+      label: card.label,
+      value: card.value,
+      percent: toPercent(card.value),
+      bar: STATUS_STYLE[card.tone].bar,
+    })),
+    {
+      label: "อื่น ๆ",
+      value: otherStatus,
+      percent: toPercent(otherStatus),
+      bar: "bg-zinc-300 dark:bg-zinc-700",
+    },
+  ].filter((item) => item.value > 0);
 
   const [exporting, setExporting] = useState(false);
 
@@ -225,12 +334,12 @@ export default function DashboardOverviewPage() {
       const byStatus = [
         title("จำนวน Alarm แยกตามสถานะ (Alarm by Status)"),
         [],
-        [
-          head("สถานะ"),
-          head("จำนวน"),
-        ],
+        [head("สถานะ"), head("จำนวน")],
         ...alarmByStatus.map((row) => [
-          { value: row.status, backgroundColor: ALARM_STATUS_COLOR[row.status] },
+          {
+            value: row.status,
+            backgroundColor: ALARM_STATUS_COLOR[row.status],
+          },
           { value: row.count, type: Number },
         ]),
       ];
@@ -239,11 +348,11 @@ export default function DashboardOverviewPage() {
       const topSources = [
         title("เครื่องจักรที่สร้าง Alarm มากที่สุด (Top Alarm Sources)"),
         [],
-        [
-          head("เครื่องจักร"),
-          head("จำนวน"),
-        ],
-        ...alarmsByMachine.map((row) => [row.machine, { value: row.count, type: Number }]),
+        [head("เครื่องจักร"), head("จำนวน")],
+        ...alarmsByMachine.map((row) => [
+          row.machine,
+          { value: row.count, type: Number },
+        ]),
       ];
 
       // 5) ตารางสถานะเครื่องจักร
@@ -266,24 +375,59 @@ export default function DashboardOverviewPage() {
         ]),
       ];
 
-      const stamp = new Date()
-        .toISOString()
-        .slice(0, 19)
-        .replace(/[:T]/g, "-");
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
 
       await writeXlsxFile([
-        { sheet: "ภาพรวม", data: overview, columns: [{ width: 32 }, { width: 14 }] },
-        { sheet: "Telemetry", data: telemetry, columns: [{ width: 22 }, ...Array(5).fill({ width: 22 })] },
-        { sheet: "Alarm by Status", data: byStatus, columns: [{ width: 20 }, { width: 12 }] },
-        { sheet: "Top Alarm Sources", data: topSources, columns: [{ width: 20 }, { width: 12 }] },
-        { sheet: "สถานะเครื่องจักร", data: statusTable, columns: [{ width: 14 }, { width: 24 }, { width: 16 }, { width: 20 }, { width: 16 }] },
+        {
+          sheet: "ภาพรวม",
+          data: overview,
+          columns: [{ width: 32 }, { width: 14 }],
+        },
+        {
+          sheet: "Telemetry",
+          data: telemetry,
+          columns: [{ width: 22 }, ...Array(5).fill({ width: 22 })],
+        },
+        {
+          sheet: "Alarm by Status",
+          data: byStatus,
+          columns: [{ width: 20 }, { width: 12 }],
+        },
+        {
+          sheet: "Top Alarm Sources",
+          data: topSources,
+          columns: [{ width: 20 }, { width: 12 }],
+        },
+        {
+          sheet: "สถานะเครื่องจักร",
+          data: statusTable,
+          columns: [
+            { width: 14 },
+            { width: 24 },
+            { width: 16 },
+            { width: 20 },
+            { width: 16 },
+          ],
+        },
       ]).toFile(`dashboard-${stamp}.xlsx`);
     } catch (err) {
       console.error("ส่งออกไฟล์ Excel ไม่สำเร็จ:", err);
     } finally {
       setExporting(false);
     }
-  }, [exporting, total, running, stop, maintenance, waitingPart, alarmCount, telemetryLogs, alarmByStatus, alarmsByMachine, machines]);
+  }, [
+    exporting,
+    total,
+    running,
+    stop,
+    maintenance,
+    waitingPart,
+    alarmCount,
+    telemetryLogs,
+    alarmByStatus,
+    alarmsByMachine,
+    machines,
+  ]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -319,7 +463,9 @@ export default function DashboardOverviewPage() {
 
   if (loading) {
     return (
-      <div className="p-6 text-zinc-600 dark:text-zinc-400">กำลังโหลดข้อมูล Dashboard...</div>
+      <div className="p-6 text-zinc-600 dark:text-zinc-400">
+        กำลังโหลดข้อมูล Dashboard...
+      </div>
     );
   }
 
@@ -345,36 +491,157 @@ export default function DashboardOverviewPage() {
       </div>
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-xl">
-          <p className="text-zinc-600 dark:text-zinc-400 text-sm">เครื่องจักรทั้งหมด</p>
-          <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 mt-2">{total}</p>
+      <div className="space-y-4">
+        {/* การ์ดหลัก: จำนวนเครื่องจักรทั้งหมด + แถบสัดส่วนตามสถานะ */}
+        <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-4">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900">
+                <Factory className="h-6 w-6" strokeWidth={1.75} />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
+                  All Machinery
+                </p>
+                <p className="mt-0.5 flex items-baseline gap-2">
+                  <span className="font-mono text-4xl font-bold tabular-nums text-zinc-900 dark:text-zinc-50">
+                    {total}
+                  </span>
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                    เครื่อง
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            {/* แถบสัดส่วนสถานะ */}
+            <div className="w-full lg:max-w-md">
+              <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                {total === 0 ? (
+                  <span className="h-full w-full bg-zinc-100 dark:bg-zinc-800" />
+                ) : (
+                  distribution.map((item) => (
+                    <span
+                      key={item.label}
+                      className={`h-full ${item.bar} transition-[width] duration-500`}
+                      style={{ width: `${item.percent}%` }}
+                    />
+                  ))
+                )}
+              </div>
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs">
+                {distribution.map((item) => (
+                  <span
+                    key={item.label}
+                    className="inline-flex items-center gap-1.5"
+                  >
+                    <span
+                      className={`h-2 w-2 shrink-0 rounded-full ${item.bar}`}
+                    />
+                    <span className="text-zinc-500 dark:text-zinc-400">
+                      {item.label}
+                    </span>
+                    <span className="font-mono font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
+                      {item.value}
+                    </span>
+                    <span className="font-mono tabular-nums text-zinc-400 dark:text-zinc-500">
+                      ({item.percent}%)
+                    </span>
+                  </span>
+                ))}
+                {total === 0 && (
+                  <span className="text-zinc-400 dark:text-zinc-500">
+                    ยังไม่มีเครื่องจักรในระบบ
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-xl border-l-4 border-l-emerald-500">
-          <p className="text-zinc-600 dark:text-zinc-400 text-sm">กำลังทำงาน (Running)</p>
-          <p className="text-3xl font-bold text-emerald-700 mt-2 dark:text-emerald-400">{running}</p>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-xl border-l-4 border-l-zinc-600">
-          <p className="text-zinc-600 dark:text-zinc-400 text-sm">หยุดทำงาน (Stop)</p>
-          <p className="text-3xl font-bold text-zinc-700 dark:text-zinc-300 mt-2">{stop}</p>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-xl border-l-4 border-l-amber-500">
-          <p className="text-zinc-600 dark:text-zinc-400 text-sm">ซ่อมบำรุง (Maintenance)</p>
-          <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 mt-2">
-            {maintenance}
-          </p>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-xl border-l-4 border-l-violet-500">
-          <p className="text-zinc-600 dark:text-zinc-400 text-sm">รออะไหล่ (Waiting Part)</p>
-          <p className="text-3xl font-bold text-violet-700 mt-2 dark:text-violet-400">
-            {waitingPart}
-          </p>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-xl border-l-4 border-l-rose-500">
-          <p className="text-zinc-600 dark:text-zinc-400 text-sm">
-            Alarm ค้างแก้ไข (ยังไม่ปิด)
-          </p>
-          <p className="text-3xl font-bold text-rose-700 mt-2 dark:text-rose-400">{alarmCount}</p>
+
+        {/* การ์ดรายสถานะ + Alarm */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {statusCards.map((card) => {
+            const style = STATUS_STYLE[card.tone];
+            const percent = toPercent(card.value);
+            const Icon = card.Icon;
+
+            return (
+              <div
+                key={card.key}
+                className="flex flex-col rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${style.chip}`}
+                  >
+                    <Icon className="h-4.5 w-4.5" strokeWidth={1.75} />
+                  </span>
+                  <span className="font-mono text-[10px] tabular-nums text-zinc-400 dark:text-zinc-500">
+                    {percent}% ของทั้งหมด
+                  </span>
+                </div>
+
+                <p
+                  className={`mt-3 font-mono text-3xl font-bold tabular-nums ${style.value}`}
+                >
+                  {card.value}
+                </p>
+                <p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                  {card.label}
+                </p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {card.sub}
+                </p>
+
+                <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                  <span
+                    className={`block h-full rounded-full ${style.bar} transition-[width] duration-500`}
+                    style={{ width: `${percent}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Alarm ไม่ใช่สถานะของเครื่อง จึงแยกออกจากแถบสัดส่วน */}
+          <div className="flex flex-col rounded-xl border border-rose-200 bg-rose-50/40 p-4 shadow-sm transition hover:shadow-md dark:border-rose-900/70 dark:bg-rose-950/20">
+            <div className="flex items-start justify-between gap-2">
+              <span
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${STATUS_STYLE.rose.chip}`}
+              >
+                <Siren className="h-4.5 w-4.5" strokeWidth={1.75} />
+              </span>
+              <span className="font-mono text-[10px] tabular-nums text-zinc-400 dark:text-zinc-500">
+                Alarm ทั้งหมด {totalAlarms}
+              </span>
+            </div>
+
+            <p
+              className={`mt-3 font-mono text-3xl font-bold tabular-nums ${STATUS_STYLE.rose.value}`}
+            >
+              {alarmCount}
+            </p>
+            <p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              Alarms Remaining
+            </p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              ปิดแล้ว {closedAlarms} รายการ
+            </p>
+
+            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-rose-100 dark:bg-rose-950/60">
+              <span
+                className={`block h-full rounded-full ${STATUS_STYLE.rose.bar} transition-[width] duration-500`}
+                style={{
+                  width: `${
+                    totalAlarms > 0
+                      ? Math.round((closedAlarms / totalAlarms) * 100)
+                      : 0
+                  }%`,
+                }}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -382,8 +649,9 @@ export default function DashboardOverviewPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* กราฟที่ 1: แนวโน้มอุณหภูมิ */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm lg:col-span-2 min-h-[360px]">
-          <h2 className="text-md font-bold text-zinc-800 dark:text-zinc-200 mb-4 dark:text-zinc-100">
-            📈 แนวโน้มอุณหภูมิ (Temperature Trends)
+          <h2 className="mb-4 flex items-center gap-2 text-md font-bold text-zinc-800 dark:text-zinc-100 dark:text-zinc-200">
+            <TrendingUp className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+            Temperature Trends
           </h2>
           <div className="w-full h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -431,8 +699,9 @@ export default function DashboardOverviewPage() {
 
         {/* กราฟที่ 2: ปริมาณน้ำใน Tank */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm min-h-[320px]">
-          <h2 className="text-md font-bold text-zinc-800 dark:text-zinc-200 mb-4 dark:text-zinc-100">
-            💧 ปริมาณน้ำใน Tank (Water Level)
+          <h2 className="mb-4 flex items-center gap-2 text-md font-bold text-zinc-800 dark:text-zinc-100 dark:text-zinc-200">
+            <Droplet className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+            Water Tank Level
           </h2>
           <div className="w-full h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -469,8 +738,9 @@ export default function DashboardOverviewPage() {
 
         {/* กราฟที่ 3: อัตราการหยุดทำงานของปั๊ม */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm min-h-[320px]">
-          <h2 className="text-md font-bold text-zinc-800 dark:text-zinc-200 mb-4 dark:text-zinc-100">
-            ⚠️ อัตราการที่ปั๊มหยุดทำงาน (Pump Downtime Rate)
+          <h2 className="mb-4 flex items-center gap-2 text-md font-bold text-zinc-800 dark:text-zinc-100 dark:text-zinc-200">
+            <TriangleAlert className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+            Pump Downtime Rate
           </h2>
           <div className="w-full h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -499,8 +769,9 @@ export default function DashboardOverviewPage() {
 
         {/* กราฟที่ 4: จำนวน Alarm แยกตามสถานะ */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm min-h-[320px]">
-          <h2 className="text-md font-bold text-zinc-800 dark:text-zinc-200 mb-4 dark:text-zinc-100">
-            🚨 จำนวน Alarm แยกตามสถานะ (Alarm by Status)
+          <h2 className="mb-4 flex items-center gap-2 text-md font-bold text-zinc-800 dark:text-zinc-100 dark:text-zinc-200">
+            <Siren className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+            Alarm by Status
           </h2>
           <div className="w-full h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -540,8 +811,9 @@ export default function DashboardOverviewPage() {
 
         {/* กราฟที่ 5: เครื่องจักรที่สร้าง Alarm มากที่สุด */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm min-h-[320px]">
-          <h2 className="text-md font-bold text-zinc-800 dark:text-zinc-200 mb-4 dark:text-zinc-100">
-            🔧 เครื่องจักรที่สร้าง Alarm มากที่สุด (Top Alarm Sources)
+          <h2 className="mb-4 flex items-center gap-2 text-md font-bold text-zinc-800 dark:text-zinc-100 dark:text-zinc-200">
+            <Wrench className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+            Top Alarm Sources
           </h2>
           <div className="w-full h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -592,30 +864,37 @@ export default function DashboardOverviewPage() {
       {/* Machine Status Table */}
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
         <h2 className="text-lg font-bold mb-4 text-zinc-800 dark:text-zinc-200 dark:text-zinc-100">
-          สถานะเครื่องจักรล่าสุด
+          Latest Machine Status
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 text-sm">
                 <th className="p-3">ID</th>
-                <th className="p-3">ชื่อเครื่องจักร</th>
-                <th className="p-3">ประเภท</th>
-                <th className="p-3">สถานที่</th>
-                <th className="p-3">สถานะ</th>
+                <th className="p-3">Machines Name</th>
+                <th className="p-3">Type</th>
+                <th className="p-3">Locate</th>
+                <th className="p-3">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
               {machines.map((m) => (
-                <tr key={m.id} className="hover:bg-zinc-100/50 transition dark:hover:bg-zinc-800/50">
+                <tr
+                  key={m.id}
+                  className="hover:bg-zinc-100/50 transition dark:hover:bg-zinc-800/50"
+                >
                   <td className="p-3 font-mono text-zinc-800 dark:text-zinc-200 font-medium">
                     {m.machine_id}
                   </td>
                   <td className="p-3 font-medium text-zinc-800 dark:text-zinc-200">
                     {m.machine_name}
                   </td>
-                  <td className="p-3 text-zinc-700 dark:text-zinc-300">{m.machine_type}</td>
-                  <td className="p-3 text-zinc-600 dark:text-zinc-400">{m.location || "-"}</td>
+                  <td className="p-3 text-zinc-700 dark:text-zinc-300">
+                    {m.machine_type}
+                  </td>
+                  <td className="p-3 text-zinc-600 dark:text-zinc-400">
+                    {m.location || "-"}
+                  </td>
                   <td className="p-3">{getStatusBadge(m.status)}</td>
                 </tr>
               ))}

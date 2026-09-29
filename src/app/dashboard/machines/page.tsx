@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Lock, Pencil, Plus, Trash } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/components/Toast";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -194,11 +195,13 @@ export default function MachineMasterPage() {
             onClick={() => handleOpenModal()}
             className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white font-medium text-sm rounded-lg transition shadow-sm flex items-center gap-2"
           >
-            ➕ เพิ่มเครื่องจักรใหม่
+            <Plus className="h-4 w-4" strokeWidth={1.75} />
+            เพิ่มเครื่องจักรใหม่
           </button>
         ) : (
           <span className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-800 px-3 py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-            🔒 โหมดดูอย่างเดียว
+            <Lock className="h-3.5 w-3.5" strokeWidth={1.75} />
+            โหมดดูอย่างเดียว
           </span>
         )}
       </div>
@@ -309,22 +312,24 @@ export default function MachineMasterPage() {
                     </td>
 
                     {/* ปุ่มจัดการ — เฉพาะแอดมิน */}
-                    <td className="p-4 text-right space-x-2">
+                    <td className="p-4 text-right">
                       {canManage && !roleLoading && (
-                        <>
-                      <button
-                        onClick={() => handleOpenModal(m)}
-                        className="px-2.5 py-1 text-xs bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded border border-zinc-300 dark:border-zinc-700 transition"
-                      >
-                        ✏️ แก้ไข
-                      </button>
-                      <button
-                        onClick={() => handleDelete(m.id, m.machine_id)}
-                        className="px-2.5 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-700 rounded border border-red-200 transition"
-                      >
-                        🗑️ ลบ
-                      </button>
-                        </>
+                        <span className="inline-flex items-center gap-2">
+                          <button
+                            onClick={() => handleOpenModal(m)}
+                            className="inline-flex items-center gap-1.5 rounded border border-zinc-300 bg-zinc-100 px-2.5 py-1 text-xs text-zinc-700 transition hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                          >
+                            <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
+                            แก้ไข
+                          </button>
+                          <button
+                            onClick={() => handleDelete(m.id, m.machine_id)}
+                            className="inline-flex items-center gap-1.5 rounded border border-red-200 bg-red-50 px-2.5 py-1 text-xs text-red-700 transition hover:bg-red-100"
+                          >
+                            <Trash className="h-3.5 w-3.5" strokeWidth={1.75} />
+                            ลบ
+                          </button>
+                        </span>
                       )}
                     </td>
                   </tr>

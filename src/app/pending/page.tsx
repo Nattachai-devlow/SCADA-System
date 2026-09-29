@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Hourglass, RefreshCw } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -100,7 +101,7 @@ export default function PendingPage() {
       <div className="w-full max-w-md bg-white dark:bg-zinc-900 p-8 rounded-xl border border-amber-200 shadow-sm text-center space-y-6">
         {/* Icon & Animation */}
         <div className="relative w-20 h-20 mx-auto flex items-center justify-center bg-amber-50 rounded-full border border-amber-200">
-          <span className="text-4xl animate-pulse">⏳</span>
+          <Hourglass className="h-9 w-9 animate-pulse text-amber-600" strokeWidth={1.5} />
         </div>
 
         {/* Status Header */}
@@ -131,9 +132,10 @@ export default function PendingPage() {
         <div className="space-y-3 pt-2">
           <button
             onClick={handleCheckStatus}
-            className="w-full bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white font-bold py-2.5 rounded-lg transition text-xs shadow-sm"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-zinc-900 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
           >
-            🔄 ตรวจสอบสถานะการอนุมัติอีกครั้ง
+            <RefreshCw className="h-3.5 w-3.5" strokeWidth={2} />
+            ตรวจสอบสถานะการอนุมัติอีกครั้ง
           </button>
 
           <button

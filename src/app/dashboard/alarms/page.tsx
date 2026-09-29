@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Check, ClipboardList, TriangleAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/components/Toast";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -213,23 +214,25 @@ export default function AlarmPage() {
           <div className="flex bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-1">
             <button
               onClick={() => setFilter("OPEN")}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
+              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition ${
                 filter === "OPEN"
                   ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:text-zinc-200"
+                  : "text-zinc-600 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
               }`}
             >
-              ⚠️ รอดำเนินการ ({openCount})
+              <TriangleAlert className="h-3.5 w-3.5" strokeWidth={1.75} />
+              รอดำเนินการ ({openCount})
             </button>
             <button
               onClick={() => setFilter("ALL")}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
+              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition ${
                 filter === "ALL"
-                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 shadow"
-                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:text-zinc-200"
+                  ? "bg-zinc-100 text-zinc-800 shadow dark:bg-zinc-800 dark:text-zinc-200"
+                  : "text-zinc-600 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
               }`}
             >
-              📋 ทั้งหมด ({alarms.length})
+              <ClipboardList className="h-3.5 w-3.5" strokeWidth={1.75} />
+              ทั้งหมด ({alarms.length})
             </button>
           </div>
         </div>
@@ -293,7 +296,8 @@ export default function AlarmPage() {
                         </span>
                       ) : a.status === "Closed" ? (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900">
-                          ✓ CLOSED
+                          <Check className="h-3 w-3" strokeWidth={2.5} />
+                          CLOSED
                         </span>
                       ) : (
                         /* ค่าที่ไม่อยู่ใน 3 สถานะนี้ ต้องไม่ถูกแสดงเป็น "ปิดแล้ว" */
@@ -301,7 +305,8 @@ export default function AlarmPage() {
                           title={`สถานะนี้ไม่อยู่ในระบบ: ${a.status}`}
                           className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700"
                         >
-                          ⚠ {a.status}
+                          <TriangleAlert className="h-3 w-3" strokeWidth={1.75} />
+                          {a.status}
                         </span>
                       )}
                     </td>

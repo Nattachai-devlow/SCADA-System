@@ -1,6 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import {
+  BadgeCheck,
+  Clock,
+  Pencil,
+  Plus,
+  ShieldCheck,
+  Trash,
+  Wrench,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/Toast";
@@ -261,21 +270,24 @@ export default function UserManagementPage() {
     switch (role) {
       case "admin":
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-900">
-            👑 Admin
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300">
+            <ShieldCheck className="h-3 w-3" strokeWidth={2} />
+            Admin
           </span>
         );
       case "technician":
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-cyan-50 text-cyan-700 border border-cyan-200">
-            🔧 Technician
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-[10px] font-semibold text-cyan-700">
+            <Wrench className="h-3 w-3" strokeWidth={2} />
+            Technician
           </span>
         );
       case "pending":
       default:
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-900 animate-pulse">
-            ⏳ รออนุมัติ (Pending)
+          <span className="inline-flex items-center gap-1.5 animate-pulse rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-[10px] font-semibold text-rose-700 dark:border-rose-900 dark:bg-rose-950 dark:text-rose-300">
+            <Clock className="h-3 w-3" strokeWidth={2} />
+            รออนุมัติ (Pending)
           </span>
         );
     }
@@ -298,8 +310,9 @@ export default function UserManagementPage() {
       {/* Header & Add Button */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-            👑 จัดการสิทธิ์ผู้ใช้งาน (User Roles)
+          <h1 className="flex items-center gap-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+            <ShieldCheck className="h-6 w-6" strokeWidth={1.75} />
+            จัดการสิทธิ์ผู้ใช้งาน (User Roles)
           </h1>
           <p className="text-zinc-600 dark:text-zinc-400 text-xs mt-1">
             ส่วนเฉพาะผู้ดูแลระบบ (Admin Only) สำหรับจัดการ เพิ่ม แก้ไข
@@ -319,7 +332,7 @@ export default function UserManagementPage() {
           }}
           className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-sm"
         >
-          <span>➕</span>
+          <Plus className="h-4 w-4" strokeWidth={1.75} />
           <span>เพิ่มผู้ใช้งานใหม่</span>
         </button>
       </div>
@@ -349,31 +362,36 @@ export default function UserManagementPage() {
                     {profile.email || "-"}
                   </td>
                   <td className="p-3">{renderRoleBadge(profile.role)}</td>
-                  <td className="p-3 text-center space-x-2">
-                    {profile.role === "pending" && (
+                  <td className="p-3 text-center">
+                    <span className="inline-flex items-center gap-2">
+                      {profile.role === "pending" && (
+                        <button
+                          onClick={() => handleApproveUser(profile, "technician")}
+                          disabled={actionLoading}
+                          className="inline-flex items-center gap-1.5 rounded-lg border-emerald-200 bg-emerald-50 px-2.5 py-1 font-medium text-emerald-700 transition hover:bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-300"
+                        >
+                          <BadgeCheck className="h-3.5 w-3.5" strokeWidth={1.75} />
+                          อนุมัติสิทธิ์ (Technician)
+                        </button>
+                      )}
+
                       <button
-                        onClick={() => handleApproveUser(profile, "technician")}
-                        disabled={actionLoading}
-                        className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-200 transition font-medium"
+                        onClick={() => handleOpenEditModal(profile)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-300 bg-zinc-100 px-2.5 py-1 text-zinc-800 transition hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
                       >
-                        ✅ อนุมัติสิทธิ์ (Technician)
+                        <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
+                        แก้ไข
                       </button>
-                    )}
 
-                    <button
-                      onClick={() => handleOpenEditModal(profile)}
-                      className="px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 transition"
-                    >
-                      ✏️ แก้ไข
-                    </button>
-
-                    <button
-                      onClick={() => handleDeleteUser(profile)}
-                      disabled={profile.id === currentUserId}
-                      className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 transition disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      🗑️ ลบ
-                    </button>
+                      <button
+                        onClick={() => handleDeleteUser(profile)}
+                        disabled={profile.id === currentUserId}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-30 dark:bg-rose-950 dark:text-rose-300"
+                      >
+                        <Trash className="h-3.5 w-3.5" strokeWidth={1.75} />
+                        ลบ
+                      </button>
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -386,8 +404,9 @@ export default function UserManagementPage() {
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-sm space-y-4">
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
-              ➕ เพิ่มผู้ใช้งานใหม่
+            <h2 className="flex items-center gap-2 text-lg font-bold text-zinc-900 dark:text-zinc-100">
+              <Plus className="h-5 w-5" strokeWidth={1.75} />
+              เพิ่มผู้ใช้งานใหม่
             </h2>
             <form onSubmit={handleAddUser} className="space-y-3 text-xs">
               <div>
@@ -445,11 +464,9 @@ export default function UserManagementPage() {
                   }
                   className="w-full p-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-900"
                 >
-                  <option value="pending">⏳ รอการอนุมัติ (Pending)</option>
-                  <option value="technician">
-                    🔧 Technician (ช่างผู้เชี่ยวชาญ)
-                  </option>
-                  <option value="admin">👑 Admin (ผู้ดูแลระบบ)</option>
+                  <option value="pending">รอการอนุมัติ (Pending)</option>
+                  <option value="technician">Technician (ช่างผู้เชี่ยวชาญ)</option>
+                  <option value="admin">Admin (ผู้ดูแลระบบ)</option>
                 </select>
               </div>
 
@@ -478,8 +495,9 @@ export default function UserManagementPage() {
       {isEditModalOpen && (
         <div className="fixed inset-0 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-sm space-y-4">
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
-              ✏️ แก้ไขข้อมูลผู้ใช้งาน
+            <h2 className="flex items-center gap-2 text-lg font-bold text-zinc-900 dark:text-zinc-100">
+              <Pencil className="h-5 w-5" strokeWidth={1.75} />
+              แก้ไขข้อมูลผู้ใช้งาน
             </h2>
             <form onSubmit={handleUpdateUser} className="space-y-3 text-xs">
               <div>
@@ -520,11 +538,9 @@ export default function UserManagementPage() {
                   }
                   className="w-full p-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-900"
                 >
-                  <option value="pending">⏳ รอการอนุมัติ (Pending)</option>
-                  <option value="technician">
-                    🔧 Technician (ช่างผู้เชี่ยวชาญ)
-                  </option>
-                  <option value="admin">👑 Admin (ผู้ดูแลระบบ)</option>
+                  <option value="pending">รอการอนุมัติ (Pending)</option>
+                  <option value="technician">Technician (ช่างผู้เชี่ยวชาญ)</option>
+                  <option value="admin">Admin (ผู้ดูแลระบบ)</option>
                 </select>
               </div>
 
