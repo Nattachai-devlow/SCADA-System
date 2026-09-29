@@ -40,13 +40,13 @@
 #### 🎛️ Machines Master & History
 
 | :-----------------------------------------: | :-------------------------: |
-|             Machines Master              |         Machine History          |
+|             Machines Master                 |         Machine History     |
 | ![Machines Master](/Shots_SCADA/master.png) | ![History](/Shots_SCADA/History.png) |
 
 #### 🎛️ Users Access & Maintenance
 
 | :-----------------------------------------: | :-------------------------: |
-|             Users Access              |         Maintenance          |
+|             Users Access                    |         Maintenance         |
 | ![Users Access](/Shots_SCADA/role.png) | ![Maintenance](/Shots_SCADA/maintenanece.png) |
 
 </div>
