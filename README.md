@@ -305,7 +305,7 @@
 
 [![Interactive ER Diagram](https://img.shields.io/badge/🔍_View_Interactive-ER_Diagram_(Eraser.io)-violet?style=for-the-badge&logo=eraser)](https://app.eraser.io/workspace/84DSDydt9pvNOBGLnGIK?origin=share&diagram=k-g_eflIWKocFujX0W9x)
 
-[![Supabase Schema Diagram](./Shots_SCADA/Machine%20Maintenance%20Data%20Model.png)](https://app.eraser.io/workspace/84DSDydt9pvNOBGLnGIK?origin=share&diagram=k-g_eflIWKocFujX0W9x)
+[![Supabase Schema Diagram](/Shots_SCADA/Machine%20Maintenance%20Data%20Model.png)](https://app.eraser.io/workspace/84DSDydt9pvNOBGLnGIK?origin=share&diagram=k-g_eflIWKocFujX0W9x)
 
 > 💡 **Tip:** คลิกที่ภาพหรือปุ่มด้านบน เพื่อเปิดหน้า **Eraser.io Interactive Canvas** ที่สามารถคลิกลาก ซูมย่อ-ขยาย และตรวจดูความสัมพันธ์ของตาราง Database ได้สมบูรณ์แบบ
 เพื่อจำลองการทำงานของ PLC เราใช้ PostgreSQL Table บน Supabase เป็นตัวเก็บ State ของระบบ I/O สามารถนำ SQL Script ด้านล่างไปสร้างใน Supabase SQL Editor ได้ทันที:
@@ -451,11 +451,11 @@ create table public.system_telemetry (
 
 | Phase / Task                         |       Planned Date        |        Actual Date        |  Status   |
 | :----------------------------------- | :-----------------------: | :-----------------------: | :-------: |
-| Requirements & Architecture Design   | 01 Oct 2026 - 05 Oct 2026 | 01 Oct 2026 - 04 Oct 2026 | Completed |
-| Supabase Virtual PLC Schema Setup    | 06 Oct 2026 - 10 Oct 2026 | 05 Oct 2026 - 09 Oct 2026 | Completed |
-| Frontend SCADA Dashboard Development | 11 Oct 2026 - 20 Oct 2026 | 10 Oct 2026 - 22 Oct 2026 | Completed |
-| Real-time Alarm & Trend Logging      | 21 Oct 2026 - 25 Oct 2026 | 23 Oct 2026 - 26 Oct 2026 | Completed |
-| System Testing & Documentation       | 26 Oct 2026 - 30 Oct 2026 | 27 Oct 2026 - 30 Oct 2026 | Completed |
+| Requirements & Architecture Design   | 14 Sep 2026 - 16 Sep 2026 | 17 Sep 2026 - 17 Sep 2026 | Completed |
+| Supabase Virtual PLC Schema Setup    | 20 Sep 2026 - 23 Sep 2026 | 19 Sep 2026 - 20 Sep 2026 | Completed |
+| Frontend SCADA Dashboard Development | 23 Sep 2026 - 26 Sep 2026 | 21 Sep 2026 - 24 Sep 2026 | Completed |
+| Real-time Alarm & Trend Logging      | 26 Sep 2026 - 27 Sep 2026 | 27 Sep 2026 - 29 Sep 2026 | Completed |
+| System Testing & Documentation       | 29 Sep 2026 - 30 Sep 2026 | 29 Sep 2026 - 30 Sep 2026 | Completed |
 
 ### 🔄 Development Cycle & Scope Limit
 
