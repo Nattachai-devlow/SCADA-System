@@ -33,9 +33,21 @@
 
 #### 🎛️ Control Panel & Alarm Center
 
-|             Pump Control Panel              | Alarms Management |
+|             Pump Control Panel              |         Alarms Management          |
+| :-----------------------------------------: | :--------------------------------: |
+| ![Control Panel](/Shots_SCADA/control2.png) | ![Alarms](/Shots_SCADA/alarm1.png) |
+
+#### 🎛️ Machines Master & History
+
 | :-----------------------------------------: | :-------------------------: |
-| ![Control Panel](/Shots_SCADA/control2.png) |     ![Alarms](/Shots_SCADA/alarm1.png)     |
+|             Machines Master              |         Machine History          |
+| ![Machines Master](/Shots_SCADA/master.png) | ![History](/Shots_SCADA/History.png) |
+
+#### 🎛️ Users Access & Maintenance
+
+| :-----------------------------------------: | :-------------------------: |
+|             Users Access              |         Maintenance          |
+| ![Users Access](/Shots_SCADA/role.png) | ![Maintenance](/Shots_SCADA/maintenanece.png) |
 
 </div>
 
