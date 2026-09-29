@@ -302,6 +302,7 @@
 
 ### 🗄️ Supabase Schema (Virtualize PLC Engine)
 
+[![Interactive ER Diagram](https://app.eraser.io/workspace/84DSDydt9pvNOBGLnGIK?origin=share&diagram=k-g_eflIWKocFujX0W9x)]
 เพื่อจำลองการทำงานของ PLC เราใช้ PostgreSQL Table บน Supabase เป็นตัวเก็บ State ของระบบ I/O สามารถนำ SQL Script ด้านล่างไปสร้างใน Supabase SQL Editor ได้ทันที:
 
 ```sql
