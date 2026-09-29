@@ -31,23 +31,40 @@
 
 ![Main Dashboard](/Shots_SCADA/Screenshot%202026-09-30%20010223.png)
 
-#### 🎛️ Control Panel & Alarm Center
+<br/>
 
-|             Pump Control Panel              |         Alarms Management          |
-| :-----------------------------------------: | :--------------------------------: |
-| ![Control Panel](/Shots_SCADA/control2.png) | ![Alarms](/Shots_SCADA/alarm1.png) |
-
-#### 🎛️ Machines Master & History
-
-| :-----------------------------------------: | :-------------------------: |
-|             Machines Master                 |         Machine History     |
-| ![Machines Master](/Shots_SCADA/master.png) | ![History](/Shots_SCADA/History.png) |
-
-#### 🎛️ Users Access & Maintenance
-
-| :-----------------------------------------: | :-------------------------: |
-|             Users Access                    |         Maintenance         |
-| ![Users Access](/Shots_SCADA/role.png) | ![Maintenance](/Shots_SCADA/maintenanece.png) |
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <b>🎛️ Pump Control Panel</b><br/><br/>
+      <img src="/Shots_SCADA/control2.png" alt="Pump Control Panel" width="100%"/>
+    </td>
+    <td align="center" width="50%">
+      <b>🚨 Alarms Management</b><br/><br/>
+      <img src="/Shots_SCADA/alarm1.png" alt="Alarms" width="100%"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <b>🏭 Machines Master</b><br/><br/>
+      <img src="/Shots_SCADA/master.png" alt="Machines Master" width="100%"/>
+    </td>
+    <td align="center" width="50%">
+      <b>📜 Machine History</b><br/><br/>
+      <img src="/Shots_SCADA/History.png" alt="Machine History" width="100%"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <b>👥 Users Access Control</b><br/><br/>
+      <img src="/Shots_SCADA/role.png" alt="Users Access" width="100%"/>
+    </td>
+    <td align="center" width="50%">
+      <b>🛠️ Maintenance Logs</b><br/><br/>
+      <img src="/Shots_SCADA/maintenanece.png" alt="Maintenance" width="100%"/>
+    </td>
+  </tr>
+</table>
 
 </div>
 
@@ -111,7 +128,7 @@
 - [npm](https://www.npmjs.com/) หรือ [yarn](https://yarnpkg.com/)
 - บัญชีใช้งาน [Supabase Cloud](https://supabase.com/)
 
-### 🛠️️ Step-by-Step Installation
+### 🛠 Step-by-Step Installation
 
 1. **Clone the repository**
 
@@ -180,13 +197,13 @@ ALTER PUBLICATION supabase_realtime ADD TABLE pump_telemetry;
 
 ### 📅 Project Timeline & Plan
 
-| Phase / Task                         |       Planned Date        |        Actual Date        |  Status   |
-| :----------------------------------- | :-----------------------: | :-----------------------: | :-------: |
-| Requirements & Architecture Design   | 01 Oct 2026 - 05 Oct 2026 | 01 Oct 2026 - 04 Oct 2026 | Completed |
-| Supabase Virtual PLC Schema Setup    | 06 Oct 2026 - 10 Oct 2026 | 05 Oct 2026 - 09 Oct 2026 | Completed |
+| Phase / Task | Planned Date | Actual Date | Status |
+| :--- | :---: | :---: | :---: |
+| Requirements & Architecture Design | 01 Oct 2026 - 05 Oct 2026 | 01 Oct 2026 - 04 Oct 2026 | Completed |
+| Supabase Virtual PLC Schema Setup | 06 Oct 2026 - 10 Oct 2026 | 05 Oct 2026 - 09 Oct 2026 | Completed |
 | Frontend SCADA Dashboard Development | 11 Oct 2026 - 20 Oct 2026 | 10 Oct 2026 - 22 Oct 2026 | Completed |
-| Real-time Alarm & Trend Logging      | 21 Oct 2026 - 25 Oct 2026 | 23 Oct 2026 - 26 Oct 2026 | Completed |
-| System Testing & Documentation       | 26 Oct 2026 - 30 Oct 2026 | 27 Oct 2026 - 30 Oct 2026 | Completed |
+| Real-time Alarm & Trend Logging | 21 Oct 2026 - 25 Oct 2026 | 23 Oct 2026 - 26 Oct 2026 | Completed |
+| System Testing & Documentation | 26 Oct 2026 - 30 Oct 2026 | 27 Oct 2026 - 30 Oct 2026 | Completed |
 
 ### 🔄 Development Cycle & Scope Limit
 
