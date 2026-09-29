@@ -32,6 +32,7 @@ type TelemetryData = {
   target_temp: number;
   pool_temp: number;
   water_level_liters: number;
+  updated_at?: string;
 };
 
 /* สไตล์ของแต่ละสถานะ ใช้ซ้ำทั้งการ์ดเครื่อง ป้าย และจุดสถานะ
@@ -76,10 +77,10 @@ function statusStyle(status: string) {
 export default function ScadaPage() {
   const [machines, setMachines] = useState<ScadaMachine[]>([]);
   const [telemetry, setTelemetry] = useState<TelemetryData>({
-    outdoor_temp: 26.6,
-    target_temp: 36.0,
-    pool_temp: 35.9,
-    water_level_liters: 55000,
+    outdoor_temp: 0,
+    target_temp: 0,
+    pool_temp: 0,
+    water_level_liters: 0,
   });
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -96,10 +97,11 @@ export default function ScadaPage() {
         .from("machines")
         .select("*");
 
-      // 2. ดึงข้อมูล Telemetry (อุณหภูมิ และ ระดับน้ำ)
+      // 2. ดึงข้อมูล Telemetry ล่าสุดจากตาราง system_telemetry (ดึงแถวล่าสุดตาม updated_at)
       const { data: telemetryData, error: tError } = await supabase
         .from("system_telemetry")
         .select("*")
+        .order("updated_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
@@ -278,9 +280,7 @@ export default function ScadaPage() {
             >
               <span
                 className={`h-1.5 w-1.5 rounded-full ${
-                  loopActive
-                    ? "bg-emerald-500 machine-blink"
-                    : "bg-zinc-400"
+                  loopActive ? "bg-emerald-500 machine-blink" : "bg-zinc-400"
                 }`}
               />
               {loopActive ? "System Running" : "System Idle"}
@@ -353,7 +353,9 @@ export default function ScadaPage() {
                   </dd>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <dt className="text-zinc-500 dark:text-zinc-400">การหมุนเวียน</dt>
+                  <dt className="text-zinc-500 dark:text-zinc-400">
+                    การหมุนเวียน
+                  </dt>
                   <dd
                     className={`font-mono font-semibold ${
                       anyPumpRunning
@@ -365,7 +367,9 @@ export default function ScadaPage() {
                   </dd>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <dt className="text-zinc-500 dark:text-zinc-400">เครื่องทำงาน</dt>
+                  <dt className="text-zinc-500 dark:text-zinc-400">
+                    เครื่องทำงาน
+                  </dt>
                   <dd className="font-mono font-semibold tabular-nums text-zinc-800 dark:text-zinc-200">
                     {machines.filter((m) => m.status === "Running").length} /{" "}
                     {machines.length}
@@ -483,7 +487,9 @@ export default function ScadaPage() {
                             >
                               <span
                                 className={`absolute right-2.5 top-2.5 h-2 w-2 rounded-full ${
-                                  running ? `${style.dot} machine-blink` : style.dot
+                                  running
+                                    ? `${style.dot} machine-blink`
+                                    : style.dot
                                 }`}
                                 aria-hidden="true"
                               />
@@ -558,10 +564,7 @@ export default function ScadaPage() {
               {/* เส้นทางน้ำกลับเข้าถัง — ปิดลูปให้เห็นว่าเป็นระบบหมุนเวียน */}
               <div className="mt-3 flex items-center gap-3 rounded-xl border border-dashed border-sky-300/80 bg-sky-50/50 px-3 py-2.5 dark:border-sky-900/70 dark:bg-sky-950/20">
                 <span className="inline-flex shrink-0 items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-sky-700 dark:text-sky-300">
-                  <ArrowDown
-                    className="h-3 w-3 rotate-90"
-                    aria-hidden="true"
-                  />
+                  <ArrowDown className="h-3 w-3 rotate-90" aria-hidden="true" />
                   Return
                 </span>
                 <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-sky-100 dark:bg-sky-900/40">
