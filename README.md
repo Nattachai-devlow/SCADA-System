@@ -60,6 +60,9 @@ cp .env.example .env.local
 1. `src/supabase/01_init.sql` — สร้างตาราง (profiles, machines, alarms, maintenance_records)
 2. `src/supabase/RLS.sql` — เปิด Row Level Security และนิยาม policy
 3. `src/supabase/02_seed_alarms.sql` — (ไม่บังคับ) ข้อมูล alarm ตัวอย่าง 10 รายการ รันซ้ำได้ไม่เกิดข้อมูลซ้ำ ต้องมีเครื่องจักรอยู่แล้ว
+4. `src/supabase/03_fix_legacy_alarm_status.sql` — (ไม่บังคับ) แก้ค่า alarm status ที่เป็นตัวพิมพ์เล็กให้ตรงกับ CHECK constraint
+5. `src/supabase/04_add_waiting_part_status.sql` — (ไม่บังคับ) เพิ่มสถานะเครื่องจักร `Waiting Part`
+6. `src/supabase/05_machine_history.sql` — (ไม่บังคับ) ตาราง `machine_history` + trigger บันทึกประวัติการเพิ่ม/แก้ไข/ลบเครื่องจักรอัตโนมัติ **ต้องรันไฟล์นี้ถ้าต้องการใช้หน้า Machine History**
 
 ### 4. เริ่ม dev server
 

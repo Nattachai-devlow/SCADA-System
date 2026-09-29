@@ -3,22 +3,38 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
+import {
+  Factory,
+  History,
+  LayoutDashboard,
+  Menu,
+  Network,
+  ShieldCheck,
+  Siren,
+  Wrench,
+} from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 
-const BASE_MENU_ITEMS = [
-  { name: "ภาพรวมระบบ", sub: "Overview", path: "/dashboard", icon: "📊" },
-  { name: "P&ID SCADA", sub: "Live Diagram", path: "/dashboard/scada", icon: "🗺️" },
-  { name: "เครื่องจักร", sub: "Machine Master", path: "/dashboard/machines", icon: "⚙️" },
-  { name: "สถานะ Alarm", sub: "Alarms", path: "/dashboard/alarms", icon: "🚨" },
-  { name: "บันทึกซ่อมบำรุง", sub: "Maintenance", path: "/dashboard/maintenance", icon: "🔧" },
+type MenuItem = {
+  name: string;
+  sub: string;
+  path: string;
+  icon: LucideIcon;
+};
+
+const BASE_MENU_ITEMS: MenuItem[] = [
+  { name: "ภาพรวมระบบ", sub: "Overview", path: "/dashboard", icon: LayoutDashboard },
+  { name: "P&ID SCADA", sub: "Live Diagram", path: "/dashboard/scada", icon: Network },
+  { name: "เครื่องจักร", sub: "Machine Master", path: "/dashboard/machines", icon: Factory },
+  { name: "สถานะ Alarm", sub: "Alarms", path: "/dashboard/alarms", icon: Siren },
+  { name: "บันทึกซ่อมบำรุง", sub: "Maintenance", path: "/dashboard/maintenance", icon: Wrench },
 ];
 
-const ADMIN_MENU_ITEM = {
-  name: "จัดการสิทธิ์ผู้ใช้",
-  sub: "User Access",
-  path: "/dashboard/users",
-  icon: "👑",
-};
+const ADMIN_MENU_ITEMS: MenuItem[] = [
+  { name: "ประวัติเครื่องจักร", sub: "Machine History", path: "/dashboard/machine-history", icon: History },
+  { name: "จัดการสิทธิ์ผู้ใช้", sub: "User Access", path: "/dashboard/users", icon: ShieldCheck },
+];
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -26,7 +42,7 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const menuItems = isAdmin
-    ? [...BASE_MENU_ITEMS, ADMIN_MENU_ITEM]
+    ? [...BASE_MENU_ITEMS, ...ADMIN_MENU_ITEMS]
     : BASE_MENU_ITEMS;
 
   const roleLabel = roleLoading
@@ -45,9 +61,7 @@ export default function Sidebar() {
         aria-label="เปิดเมนู"
         className="lg:hidden fixed top-4 left-4 z-50 flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm transition hover:bg-zinc-50 active:scale-95 dark:border-zinc-700 dark:hover:bg-zinc-800"
       >
-        <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth={1.75}>
-          <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
-        </svg>
+        <Menu className="h-5 w-5" strokeWidth={1.75} />
       </button>
 
       {/* ฉากพื้นหลังเข้ม กดเพื่อปิดเมนู */}
@@ -89,6 +103,7 @@ export default function Sidebar() {
           <nav className="space-y-1.5">
             {menuItems.map((item, index) => {
               const isActive = pathname === item.path;
+              const Icon = item.icon;
 
               return (
                 <Link
@@ -110,13 +125,13 @@ export default function Sidebar() {
                   />
 
                   <span
-                    className={`nav-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-base ${
+                    className={`nav-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                       isActive
                         ? "bg-white/10 dark:bg-zinc-900/10"
                         : "bg-zinc-100 group-hover:bg-zinc-200 dark:bg-zinc-800 dark:group-hover:bg-zinc-700"
                     }`}
                   >
-                    {item.icon}
+                    <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
                   </span>
 
                   <span className="min-w-0 flex-1">
