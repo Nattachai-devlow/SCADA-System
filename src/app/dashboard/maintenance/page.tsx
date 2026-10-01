@@ -40,6 +40,8 @@ type MaintenanceRecord = {
   id: string;
   machine_id: string;
   technician_id: string | null;
+  /** snapshot ชื่อผู้ลงบันทึก ณ เวลาซ่อม (คอลัมน์จาก 06_maintenance_technician_name.sql) */
+  technician_name: string | null;
   title: string;
   details: string | null;
   maintenance_date: string;
@@ -55,6 +57,8 @@ export default function MaintenancePage() {
   const [machinesList, setMachinesList] = useState<MachineOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  // ชื่อของผู้ใช้ที่ล็อกอินอยู่ ใช้เป็นค่าเริ่มต้นของช่อง "ผู้ลงบันทึก"
+  const [myName, setMyName] = useState("");
 
   // --- Search & Filter States ---
   const [searchQuery, setSearchQuery] = useState("");
@@ -72,6 +76,7 @@ export default function MaintenancePage() {
     machine_status: "Maintenance" as string,
     title: "",
     details: "",
+    technician_name: "",
     maintenance_date: new Date().toISOString().split("T")[0],
   });
 
@@ -118,6 +123,17 @@ export default function MaintenancePage() {
       } = await supabase.auth.getUser();
       if (user && isMounted) {
         setUserId(user.id);
+
+        // ชื่อของตัวเอง ใช้เติมช่อง "ผู้ลงบันทึก" (ช่างแก้ไขไม่ได้)
+        const { data: myProfile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (isMounted) {
+          setMyName(myProfile?.full_name?.trim() || "");
+        }
       }
 
       const { data: mData } = await supabase
@@ -174,6 +190,7 @@ export default function MaintenancePage() {
         !q ||
         rec.title?.toLowerCase().includes(q) ||
         rec.details?.toLowerCase().includes(q) ||
+        rec.technician_name?.toLowerCase().includes(q) ||
         rec.machines?.machine_name?.toLowerCase().includes(q) ||
         rec.machines?.machine_id?.toLowerCase().includes(q);
 
@@ -223,6 +240,7 @@ export default function MaintenancePage() {
           "Maintenance",
         title: record.title,
         details: record.details || "",
+        technician_name: record.technician_name || myName,
         maintenance_date: record.maintenance_date
           ? record.maintenance_date.split("T")[0]
           : new Date().toISOString().split("T")[0],
@@ -235,6 +253,8 @@ export default function MaintenancePage() {
         machine_status: "Maintenance",
         title: "",
         details: "",
+        // เริ่มต้นเป็นชื่อผู้ใช้ปัจจุบัน แอดมินค่อยแก้ได้ถ้าบันทึกแทนคนอื่น
+        technician_name: myName,
         maintenance_date: new Date().toISOString().split("T")[0],
       });
     }
@@ -286,6 +306,11 @@ export default function MaintenancePage() {
         title: formData.title,
         details: formData.details,
         maintenance_date: formData.maintenance_date,
+        // ช่างแก้ชื่อผู้ลงบันทึกไม่ได้ และฝั่ง DB ก็จะปฏิเสธอยู่แล้ว
+        // จึงไม่ส่งคีย์นี้เลยเว้นแต่เป็นผู้ดูแลระบบ
+        ...(canManage && {
+          technician_name: formData.technician_name.trim() || myName,
+        }),
       };
 
       const { error } = await supabase
@@ -308,6 +333,7 @@ export default function MaintenancePage() {
       const payload = {
         machine_id: formData.machine_id,
         technician_id: userId,
+        technician_name: formData.technician_name.trim() || myName,
         title: formData.title,
         details: formData.details,
         maintenance_date: currentDate,
@@ -494,6 +520,7 @@ export default function MaintenancePage() {
                 <th className="p-4">วันที่ดำเนินการ</th>
                 <th className="p-4">เครื่องจักร</th>
                 <th className="p-4">หัวข้องาน</th>
+                <th className="p-4">ผู้ลงบันทึก</th>
                 <th className="p-4">รายละเอียด</th>
                 <th className="p-4 text-right">การจัดการ</th>
               </tr>
@@ -501,7 +528,7 @@ export default function MaintenancePage() {
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 text-sm">
               {filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-zinc-500 dark:text-zinc-400">
+                  <td colSpan={6} className="p-8 text-center text-zinc-500 dark:text-zinc-400">
                     ไม่พบข้อมูลการซ่อมบำรุงที่ตรงกับเงื่อนไขการค้นหา
                   </td>
                 </tr>
@@ -519,6 +546,13 @@ export default function MaintenancePage() {
                     </td>
                     <td className="p-4 font-medium text-zinc-900 dark:text-zinc-100">
                       {rec.title}
+                    </td>
+                    <td className="p-4 text-zinc-700 dark:text-zinc-300">
+                      {rec.technician_name || (
+                        <span className="text-zinc-400 dark:text-zinc-500">
+                          ไม่ระบุชื่อ
+                        </span>
+                      )}
                     </td>
                     <td className="p-4 text-zinc-600 dark:text-zinc-400">{rec.details || "-"}</td>
                     <td className="p-4 text-right">
@@ -664,6 +698,54 @@ export default function MaintenancePage() {
                   }
                   className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2.5 text-sm text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-900"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
+                  ผู้ลงบันทึก (ช่างผู้ซ่อม)
+                </label>
+
+                {canManage ? (
+                  <>
+                    <input
+                      type="text"
+                      placeholder={myName || "ระบุชื่อผู้ลงบันทึก"}
+                      value={formData.technician_name}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          technician_name: e.target.value,
+                        })
+                      }
+                      className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2.5 text-sm text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-900"
+                    />
+                    <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+                      ผู้ดูแลระบบแก้ไขชื่อได้ เช่น กรณีบันทึกแทนช่าง
+                      หรือทีมงานซ่อมร่วมกัน
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-full flex items-center gap-2 bg-zinc-50/60 border border-zinc-200/80 rounded-lg p-2.5 text-sm text-zinc-600 dark:bg-zinc-950/60 dark:border-zinc-800/80 dark:text-zinc-300">
+                      <Wrench
+                        className="h-3.5 w-3.5 shrink-0"
+                        strokeWidth={1.75}
+                      />
+                      <span className="truncate">
+                        {formData.technician_name || myName || "ไม่ระบุชื่อ"}
+                      </span>
+                      <Lock
+                        className="h-3.5 w-3.5 shrink-0 ml-auto"
+                        strokeWidth={1.75}
+                      />
+                    </div>
+                    <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+                      ช่างลงบันทึกงานของตัวเองเท่านั้น
+                      ชื่อผู้ลงบันทึกแก้ไขไม่ได้
+                      (ผู้ดูแลระบบเป็นผู้แก้ไขได้)
+                    </p>
+                  </>
+                )}
               </div>
 
               <div>
