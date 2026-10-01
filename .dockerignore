@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.github
+.ci-test
+.vercel
+.vscode
+coverage
+npm-debug.log*
+Dockerfile
+docker-compose.yaml
+README.md
+.env
+.env.local
+.env*.local
+Shots_SCADA
+tsconfig.tsbuildinfo

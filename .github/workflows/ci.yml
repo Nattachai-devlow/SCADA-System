@@ -1,0 +1,206 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  # ---------------------------------------------------------------------
+  # 1) Lint — eslint (react-hooks, next/core-web-vitals, next/typescript)
+  # ---------------------------------------------------------------------
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+  # ---------------------------------------------------------------------
+  # 2) Type check — tsc --noEmit (เข้มงวดตาม tsconfig strict: true)
+  # ---------------------------------------------------------------------
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript compiler
+        run: npm run typecheck
+
+  # ---------------------------------------------------------------------
+  # 3) Build — next build แบบ matrix ข้าม Node 20 / 22 เพื่อกันปัญหา
+  #    ที่เกิดเฉพาะบางรุ่น (Next 16 บังคับใช้ Node >= 20.9)
+  # ---------------------------------------------------------------------
+  build:
+    name: Build (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Build ไม่ได้ต่อ Supabase จริง จึงใช้ค่าจำลองเฉพาะตอน compile
+      - name: Build with placeholder env
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+
+  # ---------------------------------------------------------------------
+  # 4) Production smoke test — build แล้ว start แล้ว curl หน้าแรก
+  # ---------------------------------------------------------------------
+  smoke-test:
+    name: Smoke Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [lint, typecheck, build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+
+      - name: Start production server
+        run: |
+          npm run start &
+          echo "SERVER_PID=$!"
+          echo $! > server.pid
+
+      - name: Wait for server
+        run: |
+          npx --yes wait-on@8 http://127.0.0.1:3000 --timeout 120000
+
+      - name: Verify routes respond
+        run: |
+          for path in / /login /pending /dashboard; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:3000${path}")
+            echo "${path} -> ${code}"
+            if [ "$code" = "000" ]; then
+              echo "route ${path} did not respond"
+              exit 1
+            fi
+          done
+
+      - name: Dump server log on failure
+        if: failure()
+        run: tail -n 200 .next/trace || true
+
+      - name: Stop server
+        if: always()
+        run: kill "$(cat server.pid)" 2>/dev/null || true
+
+  # ---------------------------------------------------------------------
+  # 5) Guard — เช็กว่าไม่มี secret หลุดเข้า repository
+  # ---------------------------------------------------------------------
+  secret-scan:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Ensure env files are not tracked
+        run: |
+          tracked=$(git ls-files | grep -E '(^|/)\.env' | grep -v '\.env\.example$' || true)
+          if [ -n "$tracked" ]; then
+            echo "::error::ไฟล์ env ถูก commit มาแล้ว: $tracked"
+            exit 1
+          fi
+          echo "ไม่พบไฟล์ env ในรายการที่ถูก track"
+
+      - name: gitleaks scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+  # ---------------------------------------------------------------------
+  # 6) Summary — รวมผลทุก job ไว้ที่เดียว
+  # ---------------------------------------------------------------------
+  ci-summary:
+    name: CI Summary
+    if: always()
+    needs: [lint, typecheck, build, smoke-test, secret-scan]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write summary
+        run: |
+          {
+            echo "## CI Summary"
+            echo ""
+            echo "| Job | Result |"
+            echo "| --- | --- |"
+            echo "| Lint | ${{ needs.lint.result }} |"
+            echo "| Type Check | ${{ needs.typecheck.result }} |"
+            echo "| Build | ${{ needs.build.result }} |"
+            echo "| Smoke Test | ${{ needs.smoke-test.result }} |"
+            echo "| Secret Scan | ${{ needs.secret-scan.result }} |"
+            echo ""
+            echo "Commit: \`${{ github.sha }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

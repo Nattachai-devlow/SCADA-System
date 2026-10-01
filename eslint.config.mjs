@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local CI sandbox (ผลลัพธ์ของ next build) ไม่ต้องผ่าน lint
+    ".ci-test/**",
   ]),
 ]);
 
