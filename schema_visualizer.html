@@ -1,0 +1,1251 @@
+<!doctype html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SCADA Virtual PLC — Supabase Schema Visualizer</title>
+<style>
+  /* ------------------------------------------------------------------
+     Theme tokens
+  ------------------------------------------------------------------ */
+  :root {
+    --speed: 2.4s;
+    --radius: 14px;
+  }
+  :root[data-theme="dark"] {
+    --bg: #08090b;
+    --bg-grid: #17181c;
+    --panel: #131417;
+    --panel-2: #1b1d21;
+    --border: #2b2e35;
+    --border-soft: #22242a;
+    --text: #f4f4f5;
+    --text-dim: #a1a1aa;
+    --text-faint: #71717a;
+    --accent: #38bdf8;
+    --accent-soft: rgba(56, 189, 248, 0.14);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f6f7;
+    --bg-grid: #e5e5e8;
+    --panel: #ffffff;
+    --panel-2: #f4f4f5;
+    --border: #d4d4d8;
+    --border-soft: #e4e4e7;
+    --text: #18181b;
+    --text-dim: #52525b;
+    --text-faint: #a1a1aa;
+    --accent: #0284c7;
+    --accent-soft: rgba(2, 132, 199, 0.12);
+    --shadow: 0 8px 24px rgba(24, 24, 27, 0.12);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+      "Noto Sans Thai", "Leelawadee UI", sans-serif;
+    overflow: hidden;
+  }
+
+  /* ------------------------------------------------------------------
+     Top bar
+  ------------------------------------------------------------------ */
+  header {
+    flex: none;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 9px 14px;
+    background: color-mix(in srgb, var(--panel) 90%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-soft);
+  }
+  header h1 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+  }
+  header .sub {
+    font-size: 11px;
+    color: var(--text-faint);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    white-space: nowrap;
+  }
+  .spacer { flex: 1 1 auto; }
+
+  button, select, input[type="search"] {
+    font: inherit;
+    font-size: 12px;
+    color: var(--text);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  button:hover, select:hover { background: var(--accent-soft); border-color: var(--accent); }
+  button:active { transform: scale(0.97); }
+  button[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+    font-weight: 600;
+  }
+  input[type="search"] { cursor: text; min-width: 180px; }
+  input[type="search"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .group { display: flex; align-items: center; gap: 6px; }
+  .zoom { font-family: ui-monospace, Menlo, monospace; min-width: 52px; text-align: center; }
+
+  /* ------------------------------------------------------------------
+     Canvas
+  ------------------------------------------------------------------ */
+  #viewport {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    cursor: grab;
+    background-image:
+      linear-gradient(var(--bg-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+  #viewport.panning, #viewport.dragging { cursor: grabbing; }
+
+  #stage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+  }
+  #edges { position: absolute; top: 0; left: 0; overflow: visible; pointer-events: none; }
+  #cards { position: absolute; top: 0; left: 0; width: 0; height: 0; }
+
+  /* ------------------------------------------------------------------
+     Relationship edges
+  ------------------------------------------------------------------ */
+  .edge { pointer-events: auto; cursor: pointer; }
+  .edge .hit { fill: none; stroke: transparent; stroke-width: 20; }
+  .edge .base {
+    fill: none;
+    stroke: var(--edge-color);
+    stroke-width: 2;
+    opacity: 0.26;
+    transition: opacity 0.2s, stroke-width 0.2s;
+  }
+  .edge .flow {
+    fill: none;
+    stroke: var(--edge-color);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    opacity: 0.95;
+    filter: drop-shadow(0 0 4px var(--edge-color));
+  }
+  .edge .crow, .edge .one {
+    fill: none;
+    stroke: var(--edge-color);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    opacity: 0.9;
+  }
+  .edge .dot { fill: var(--edge-color); filter: drop-shadow(0 0 6px var(--edge-color)); }
+
+  /* period ของ dasharray = 30 ทั้งสองแบบ จึงวนลูปได้โดยไม่กระตุก */
+  @keyframes flowFwd { to { stroke-dashoffset: -30; } }
+  @keyframes flowRev { to { stroke-dashoffset: 30; } }
+  .flow.fwd { animation: flowFwd var(--speed) linear infinite; }
+  .flow.rev { animation: flowRev var(--speed) linear infinite; }
+
+  #stage.no-anim .flow { animation: none; stroke-dasharray: none; opacity: 0.5; }
+  #stage.no-anim .dot  { display: none; }
+
+  .edge .label-bg { fill: var(--panel); stroke: var(--border); stroke-width: 1; }
+  .edge .label-tx {
+    fill: var(--text-dim);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+  }
+  .edge .detail-tx {
+    fill: var(--text-faint);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 9px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+  }
+
+  .edge.on .base { opacity: 0.85; stroke-width: 3.2; }
+  .edge.on .flow { stroke-width: 3.4; }
+  .edge.on .crow, .edge.on .one { stroke-width: 3; }
+  .edge.on .label-tx { fill: var(--text); }
+  .edge.off { opacity: 0.12; }
+  .edge:not(.off):not(.on):hover .base { opacity: 0.6; }
+
+  /* ------------------------------------------------------------------
+     Table cards
+  ------------------------------------------------------------------ */
+  .tbl {
+    position: absolute;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: box-shadow 0.2s, border-color 0.2s, opacity 0.2s;
+  }
+  .tbl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .tbl.on {
+    border-color: var(--tint);
+    box-shadow: var(--shadow), 0 0 0 2px var(--tint),
+      0 0 26px color-mix(in srgb, var(--tint) 45%, transparent);
+  }
+  .tbl.off { opacity: 0.2; }
+  .tbl.external { border-style: dashed; }
+
+  .tbl-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--tint) 20%, var(--panel)), var(--panel));
+    border-bottom: 1px solid var(--border);
+    cursor: move;
+  }
+  .tbl-head .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--tint); flex: none; }
+  .tbl-head .name {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tbl-head .tag {
+    margin-left: auto;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--tint);
+    border: 1px solid color-mix(in srgb, var(--tint) 45%, transparent);
+    border-radius: 999px;
+    padding: 1px 7px;
+    white-space: nowrap;
+  }
+
+  .tbl-body { padding: 5px 0 7px; }
+  .col {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: baseline;
+    padding: 3px 12px;
+  }
+  .col:hover { background: var(--panel-2); }
+  .col .cname { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; }
+  .col .ctype {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+  .col .meta {
+    grid-column: 1 / -1;
+    font-size: 9.5px;
+    color: var(--text-faint);
+    margin-top: -1px;
+  }
+  .badges { display: inline-flex; gap: 3px; margin-left: 5px; vertical-align: 1px; }
+  .b {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 8.5px;
+    font-weight: 700;
+    border-radius: 4px;
+    padding: 0 4px;
+    line-height: 14px;
+    display: inline-block;
+  }
+  .b-pk  { background: rgba(245, 158, 11, 0.18); color: #f59e0b; }
+  .b-fk  { background: rgba(56, 189, 248, 0.18);  color: #38bdf8; }
+  .b-nn  { background: rgba(163, 163, 163, 0.16); color: var(--text-dim); }
+  .b-uq  { background: rgba(244, 63, 94, 0.18);  color: #fb7185; }
+  .b-no-fk { background: rgba(168, 85, 247, 0.18); color: #c084fc; }
+
+  @keyframes pulseRing {
+    0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--tint) 60%, transparent); }
+    70%  { box-shadow: 0 0 0 14px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+  .tbl.flash { animation: pulseRing 1.1s ease-out 2; }
+
+  /* ------------------------------------------------------------------
+     Side panel + hint
+  ------------------------------------------------------------------ */
+  aside {
+    position: fixed;
+    left: 14px;
+    bottom: 14px;
+    z-index: 25;
+    width: 300px;
+    max-height: calc(100vh - 90px);
+    overflow: auto;
+    background: color-mix(in srgb, var(--panel) 93%, transparent);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    font-size: 11.5px;
+  }
+  aside summary {
+    padding: 9px 12px;
+    cursor: pointer;
+    font-weight: 600;
+    list-style: none;
+    display: flex;
+    align-items: center;
+  }
+  aside summary::-webkit-details-marker { display: none; }
+  aside summary::after { content: "+"; margin-left: auto; color: var(--text-faint); font-weight: 400; }
+  aside[open] summary::after { content: "-"; }
+  .aside-body { padding: 2px 12px 12px; color: var(--text-dim); line-height: 1.65; }
+  .aside-body h3 {
+    margin: 12px 0 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--text-faint);
+  }
+  .aside-body ul { margin: 0; padding-left: 16px; }
+  .aside-body li { margin: 2px 0; }
+  .aside-body b { color: var(--text); }
+  .aside-body code {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10.5px;
+    background: var(--panel-2);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    padding: 0 4px;
+  }
+  .lg { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+  .lg svg { flex: none; }
+
+  #relList { margin: 0; padding: 0; list-style: none; }
+  #relList li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  #relList li:hover { background: var(--panel-2); border-color: var(--border); }
+  #relList li.on { background: var(--accent-soft); border-color: var(--accent); }
+  #relList .swatch { width: 16px; height: 3px; border-radius: 2px; flex: none; }
+  #relList .txt {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #hint {
+    position: fixed;
+    right: 14px;
+    bottom: 14px;
+    z-index: 25;
+    font-size: 10.5px;
+    color: var(--text-faint);
+    background: color-mix(in srgb, var(--panel) 90%, transparent);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 6px 10px;
+    line-height: 1.7;
+    text-align: right;
+  }
+  #hint b { color: var(--text-dim); font-weight: 600; }
+
+  @media (max-width: 900px) {
+    aside, #hint { display: none; }
+    header .sub { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .flow { animation: none !important; }
+    .dot { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SCADA Virtual PLC</h1>
+  <span class="sub">supabase schema visualizer</span>
+  <span class="spacer"></span>
+  <input type="search" id="search" placeholder="ค้นหาตาราง เช่น machines" aria-label="ค้นหาตาราง" />
+  <div class="group">
+    <button id="zoomOut" title="ซูมออก">-</button>
+    <span class="zoom" id="zoomVal">100%</span>
+    <button id="zoomIn" title="ซูมเข้า">+</button>
+    <button id="zoomFit" title="พอดีกับหน้าจอ">Fit</button>
+  </div>
+  <div class="group">
+    <button id="animBtn" aria-pressed="true" title="เปิด/ปิดแอนิเมชันเส้นเชื่อม">Animate</button>
+    <select id="speed" title="ความเร็วแอนิเมชัน" aria-label="ความเร็วแอนิเมชัน">
+      <option value="4s">ช้า</option>
+      <option value="2.4s" selected>ปกติ</option>
+      <option value="1.1s">เร็ว</option>
+    </select>
+  </div>
+  <div class="group">
+    <button id="resetBtn" title="กลับตำแหน่งตั้งต้น">Reset layout</button>
+    <button id="themeBtn" title="สลับธีมสว่าง/มืด">Theme</button>
+  </div>
+</header>
+
+<div id="viewport">
+  <div id="stage">
+    <svg id="edges" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div id="cards"></div>
+  </div>
+</div>
+
+<aside id="panel" open>
+  <summary>Legend &amp; Schema Notes</summary>
+  <div class="aside-body">
+
+    <h3>Cardinality</h3>
+    <div class="lg">
+      <svg width="78" height="16"><path d="M2 8 H72" stroke="currentColor" stroke-width="2" fill="none"/><path d="M62 2 V14" stroke="currentColor" stroke-width="2"/></svg>
+      <span>หนึ่ง (one) แบบขีดตั้ง</span>
+    </div>
+    <div class="lg">
+      <svg width="78" height="16"><path d="M2 8 H72" stroke="currentColor" stroke-width="2" fill="none"/><path d="M72 8 L60 2 M72 8 L60 8 M72 8 L60 14" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+      <span>หลาย (many) แบบเลย์กกา</span>
+    </div>
+
+    <h3>Line style</h3>
+    <div class="lg"><svg width="78" height="16"><path d="M2 8 H72" stroke="#38bdf8" stroke-width="2.4" stroke-dasharray="12 18" fill="none"/></svg><span>Foreign Key</span></div>
+    <div class="lg"><svg width="78" height="16"><path d="M2 8 H72" stroke="#fbbf24" stroke-width="2.4" stroke-dasharray="5 10" fill="none"/></svg><span>Trigger / ไม่มี FK</span></div>
+
+    <h3>Column badges</h3>
+    <div class="lg"><span class="b b-pk">PK</span><span>Primary key</span></div>
+    <div class="lg"><span class="b b-fk">FK</span><span>Foreign key</span></div>
+    <div class="lg"><span class="b b-nn">NN</span><span>NOT NULL</span></div>
+    <div class="lg"><span class="b b-uq">UQ</span><span>UNIQUE</span></div>
+    <div class="lg"><span class="b b-no-fk">NO FK</span><span>ตั้งใจไม่ทำ FK</span></div>
+
+    <h3>Relationships</h3>
+    <ul id="relList"></ul>
+
+    <h3>Schema notes</h3>
+    <ul>
+      <li><b>Trigger</b> <code>trg_machine_history</code> ทำงาน <code>AFTER INSERT/UPDATE/DELETE</code> บน <code>machines</code> เรียก <code>log_machine_change()</code> (SECURITY DEFINER) แล้วเขียนลง <code>machine_history</code></li>
+      <li><code>machine_uuid</code> <b>ไม่มี Foreign Key</b> โดยตั้งใจ เพื่อให้ประวัติของเครื่องที่ถูกลบยังอยู่</li>
+      <li>ลบเครื่องจักรจะ <code>CASCADE</code> ไปยัง <code>alarms</code> และ <code>maintenance_records</code></li>
+      <li>ลบผู้ใช้จะ <code>SET NULL</code> ที่ <code>technician_id</code> และ <code>performed_by</code></li>
+      <li>ฟังก์ชันช่วย RLS: <code>is_admin()</code>, <code>is_active_user()</code> ใช้ <code>lower(trim(role))</code></li>
+      <li><code>machine_history</code> ไม่มี policy สำหรับ INSERT/UPDATE/DELETE โดยตั้งใจ ข้อมูลต้องมาจาก trigger เท่านั้น</li>
+      <li><code>system_telemetry</code> ไม่มีความสัมพันธ์กับตารางอื่น เป็น time-series ที่เขียนเพิ่มจากภายนอก</li>
+    </ul>
+
+    <h3>Source of truth</h3>
+    <ul>
+      <li><code>src/supabase/01_init.sql</code></li>
+      <li><code>src/supabase/04_add_waiting_part_status.sql</code></li>
+      <li><code>src/supabase/05_machine_history.sql</code></li>
+      <li><code>src/supabase/RLS.sql</code></li>
+    </ul>
+
+  </div>
+</aside>
+
+<div id="hint">
+  <b>ลากหัวตาราง</b> เพื่อย้าย &nbsp;·&nbsp; <b>ลากพื้นที่ว่าง</b> เพื่อเลื่อน<br />
+  <b>Scroll</b> เพื่อซูม &nbsp;·&nbsp; <b>คลิกเส้น</b> เพื่อไฮไลต์ความสัมพันธ์<br />
+  <b>ดับเบิลคลิกตาราง</b> เพื่อซูมเข้าหา &nbsp;·&nbsp; <b>Tab + ลูกศร</b> เพื่อขยับทีละน้อย<br />
+  <b>Esc</b> ล้างการเลือก &nbsp;·&nbsp; <b>0</b> พอดีกับหน้าจอ
+</div>
+
+<script>
+"use strict";
+
+/* ==================================================================
+   1. Schema model — ตรงกับ src/supabase/*.sql
+   ================================================================== */
+const TABLES = [
+  {
+    id: "auth.users",
+    label: "auth.users",
+    tag: "external",
+    external: true,
+    color: "#71717a",
+    x: 40, y: 40, w: 300,
+    cols: [
+      { name: "id", type: "uuid", b: ["PK"] },
+      { name: "email", type: "text" },
+      { name: "(managed by GoTrue)", type: "", meta: "ตารางผู้ใช้ของ Supabase Auth ระบบนี้ไม่ได้เขียนเอง" }
+    ]
+  },
+  {
+    id: "profiles",
+    label: "profiles",
+    tag: "app",
+    color: "#38bdf8",
+    x: 40, y: 215, w: 350,
+    cols: [
+      { name: "id", type: "uuid", b: ["PK", "FK"], meta: "-> auth.users.id · ON DELETE CASCADE" },
+      { name: "email", type: "text", b: ["NN"] },
+      { name: "full_name", type: "text" },
+      { name: "role", type: "text", b: ["NN"], meta: "DEFAULT 'pending' · CHECK (admin|technician|pending)" },
+      { name: "created_at", type: "timestamptz" }
+    ]
+  },
+  {
+    id: "system_telemetry",
+    label: "system_telemetry",
+    tag: "time-series",
+    color: "#a78bfa",
+    x: 40, y: 455, w: 370,
+    cols: [
+      { name: "id", type: "uuid", b: ["PK"], meta: "DEFAULT gen_random_uuid()" },
+      { name: "outdoor_temp", type: "numeric(5,2)", meta: "DEFAULT 26.6" },
+      { name: "target_temp", type: "numeric(5,2)", meta: "DEFAULT 36.0" },
+      { name: "pool_temp", type: "numeric(5,2)", meta: "DEFAULT 35.9" },
+      { name: "water_level_liters", type: "numeric(10,2)", meta: "DEFAULT 55000" },
+      { name: "pump_stop_rate", type: "numeric(5,2)", meta: "DEFAULT 0" },
+      { name: "updated_at", type: "timestamptz", meta: "DEFAULT now() · ใช้เรียง time-series" }
+    ]
+  },
+  {
+    id: "machines",
+    label: "machines",
+    tag: "virtual PLC",
+    color: "#34d399",
+    x: 440, y: 200, w: 400,
+    cols: [
+      { name: "id", type: "uuid", b: ["PK"], meta: "DEFAULT uuid_generate_v4()" },
+      { name: "machine_id", type: "text", b: ["NN", "UQ"] },
+      { name: "machine_name", type: "text", b: ["NN"] },
+      { name: "machine_type", type: "text", b: ["NN"], meta: "free-text · ใช้จัดกลุ่มบน P&ID" },
+      { name: "location", type: "text" },
+      { name: "status", type: "text", b: ["NN"], meta: "DEFAULT 'Stop' · CHECK (Running|Stop|Alarm|Maintenance|Waiting Part)" },
+      { name: "created_at", type: "timestamptz" }
+    ]
+  },
+  {
+    id: "alarms",
+    label: "alarms",
+    tag: "events",
+    color: "#fb7185",
+    x: 440, y: 590, w: 400,
+    cols: [
+      { name: "id", type: "uuid", b: ["PK"] },
+      { name: "machine_id", type: "uuid", b: ["NN", "FK"], meta: "-> machines.id · ON DELETE CASCADE" },
+      { name: "alarm_code", type: "text", b: ["NN"] },
+      { name: "alarm_description", type: "text", b: ["NN"] },
+      { name: "cause", type: "text" },
+      { name: "status", type: "text", b: ["NN"], meta: "DEFAULT 'Open' · CHECK (Open|In Progress|Closed)" },
+      { name: "created_at", type: "timestamptz" }
+    ]
+  },
+  {
+    id: "maintenance_records",
+    label: "maintenance_records",
+    tag: "work orders",
+    color: "#f59e0b",
+    x: 960, y: 40, w: 440,
+    cols: [
+      { name: "id", type: "uuid", b: ["PK"] },
+      { name: "machine_id", type: "uuid", b: ["NN", "FK"], meta: "-> machines.id · ON DELETE CASCADE" },
+      { name: "technician_id", type: "uuid", b: ["FK"], meta: "-> profiles.id · ON DELETE SET NULL" },
+      { name: "title", type: "text", b: ["NN"] },
+      { name: "details", type: "text" },
+      { name: "maintenance_date", type: "timestamptz" },
+      { name: "created_at", type: "timestamptz" }
+    ]
+  },
+  {
+    id: "machine_history",
+    label: "machine_history",
+    tag: "audit log",
+    color: "#22d3ee",
+    x: 960, y: 330, w: 450,
+    cols: [
+      { name: "id", type: "uuid", b: ["PK"] },
+      { name: "machine_uuid", type: "uuid", b: ["NO FK"], meta: "ตั้งใจไม่ทำ FK เพื่อคงประวัติเมื่อเครื่องถูกลบ" },
+      { name: "machine_code", type: "text", b: ["NN"], meta: "snapshot ค่าเดิม ไม่ต้อง join" },
+      { name: "machine_name", type: "text", b: ["NN"] },
+      { name: "action", type: "text", b: ["NN"], meta: "CHECK (create|update|delete)" },
+      { name: "before_data", type: "jsonb" },
+      { name: "after_data", type: "jsonb" },
+      { name: "performed_by", type: "uuid", b: ["FK"], meta: "-> profiles.id · ON DELETE SET NULL" },
+      { name: "performed_by_name", type: "text" },
+      { name: "performed_by_email", type: "text" },
+      { name: "created_at", type: "timestamptz", meta: "มี index created_at DESC" }
+    ]
+  }
+];
+
+/* bow = ดัดเส้นออกจากแนวตรง ใช้แยกเส้นที่วางทับกัน
+   fromOff / toOff = เลื่อนจุดยึดตามขอบการ์ด เพื่อให้สองเส้นที่ไปตารางเดียวกันไม่ทับกัน */
+const EDGES = [
+  { id: "e1", from: "auth.users", to: "profiles",
+    label: "1 : N", detail: "ON DELETE CASCADE", color: "#38bdf8", bow: 0 },
+  { id: "e2", from: "machines", to: "alarms",
+    label: "1 : N", detail: "ON DELETE CASCADE", color: "#fb7185", bow: 0 },
+  { id: "e3", from: "machines", to: "maintenance_records",
+    label: "1 : N", detail: "ON DELETE CASCADE", color: "#f59e0b", bow: 0 },
+  { id: "e4", from: "profiles", to: "maintenance_records",
+    label: "1 : N", detail: "ON DELETE SET NULL", color: "#38bdf8", bow: -150 },
+  { id: "e5", from: "profiles", to: "machine_history",
+    label: "1 : N", detail: "ON DELETE SET NULL", color: "#38bdf8", bow: 120 },
+  { id: "e6", from: "machines", to: "machine_history",
+    label: "trigger", detail: "trg_machine_history", color: "#fbbf24", kind: "trigger", bow: 0 },
+  { id: "e7", from: "machines", to: "machine_history",
+    label: "1 : 1", detail: "machine_uuid (no FK)", color: "#a855f7", kind: "trigger",
+    bow: 30, fromOff: 34, toOff: 45 }
+];
+
+const STAGE_W = 1450;
+const STAGE_H = 850;
+const STORE_KEY = "scada-schema-visualizer.layout.v1";
+const SVGNS = "http://www.w3.org/2000/svg";
+
+/* ==================================================================
+   2. DOM refs + state
+   ================================================================== */
+const stage = document.getElementById("stage");
+const cardsEl = document.getElementById("cards");
+const svg = document.getElementById("edges");
+const viewport = document.getElementById("viewport");
+const zoomVal = document.getElementById("zoomVal");
+
+const byId = new Map(TABLES.map((t) => [t.id, t]));
+const edgeNodes = new Map();
+const motions = [];
+
+const view = { x: 40, y: 20, s: 0.72 };
+let selEdge = null;
+let selTable = null;
+
+/* ==================================================================
+   3. Helpers
+   ================================================================== */
+function svgEl(name, attrs) {
+  const el = document.createElementNS(SVGNS, name);
+  if (attrs) for (const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+function norm(x, y) {
+  const l = Math.hypot(x, y) || 1;
+  return { x: x / l, y: y / l };
+}
+function cardEl(id) { return document.getElementById("card-" + id); }
+
+/* ==================================================================
+   4. Persistence (กันพังบน file:// ที่บางเบราว์เซอร์บล็อก localStorage)
+   ================================================================== */
+function loadLayout() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    for (const t of TABLES) {
+      const s = saved[t.id];
+      if (s && Number.isFinite(s.x) && Number.isFinite(s.y)) {
+        t.x = s.x;
+        t.y = s.y;
+      }
+    }
+  } catch (_) { /* ใช้ค่าเริ่มต้น */ }
+}
+function saveLayout() {
+  try {
+    const out = {};
+    for (const t of TABLES) out[t.id] = { x: t.x, y: t.y };
+    localStorage.setItem(STORE_KEY, JSON.stringify(out));
+  } catch (_) { /* ไม่มีที่เก็บ ก็ข้าม */ }
+}
+
+/* ==================================================================
+   5. Cards
+   ================================================================== */
+const BADGE_TEXT = { PK: "PK", FK: "FK", NN: "NN", UQ: "UQ", "NO FK": "NO FK" };
+
+function buildCard(t) {
+  const el = document.createElement("div");
+  el.className = "tbl" + (t.external ? " external" : "");
+  el.id = "card-" + t.id;
+  el.dataset.id = t.id;
+  el.dataset.moved = "0";
+  el.style.width = t.w + "px";
+  el.style.left = t.x + "px";
+  el.style.top = t.y + "px";
+  el.style.setProperty("--tint", t.color);
+  el.tabIndex = 0;
+  el.setAttribute("role", "group");
+  el.setAttribute("aria-label", "ตาราง " + t.label);
+
+  const head = document.createElement("div");
+  head.className = "tbl-head";
+  const d = document.createElement("span");
+  d.className = "dot";
+  const nm = document.createElement("span");
+  nm.className = "name";
+  nm.textContent = t.label;
+  const tg = document.createElement("span");
+  tg.className = "tag";
+  tg.textContent = t.tag;
+  head.append(d, nm, tg);
+  el.appendChild(head);
+
+  const body = document.createElement("div");
+  body.className = "tbl-body";
+  for (const c of t.cols) {
+    const row = document.createElement("div");
+    row.className = "col";
+
+    const left = document.createElement("div");
+    left.className = "cname";
+    left.textContent = c.name;
+    if (c.b && c.b.length) {
+      const wrap = document.createElement("span");
+      wrap.className = "badges";
+      for (const b of c.b) {
+        const s = document.createElement("span");
+        s.className = "b b-" + b.toLowerCase().replace(/\s+/g, "-");
+        s.textContent = BADGE_TEXT[b] || b;
+        wrap.appendChild(s);
+      }
+      left.appendChild(wrap);
+    }
+
+    const right = document.createElement("div");
+    right.className = "ctype";
+    right.textContent = c.type || "";
+
+    row.append(left, right);
+    if (c.meta) {
+      const m = document.createElement("div");
+      m.className = "meta";
+      m.textContent = c.meta;
+      row.appendChild(m);
+    }
+    body.appendChild(row);
+  }
+  el.appendChild(body);
+
+  el.addEventListener("pointerdown", (ev) => startCardDrag(ev, t, el));
+  el.addEventListener("keydown", (ev) => onCardKey(ev, t));
+  el.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    if (el.dataset.moved === "1") return; /* เพิ่งลากเสร็จ ไม่ใช่การคลิก */
+    selectTable(selTable === t.id ? null : t.id);
+  });
+  el.addEventListener("dblclick", (ev) => { ev.stopPropagation(); centerOn(t); });
+  return el;
+}
+
+/* ==================================================================
+   6. Geometry
+   ================================================================== */
+function rectOf(t) {
+  return { x: t.x, y: t.y, w: t.w, h: t._h || 200 };
+}
+
+/** จุดบนขอบสี่เหลี่ยม r ที่หันไปทาง (tx, ty) */
+function borderPoint(r, tx, ty) {
+  const cx = r.x + r.w / 2;
+  const cy = r.y + r.h / 2;
+  const dx = tx - cx;
+  const dy = ty - cy;
+  if (dx === 0 && dy === 0) return { x: cx, y: cy };
+  const sx = dx === 0 ? Infinity : r.w / 2 / Math.abs(dx);
+  const sy = dy === 0 ? Infinity : r.h / 2 / Math.abs(dy);
+  const s = Math.min(sx, sy);
+  return { x: cx + dx * s, y: cy + dy * s };
+}
+
+/** เลื่อนจุดยึดไปตามขอบการ์ด (ใช้แยกสองเส้นที่ไปตารางเดียวกัน) */
+function slide(p, r, off) {
+  if (!off) return p;
+  const L = 10;
+  if (Math.abs(p.x - r.x) < 1 || Math.abs(p.x - (r.x + r.w)) < 1) {
+    return { x: p.x, y: clamp(p.y + off, r.y + L, r.y + r.h - L) };
+  }
+  return { x: clamp(p.x + off, r.x + L, r.x + r.w - L), y: p.y };
+}
+
+/** เบเซียร์พร้อมดัดเส้นออกตามแนวตั้งของ bow */
+function curve(p1, p2, bow) {
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  const dist = Math.hypot(dx, dy) || 1;
+  const nx = -dy / dist;
+  const ny = dx / dist;
+  const c = Math.max(48, Math.min(170, dist * 0.38));
+
+  let c1, c2;
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    const s = Math.sign(dx || 1);
+    c1 = { x: p1.x + s * c, y: p1.y };
+    c2 = { x: p2.x - s * c, y: p2.y };
+  } else {
+    const s = Math.sign(dy || 1);
+    c1 = { x: p1.x, y: p1.y + s * c };
+    c2 = { x: p2.x, y: p2.y - s * c };
+  }
+  c1 = { x: c1.x + nx * bow, y: c1.y + ny * bow };
+  c2 = { x: c2.x + nx * bow, y: c2.y + ny * bow };
+
+  return {
+    d: `M${p1.x.toFixed(1)},${p1.y.toFixed(1)} C${c1.x.toFixed(1)},${c1.y.toFixed(1)} ` +
+       `${c2.x.toFixed(1)},${c2.y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`,
+    c1, c2
+  };
+}
+
+function bezierPoint(p0, c1, c2, p3, t) {
+  const u = 1 - t;
+  const a = u * u * u, b = 3 * u * u * t, c = 3 * u * t * t, d = t * t * t;
+  return {
+    x: a * p0.x + b * c1.x + c * c2.x + d * p3.x,
+    y: a * p0.y + b * c1.y + c * c2.y + d * p3.y
+  };
+}
+
+/* ==================================================================
+   7. Edges
+   ================================================================== */
+function buildEdges() {
+  svg.setAttribute("width", STAGE_W);
+  svg.setAttribute("height", STAGE_H);
+  svg.setAttribute("viewBox", `0 0 ${STAGE_W} ${STAGE_H}`);
+  motions.length = 0;
+
+  for (const e of EDGES) {
+    const pid = "path-" + e.id;
+    const g = svgEl("g", { class: "edge" });
+    g.style.setProperty("--edge-color", e.color);
+
+    const hit = svgEl("path", { class: "hit" });
+    const base = svgEl("path", { class: "base", id: pid });
+    const flow = svgEl("path", { class: "flow" });
+    if (e.kind === "trigger") flow.setAttribute("stroke-dasharray", "5 10");
+
+    const labelBg = svgEl("rect", { class: "label-bg", rx: 6 });
+    const labelTx = svgEl("text", { class: "label-tx" });
+    labelTx.textContent = e.label;
+    const detailTx = svgEl("text", { class: "detail-tx" });
+    detailTx.textContent = e.detail;
+
+    /* จุดข้อมูลวิ่งตามเส้น สร้างครั้งเดียว ใช้ร่วมทุกครั้งที่ redraw */
+    const dot = svgEl("circle", { class: "dot", r: 4.5 });
+    const motion = svgEl("animateMotion", { dur: "2.4s", repeatCount: "indefinite" });
+    const mp = svgEl("mpath", { href: "#" + pid });
+    mp.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "#" + pid);
+    motion.appendChild(mp);
+    dot.appendChild(motion);
+    motions.push(motion);
+
+    const marks = svgEl("g", {});
+
+    g.append(hit, base, flow, dot, marks, labelBg, labelTx, detailTx);
+    g.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      selectEdge(selEdge === e.id ? null : e.id);
+    });
+    svg.appendChild(g);
+
+    edgeNodes.set(e.id, { g, hit, base, flow, marks, motion, labelBg, labelTx, detailTx, edge: e });
+  }
+}
+
+function redrawEdges() {
+  for (const { g, hit, base, flow, marks, motion, labelBg, labelTx, detailTx, edge: e } of edgeNodes.values()) {
+    const A = byId.get(e.from);
+    const B = byId.get(e.to);
+    if (!A || !B) continue;
+
+    const ra = rectOf(A);
+    const rb = rectOf(B);
+    const ca = { x: ra.x + ra.w / 2, y: ra.y + ra.h / 2 };
+    const cb = { x: rb.x + rb.w / 2, y: rb.y + rb.h / 2 };
+
+    const pa = slide(borderPoint(ra, cb.x, cb.y), ra, e.fromOff || 0); /* from */
+    const pb = slide(borderPoint(rb, ca.x, ca.y), rb, e.toOff || 0);   /* to   */
+
+    /* ให้ p1 = จุดที่อยู่ซ้าย/บน เพื่อให้ทิศของเส้นคงที่ตามตำแหน่งจริง */
+    const aFirst = pa.x < pb.x || (pa.x === pb.x && pa.y <= pb.y);
+    const p1 = aFirst ? pa : pb;
+    const p2 = aFirst ? pb : pa;
+    const forward = aFirst; /* true = ไหลจาก from -> to */
+
+    const c = curve(p1, p2, e.bow || 0);
+    for (const el of [hit, base, flow]) el.setAttribute("d", c.d);
+
+    flow.setAttribute("class", "flow " + (forward ? "fwd" : "rev"));
+    if (forward) {
+      motion.removeAttribute("keyPoints");
+      motion.removeAttribute("keyTimes");
+    } else {
+      motion.setAttribute("keyPoints", "1;0");
+      motion.setAttribute("keyTimes", "0;1");
+      motion.setAttribute("calcMode", "linear");
+    }
+
+    const d2 = norm(p2.x - c.c2.x, p2.y - c.c2.y);
+    const n2 = { x: -d2.y, y: d2.x };
+    const L = 17, S = 7;
+    const crow =
+      `M${(p2.x - d2.x * L + n2.x * S).toFixed(1)},${(p2.y - d2.y * L + n2.y * S).toFixed(1)} ` +
+      `L${p2.x.toFixed(1)},${p2.y.toFixed(1)} ` +
+      `L${(p2.x - d2.x * L - n2.x * S).toFixed(1)},${(p2.y - d2.y * L - n2.y * S).toFixed(1)}`;
+    const d1 = norm(p1.x - c.c1.x, p1.y - c.c1.y);
+    const n1 = { x: -d1.y, y: d1.x };
+    const oa = { x: p1.x + d1.x * 13 + n1.x * 8, y: p1.y + d1.y * 13 + n1.y * 8 };
+    const ob = { x: p1.x + d1.x * 13 - n1.x * 8, y: p1.y + d1.y * 13 - n1.y * 8 };
+    const one = `M${oa.x.toFixed(1)},${oa.y.toFixed(1)} L${ob.x.toFixed(1)},${ob.y.toFixed(1)}`;
+
+    marks.textContent = "";
+    marks.append(
+      svgEl("path", { class: "one", d: one }),
+      svgEl("path", { class: "crow", d: crow })
+    );
+
+    const mid = bezierPoint(p1, c.c1, c.c2, p2, 0.5);
+    labelTx.setAttribute("x", mid.x.toFixed(1));
+    labelTx.setAttribute("y", (mid.y - 7).toFixed(1));
+    detailTx.setAttribute("x", mid.x.toFixed(1));
+    detailTx.setAttribute("y", (mid.y + 5).toFixed(1));
+    const w = Math.max(e.label.length, e.detail.length) * 6.2 + 20;
+    labelBg.setAttribute("x", (mid.x - w / 2).toFixed(1));
+    labelBg.setAttribute("y", (mid.y - 17).toFixed(1));
+    labelBg.setAttribute("width", w.toFixed(1));
+    labelBg.setAttribute("height", 30);
+  }
+}
+
+/* ==================================================================
+   8. Selection / highlight
+   ================================================================== */
+function selectEdge(id) { selEdge = id; selTable = null; applyHighlight(); }
+function selectTable(id) { selTable = id; selEdge = null; applyHighlight(); }
+
+function applyHighlight() {
+  const active = new Set();
+  const edgeOn = new Set();
+
+  if (selEdge) {
+    const e = EDGES.find((x) => x.id === selEdge);
+    if (e) { active.add(e.from); active.add(e.to); edgeOn.add(e.id); }
+  } else if (selTable) {
+    active.add(selTable);
+    for (const e of EDGES) {
+      if (e.from === selTable || e.to === selTable) {
+        edgeOn.add(e.id);
+        active.add(e.from);
+        active.add(e.to);
+      }
+    }
+  }
+
+  const has = !!(selEdge || selTable);
+  for (const t of TABLES) {
+    const el = cardEl(t.id);
+    if (!el) continue;
+    el.classList.toggle("on", has && active.has(t.id));
+    el.classList.toggle("off", has && !active.has(t.id));
+  }
+  for (const [id, n] of edgeNodes) {
+    n.g.classList.toggle("on", edgeOn.has(id));
+    n.g.classList.toggle("off", has && !edgeOn.has(id));
+  }
+  for (const li of document.querySelectorAll("#relList li")) {
+    li.classList.toggle("on", li.dataset.id === selEdge);
+  }
+}
+
+/* ==================================================================
+   9. Drag cards
+   ================================================================== */
+function startCardDrag(ev, t, el) {
+  if (ev.pointerType === "mouse" && ev.button !== 0) return;
+  ev.stopPropagation();
+  ev.preventDefault();
+
+  const startX = ev.clientX;
+  const startY = ev.clientY;
+  const origX = t.x;
+  const origY = t.y;
+  let moved = false;
+
+  try { el.setPointerCapture(ev.pointerId); } catch (_) {}
+  viewport.classList.add("dragging");
+
+  const onMove = (m) => {
+    const dx = (m.clientX - startX) / view.s;
+    const dy = (m.clientY - startY) / view.s;
+    if (!moved && Math.hypot(dx, dy) > 3) {
+      moved = true;
+      el.dataset.moved = "1";
+    }
+    if (!moved) return;
+    t.x = Math.round(origX + dx);
+    t.y = Math.round(origY + dy);
+    el.style.left = t.x + "px";
+    el.style.top = t.y + "px";
+    redrawEdges();
+  };
+
+  const onUp = (u) => {
+    el.removeEventListener("pointermove", onMove);
+    el.removeEventListener("pointerup", onUp);
+    el.removeEventListener("pointercancel", onUp);
+    try { el.releasePointerCapture(ev.pointerId); } catch (_) {}
+    viewport.classList.remove("dragging");
+    if (moved) saveLayout();
+    el.dataset.moved = "0";
+  };
+
+  el.addEventListener("pointermove", onMove);
+  el.addEventListener("pointerup", onUp);
+  el.addEventListener("pointercancel", onUp);
+}
+
+function onCardKey(ev, t) {
+  const step = ev.shiftKey ? 40 : 10;
+  let dx = 0, dy = 0;
+  if (ev.key === "ArrowLeft") dx = -step;
+  else if (ev.key === "ArrowRight") dx = step;
+  else if (ev.key === "ArrowUp") dy = -step;
+  else if (ev.key === "ArrowDown") dy = step;
+  else if (ev.key === "Enter" || ev.key === " ") {
+    ev.preventDefault();
+    selectTable(selTable === t.id ? null : t.id);
+    return;
+  } else return;
+
+  ev.preventDefault();
+  t.x += dx;
+  t.y += dy;
+  const el = cardEl(t.id);
+  if (el) { el.style.left = t.x + "px"; el.style.top = t.y + "px"; }
+  redrawEdges();
+  saveLayout();
+}
+
+/* ==================================================================
+   10. Pan / zoom
+   ================================================================== */
+let pan = null;
+
+viewport.addEventListener("pointerdown", (ev) => {
+  if (ev.pointerType === "mouse" && ev.button !== 0) return;
+  if (ev.target !== viewport && ev.target !== stage && ev.target !== cardsEl) return;
+  pan = { x: ev.clientX, y: ev.clientY, vx: view.x, vy: view.y };
+  viewport.classList.add("panning");
+  try { viewport.setPointerCapture(ev.pointerId); } catch (_) {}
+  selectEdge(null);
+  selectTable(null);
+});
+
+viewport.addEventListener("pointermove", (ev) => {
+  if (!pan) return;
+  view.x = pan.vx + (ev.clientX - pan.x);
+  view.y = pan.vy + (ev.clientY - pan.y);
+  applyView();
+});
+
+function endPan(ev) {
+  if (!pan) return;
+  pan = null;
+  viewport.classList.remove("panning");
+  try { viewport.releasePointerCapture(ev.pointerId); } catch (_) {}
+}
+viewport.addEventListener("pointerup", endPan);
+viewport.addEventListener("pointercancel", endPan);
+
+viewport.addEventListener("wheel", (ev) => {
+  ev.preventDefault();
+  const r = viewport.getBoundingClientRect();
+  zoomTo(view.s * Math.exp(-ev.deltaY * 0.0015), ev.clientX - r.left, ev.clientY - r.top);
+}, { passive: false });
+
+function applyView() {
+  stage.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.s})`;
+  zoomVal.textContent = Math.round(view.s * 100) + "%";
+}
+
+function zoomTo(next, ax, ay) {
+  const r = viewport.getBoundingClientRect();
+  const mx = ax ?? r.width / 2;
+  const my = ay ?? r.height / 2;
+  const s = clamp(next, 0.25, 2.2);
+  const k = s / view.s;
+  view.x = mx - (mx - view.x) * k;
+  view.y = my - (my - view.y) * k;
+  view.s = s;
+  applyView();
+}
+
+function centerOn(t) {
+  const r = viewport.getBoundingClientRect();
+  view.s = clamp(view.s, 0.6, 1.1);
+  view.x = r.width / 2 - (t.x + t.w / 2) * view.s;
+  view.y = r.height / 2 - (t.y + (t._h || 200) / 2) * view.s;
+  applyView();
+}
+
+function fitView() {
+  const r = viewport.getBoundingClientRect();
+  const pad = 48;
+  const minX = Math.min(...TABLES.map((t) => t.x));
+  const minY = Math.min(...TABLES.map((t) => t.y));
+  const maxX = Math.max(...TABLES.map((t) => t.x + t.w));
+  const maxY = Math.max(...TABLES.map((t) => t.y + (t._h || 200)));
+  const s = clamp(
+    Math.min((r.width - pad * 2) / (maxX - minX), (r.height - pad * 2) / (maxY - minY)),
+    0.25, 1.4
+  );
+  view.s = s;
+  view.x = (r.width - (maxX - minX) * s) / 2 - minX * s;
+  view.y = (r.height - (maxY - minY) * s) / 2 - minY * s;
+  applyView();
+}
+
+/* ==================================================================
+   11. Toolbar
+   ================================================================== */
+document.getElementById("zoomIn").addEventListener("click", () => zoomTo(view.s * 1.2));
+document.getElementById("zoomOut").addEventListener("click", () => zoomTo(view.s / 1.2));
+document.getElementById("zoomFit").addEventListener("click", fitView);
+
+const animBtn = document.getElementById("animBtn");
+animBtn.addEventListener("click", () => {
+  const on = animBtn.getAttribute("aria-pressed") === "true";
+  animBtn.setAttribute("aria-pressed", String(!on));
+  stage.classList.toggle("no-anim", on);
+});
+
+const speedSel = document.getElementById("speed");
+speedSel.addEventListener("change", () => {
+  const dur = speedSel.value;
+  document.documentElement.style.setProperty("--speed", dur);
+  for (const m of motions) m.setAttribute("dur", dur);
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  try { localStorage.removeItem(STORE_KEY); } catch (_) {}
+  location.reload();
+});
+
+document.getElementById("themeBtn").addEventListener("click", () => {
+  const root = document.documentElement;
+  root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+});
+
+document.getElementById("search").addEventListener("input", (ev) => {
+  const q = ev.target.value.trim().toLowerCase();
+  if (!q) { selectTable(null); return; }
+  const hit = TABLES.find((t) => t.label.toLowerCase().includes(q));
+  if (!hit) { selectTable(null); return; }
+  selectTable(hit.id);
+  centerOn(hit);
+  const el = cardEl(hit.id);
+  if (el) { el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+});
+
+window.addEventListener("keydown", (ev) => {
+  if (ev.target instanceof HTMLElement && ev.target.matches("input, select, textarea")) return;
+  if (ev.key === "Escape") { selectEdge(null); selectTable(null); }
+  if (ev.key === "0") fitView();
+});
+
+/* ==================================================================
+   12. Relationship list
+   ================================================================== */
+function buildRelList() {
+  const ul = document.getElementById("relList");
+  for (const e of EDGES) {
+    const li = document.createElement("li");
+    li.dataset.id = e.id;
+    li.title = `${e.from} -> ${e.to} · ${e.label} · ${e.detail}`;
+
+    const sw = document.createElement("span");
+    sw.className = "swatch";
+    sw.style.background = e.color;
+    const tx = document.createElement("span");
+    tx.className = "txt";
+    tx.textContent = `${e.from} -> ${e.to}`;
+    li.append(sw, tx);
+
+    li.addEventListener("click", () => {
+      selectEdge(selEdge === e.id ? null : e.id);
+      const a = byId.get(e.from);
+      const b = byId.get(e.to);
+      if (!a || !b) return;
+      const mx = (a.x + a.w / 2 + b.x + b.w / 2) / 2;
+      const my = (a.y + (a._h || 200) / 2 + b.y + (b._h || 200) / 2) / 2;
+      const r = viewport.getBoundingClientRect();
+      view.x = r.width / 2 - mx * view.s;
+      view.y = r.height / 2 - my * view.s;
+      applyView();
+    });
+    ul.appendChild(li);
+  }
+}
+
+/* ==================================================================
+   13. Boot
+   ================================================================== */
+function boot() {
+  loadLayout();
+
+  stage.style.width = STAGE_W + "px";
+  stage.style.height = STAGE_H + "px";
+
+  for (const t of TABLES) cardsEl.appendChild(buildCard(t));
+
+  /* วัดความสูงจริงหลัง mount เพื่อให้เส้นเชื่อมชนขอบการ์ดพอดี */
+  for (const t of TABLES) t._h = cardEl(t.id).offsetHeight;
+
+  buildEdges();
+  redrawEdges();
+  buildRelList();
+  applyView();
+  fitView();
+  applyHighlight();
+
+  window.addEventListener("resize", () => { /* ผู้ใช้ซูมเองได้ จึงไม่ยัดเข้าให้อัตโนมัติ */ });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", boot);
+} else {
+  boot();
+}
+</script>
+</body>
+</html>

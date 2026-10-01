@@ -608,6 +608,28 @@ docker compose down
 
 ### 5.11 Schema Visualizer
 
+#### Interactive ER Diagram (Local)
+
+เปิดไฟล์ [`schema_visualizer.html`](./schema_visualizer.html) ได้ทันทีโดยไม่ต้องติดตั้งอะไรเพิ่ม (double-click ที่ไฟล์ หรือพิมพ์ `start schema_visualizer.html` ใน Command Prompt)
+
+ฟีเจอร์ของไฟล์นี้
+
+| ความสามารถ | วิธีใช้ |
+| --------- | ------ |
+| ลากย้ายตาราง | ลากที่หัวตาราง ตำแหน่งถูกจำไว้ใน `localStorage` ของเบราว์เซอร์นั้น |
+| เลื่อนแคนวาส | ลากบนพื้นที่ว่างของแคนวาส |
+| ซูมเข้า-ออก | Scroll เมาส์ หรือปุ่ม `+` / `-` / `Fit` |
+| ไฮไลต์ความสัมพันธ์ | คลิกที่การ์ดตาราง หรือคลิกที่เส้นเชื่อม |
+| แอนิเมชันเส้นเชื่อม | ปุ่ม `Animate` เปิด/ปิด และเลือกความเร็วได้ที่ dropdown |
+| ค้นหาตาราง | พิมพ์ชื่อตารางในช่องค้นหา ระบบจะซูมไปที่ตารางนั้นให้อัตโนมัติ |
+| สลับธีม | ปุ่ม `Theme` (โหมดมืด/สว่าง) |
+| คีย์บอร์ด | `Tab` + ลูกศร เพื่อขยับทีละ 10px (กด `Shift` เพื่อขยับ 40px), `Esc` ล้างการเลือก, `0` พอดีกับหน้าจอ |
+| คืนค่าเริ่มต้น | ปุ่ม `Reset layout` |
+
+> เส้นเชื่อมสีฟ้า/ชมพู/ส้มคือ Foreign Key ส่วนเส้นประสีเหลืองและม่วงคือความสัมพันธ์ที่ **ไม่มี Foreign Key** โดยเฉพาะ `machine_history.machine_uuid` ที่ตั้งใจไม่ทำ FK เพื่อให้ประวัติของเครื่องที่ถูกลบยังคงอยู่
+>
+> ไฟล์นี้เป็นไฟล์เดี่ยวจบ ไม่พึ่ง dependency ใด ๆ และอ่านข้อมูลสคีมาแบบ hardcode ไว้ในไฟล์ หากแก้ `src/supabase/*.sql` แล้วต้องอัปเดตตาราง `TABLES` และ `EDGES` ในไฟล์นี้ด้วย
+
 #### Supabase Schema Diagram (Virtual PLC Engine)
 
 [![Interactive ER Diagram](https://img.shields.io/badge/View_Interactive-ER_Diagram_(Eraser.io)-violet?style=for-the-badge&logo=eraser)](https://app.eraser.io/workspace/84DSDydt9pvNOBGLnGIK?origin=share&diagram=k-g_eflIWKocFujX0W9x)
