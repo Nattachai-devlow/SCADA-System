@@ -640,11 +640,13 @@ docker compose down
 
 #### Supabase Schema Diagram (Virtual PLC Engine)
 
-[![Interactive ER Diagram](https://img.shields.io/badge/View_Interactive-ER_Diagram_(Eraser.io)-violet?style=for-the-badge&logo=eraser)](https://app.eraser.io/workspace/84DSDydt9pvNOBGLnGIK?origin=share&diagram=k-g_eflIWKocFujX0W9x)
+[![Schema Visualizer Preview](/Shots_SCADA/schema-visualizer.png)](https://nattachai-devlow.github.io/SCADA-System/)
 
-[![Supabase Schema Diagram](/Shots_SCADA/Machine%20Maintenance%20Data%20Model.png)](https://app.eraser.io/workspace/84DSDydt9pvNOBGLnGIK?origin=share&diagram=k-g_eflIWKocFujX0W9x)
-
-> คลิกที่ภาพหรือปุ่มด้านบน เพื่อเปิดหน้า **Eraser.io Interactive Canvas** ที่สามารถคลิกลาก ซูมย่อ-ขยาย และตรวจดูความสัมพันธ์ของตาราง Database ได้สมบูรณ์แบบ
+> ภาพด้านบนคือภาพหน้าจอจริงของ [`schema_visualizer.html`](./schema_visualizer.html) คลิกที่ภาพเพื่อเปิดแบบเต็มจอที่โต้ตอบได้ (ลากย้ายตาราง คลิกไฮไลต์ความสัมพันธ์ ค้นหาตาราง เปิด/ปิดแอนิเมชัน สลับธีม) หรือคลิกขวาบนภาพเพื่อเปิดดูขนาดเต็ม
+>
+> ถ้า URL โหลดไม่ได้ ให้เปิดในเครื่องด้วย `start schema_visualizer.html` หรือดูวิธีใช้และคีย์ลัดทั้งหมดที่หัวข้อ [5.11 Schema Visualizer](#511-schema-visualizer)
+>
+> ทางเลือกสำรอง: [Eraser.io Interactive Canvas](https://app.eraser.io/workspace/84DSDydt9pvNOBGLnGIK?origin=share&diagram=k-g_eflIWKocFujX0W9x) (แคนวาสของทีม)
 >
 > เพื่อจำลองการทำงานของ PLC เราใช้ PostgreSQL Table บน Supabase เป็นตัวเก็บ State ของระบบ I/O สามารถนำ SQL Script ใน `src/supabase/` ไปรันใน Supabase SQL Editor ได้ทันที
 
