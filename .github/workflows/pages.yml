@@ -1,7 +1,7 @@
 name: Deploy Schema Visualizer to Pages
 
 # Deploy schema_visualizer.html เป็นหน้าเว็บจริงที่
-# https://nattachai-devlow.github.io/automation-web-app/
+# https://nattachai-devlow.github.io/SCADA-System/
 #
 # หมายเหตุ: GitHub จะไม่ render ไฟล์ .html ในหน้า file browser ของ repo
 # ไฟล์จะแสดงเป็น source code เสมอ (โดยเจตนา เพื่อไม่ให้ GitHub execute HTML
@@ -41,6 +41,11 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          # ถ้ายังไม่เคยเปิด Pages มาก่อน ให้เปิดให้อัตโนมัติ
+          # (ไม่ต้องไปกด Settings > Pages เอง)
+          # ต้องมี permission pages: write ซึ่งประกาศไว้ด้านบนแล้ว
+          enablement: true
 
       # visualizer เป็นไฟล์ HTML เดี่ยวจบ ไม่ต้อง build
       # จัดเตรียมเฉพาะไฟล์ที่ต้องการ ไม่เอา node_modules / .git ไปด้วย

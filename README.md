@@ -2,16 +2,16 @@
 
 # SCADA Water Pump Automation & Monitoring System
 
-[![CI](https://img.shields.io/github/actions/workflow/status/Nattachai-devlow/automation-web-app/ci.yml?branch=main&style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/Nattachai-devlow/automation-web-app/actions/workflows/ci.yml)
-[![CodeQL](https://img.shields.io/github/actions/workflow/status/Nattachai-devlow/automation-web-app/codeql.yml?branch=main&style=for-the-badge&logo=github&logoColor=white)](https://github.com/Nattachai-devlow/automation-web-app/actions/workflows/codeql.yml)
-[![Docker](https://img.shields.io/github/actions/workflow/status/Nattachai-devlow/automation-web-app/docker.yml?branch=main&style=for-the-badge&logo=docker&logoColor=white)](https://github.com/Nattachai-devlow/automation-web-app/actions/workflows/docker.yml)
-[![Version](https://img.shields.io/badge/version-1.0.0--beta-blue?style=for-the-badge&logo=semver)](https://github.com/Nattachai-devlow/automation-web-app/releases)
+[![CI](https://img.shields.io/github/actions/workflow/status/Nattachai-devlow/SCADA-System/ci.yml?branch=master&style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/Nattachai-devlow/SCADA-System/actions/workflows/ci.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/Nattachai-devlow/SCADA-System/codeql.yml?branch=master&style=for-the-badge&logo=github&logoColor=white)](https://github.com/Nattachai-devlow/SCADA-System/actions/workflows/codeql.yml)
+[![Docker](https://img.shields.io/github/actions/workflow/status/Nattachai-devlow/SCADA-System/docker.yml?branch=master&style=for-the-badge&logo=docker&logoColor=white)](https://github.com/Nattachai-devlow/SCADA-System/actions/workflows/docker.yml)
+[![Version](https://img.shields.io/badge/version-1.0.0--beta-blue?style=for-the-badge&logo=semver)](https://github.com/Nattachai-devlow/SCADA-System/releases)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
 [![Supabase](https://img.shields.io/badge/Backend-Supabase-emerald?style=for-the-badge&logo=supabase)](https://supabase.com)
 
 **ระบบควบคุมและเฝ้าระวังการทำงานของปั๊มน้ำอุตสาหกรรมแบบเรียลไทม์ผ่านเว็บอินเทอร์เฟซ (Virtual SCADA System)**
 
-[คู่มือการใช้งาน](#5-manual--operating-guide) · [GitHub Actions CI](#6-continuous-integration-cicd) · [Report Bug](https://github.com/Nattachai-devlow/automation-web-app/issues) · [Request Feature](https://github.com/Nattachai-devlow/automation-web-app/issues)
+[คู่มือการใช้งาน](#5-manual--operating-guide) · [GitHub Actions CI](#6-continuous-integration-cicd) · [Report Bug](https://github.com/Nattachai-devlow/SCADA-System/issues) · [Request Feature](https://github.com/Nattachai-devlow/SCADA-System/issues)
 
 </div>
 
@@ -189,8 +189,8 @@
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/Nattachai-devlow/automation-web-app.git
-   cd automation-web-app
+   git clone https://github.com/Nattachai-devlow/SCADA-System.git
+   cd SCADA-System
    ```
 
 2. **Install dependencies**
@@ -610,9 +610,9 @@ docker compose down
 
 #### Interactive ER Diagram (Hosted)
 
-[![Open Interactive ER Diagram](https://img.shields.io/badge/View_Interactive_ER_Diagram-38bdf8?style=for-the-badge&logo=githubactions)](https://nattachai-devlow.github.io/automation-web-app/)
+[![Open Interactive ER Diagram](https://img.shields.io/badge/View_Interactive_ER_Diagram-38bdf8?style=for-the-badge&logo=githubactions)](https://nattachai-devlow.github.io/SCADA-System/)
 
-> **[เปิดหน้า ER Diagram แบบเต็มจอโดยตรง](https://nattachai-devlow.github.io/automation-web-app/)** — deploy อัตโนมัติจากไฟล์ [`schema_visualizer.html`](./schema_visualizer.html) ผ่าน GitHub Pages (ดู workflow ที่ [`.github/workflows/pages.yml`](./.github/workflows/pages.yml))
+> **[เปิดหน้า ER Diagram แบบเต็มจอโดยตรง](https://nattachai-devlow.github.io/SCADA-System/)** — deploy อัตโนมัติจากไฟล์ [`schema_visualizer.html`](./schema_visualizer.html) ผ่าน GitHub Pages (ดู workflow ที่ [`.github/workflows/pages.yml`](./.github/workflows/pages.yml))
 
 > หมายเหตุ: การกดไฟล์ `.html` โดยตรงในหน้า file ของ GitHub จะแสดงเป็น source code เสมอ ไม่ใช่หน้าเว็บ เพราะ GitHub ไม่ execute HTML ที่มาจาก repository (โดยเจตนา เพื่อความปลอดภัย) ต้องเปิดผ่าน URL ของ Pages ด้านบนแทน
 
