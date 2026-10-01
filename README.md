@@ -608,6 +608,14 @@ docker compose down
 
 ### 5.11 Schema Visualizer
 
+#### Interactive ER Diagram (Hosted)
+
+[![Open Interactive ER Diagram](https://img.shields.io/badge/View_Interactive_ER_Diagram-38bdf8?style=for-the-badge&logo=githubactions)](https://nattachai-devlow.github.io/automation-web-app/)
+
+> **[เปิดหน้า ER Diagram แบบเต็มจอโดยตรง](https://nattachai-devlow.github.io/automation-web-app/)** — deploy อัตโนมัติจากไฟล์ [`schema_visualizer.html`](./schema_visualizer.html) ผ่าน GitHub Pages (ดู workflow ที่ [`.github/workflows/pages.yml`](./.github/workflows/pages.yml))
+
+> หมายเหตุ: การกดไฟล์ `.html` โดยตรงในหน้า file ของ GitHub จะแสดงเป็น source code เสมอ ไม่ใช่หน้าเว็บ เพราะ GitHub ไม่ execute HTML ที่มาจาก repository (โดยเจตนา เพื่อความปลอดภัย) ต้องเปิดผ่าน URL ของ Pages ด้านบนแทน
+
 #### Interactive ER Diagram (Local)
 
 เปิดไฟล์ [`schema_visualizer.html`](./schema_visualizer.html) ได้ทันทีโดยไม่ต้องติดตั้งอะไรเพิ่ม (double-click ที่ไฟล์ หรือพิมพ์ `start schema_visualizer.html` ใน Command Prompt)

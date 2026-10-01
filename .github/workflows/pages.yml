@@ -1,0 +1,67 @@
+name: Deploy Schema Visualizer to Pages
+
+# Deploy schema_visualizer.html เป็นหน้าเว็บจริงที่
+# https://nattachai-devlow.github.io/automation-web-app/
+#
+# หมายเหตุ: GitHub จะไม่ render ไฟล์ .html ในหน้า file browser ของ repo
+# ไฟล์จะแสดงเป็น source code เสมอ (โดยเจตนา เพื่อไม่ให้ GitHub execute HTML
+# ที่มาจาก repo) วิธีที่ได้หน้าเว็บจริงจึงต้อง deploy ผ่าน Pages นี้
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - "schema_visualizer.html"
+      - ".github/workflows/pages.yml"
+  # ให้กดรันเองได้จากหน้า Actions โดยไม่ต้องแก้ไฟล์ใด ๆ
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# ป้องกันไม่ให้ deploy ซ้อนกัน
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # visualizer เป็นไฟล์ HTML เดี่ยวจบ ไม่ต้อง build
+      # จัดเตรียมเฉพาะไฟล์ที่ต้องการ ไม่เอา node_modules / .git ไปด้วย
+      - name: Stage static site
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp schema_visualizer.html _site/schema_visualizer.html
+          # ทำให้หน้าแรกของ Pages เปิดเป็น visualizer ทันที
+          cp schema_visualizer.html _site/index.html
+          echo "--- staging _site ---"
+          ls -l _site
+          # ยืนยันว่าไฟล์ HTML ไม่ถูกห่อหุ้ม/ทำลายระหว่าง copy
+          test -s _site/index.html
+          grep -q '<svg id="edges"' _site/index.html
+
+      - name: Upload static artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

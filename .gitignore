@@ -44,5 +44,8 @@ next-env.d.ts
 # local CI sandbox
 /.ci-test/
 
+# GitHub Pages staging dir (created inside the Actions runner, ignored just in case)
+/_site/
+
 .vercel
 
