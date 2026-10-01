@@ -1,7 +1,12 @@
 name: Deploy Schema Visualizer to Pages
 
 # Deploy schema_visualizer.html เป็นหน้าเว็บจริงที่
-# https://nattachai-devlow.github.io/SCADA-System/
+# https://nattachai-devlow.github.io/SCADA-System/schema_visualizer.html
+#
+# workflow นี้ stage ไฟล์ไว้ 2 path คือ _site/index.html (กรณี Pages ใช้
+# Source = GitHub Actions) และ _site/schema_visualizer.html ด้วย เพื่อให้ URL
+# แบบระบุชื่อไฟล์ใช้ได้ทั้งตอนตั้ง Source เป็น GitHub Actions และ branch
+# (ถ้าตั้งเป็น branch แล้วเปิด root เว็บไซต์จะได้ README แทน visualizer)
 #
 # หมายเหตุ: GitHub จะไม่ render ไฟล์ .html ในหน้า file browser ของ repo
 # ไฟล์จะแสดงเป็น source code เสมอ (โดยเจตนา เพื่อไม่ให้ GitHub execute HTML

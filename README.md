@@ -610,11 +610,13 @@ docker compose down
 
 #### Interactive ER Diagram (Hosted)
 
-[![Open Interactive ER Diagram](https://img.shields.io/badge/View_Interactive_ER_Diagram-38bdf8?style=for-the-badge&logo=githubactions)](https://nattachai-devlow.github.io/SCADA-System/)
+[![Open Interactive ER Diagram](https://img.shields.io/badge/View_Interactive_ER_Diagram-38bdf8?style=for-the-badge&logo=githubactions)](https://nattachai-devlow.github.io/SCADA-System/schema_visualizer.html)
 
-> **[เปิดหน้า ER Diagram แบบเต็มจอโดยตรง](https://nattachai-devlow.github.io/SCADA-System/)** — deploy อัตโนมัติจากไฟล์ [`schema_visualizer.html`](./schema_visualizer.html) ผ่าน GitHub Pages (ดู workflow ที่ [`.github/workflows/pages.yml`](./.github/workflows/pages.yml))
+> **[เปิดหน้า ER Diagram แบบเต็มจอโดยตรง](https://nattachai-devlow.github.io/SCADA-System/schema_visualizer.html)** — deploy อัตโนมัติจากไฟล์ [`schema_visualizer.html`](./schema_visualizer.html) ผ่าน GitHub Pages (ดู workflow ที่ [`.github/workflows/pages.yml`](./.github/workflows/pages.yml))
 
 > หมายเหตุ: การกดไฟล์ `.html` โดยตรงในหน้า file ของ GitHub จะแสดงเป็น source code เสมอ ไม่ใช่หน้าเว็บ เพราะ GitHub ไม่ execute HTML ที่มาจาก repository (โดยเจตนา เพื่อความปลอดภัย) ต้องเปิดผ่าน URL ของ Pages ด้านบนแทน
+>
+> หมายเหตุ: URL ข้างบนชี้ไปที่ไฟล์ `schema_visualizer.html` โดยตรง (ไม่ใช่ root ของเว็บไซต์) เพราะ path นี้ใช้ได้ทั้งตอนที่ Pages ตั้ง Source เป็น GitHub Actions และตอนที่ตั้งเป็น branch ส่วน URL root จะแสดงหน้า README เมื่อ Source เป็น branch
 
 #### Interactive ER Diagram (Local)
 
@@ -640,7 +642,7 @@ docker compose down
 
 #### Supabase Schema Diagram (Virtual PLC Engine)
 
-[![Schema Visualizer Preview](/Shots_SCADA/schema-visualizer.png)](https://nattachai-devlow.github.io/SCADA-System/)
+[![Schema Visualizer Preview](/Shots_SCADA/schema-visualizer.png)](https://nattachai-devlow.github.io/SCADA-System/schema_visualizer.html)
 
 > ภาพด้านบนคือภาพหน้าจอจริงของ [`schema_visualizer.html`](./schema_visualizer.html) คลิกที่ภาพเพื่อเปิดแบบเต็มจอที่โต้ตอบได้ (ลากย้ายตาราง คลิกไฮไลต์ความสัมพันธ์ ค้นหาตาราง เปิด/ปิดแอนิเมชัน สลับธีม) หรือคลิกขวาบนภาพเพื่อเปิดดูขนาดเต็ม
 >
