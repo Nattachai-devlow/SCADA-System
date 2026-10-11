@@ -3,6 +3,7 @@ import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import ToastHost from "@/components/Toast";
 import DashboardGuard from "@/components/DashboardGuard";
+import PageViewLogger from "@/components/PageViewLogger";
 
 export default function DashboardLayout({
   children,
@@ -25,6 +26,9 @@ export default function DashboardLayout({
 
       {/* 3. ป๊อปอัปแจ้งเตือน ครอบคลุมทุกหน้าใน dashboard */}
       <ToastHost />
+
+      {/* 4. บันทึกการเปิดหน้า (audit) ทุกครั้งที่เปลี่ยนเส้นทาง */}
+      <PageViewLogger />
     </div>
     </DashboardGuard>
   );

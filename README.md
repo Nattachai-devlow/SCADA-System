@@ -108,6 +108,7 @@
 - ระบบสิทธิ์ 3 ระดับบังคับด้วย Row Level Security (RLS) ที่ฝั่งฐานข้อมูล ไม่ใช่แค่ซ่อนปุ่มใน UI
 - ผู้สมัครใหม่เริ่มต้นเป็นสถานะ `pending` และเข้าถึงข้อมูลไม่ได้จนกว่าผู้ดูแลจะอนุมัติ
 - ประวัติการเปลี่ยนแปลงเครื่องจักร (create / update / delete) ถูกบันทึกอัตโนมัติและอ่านได้เฉพาะผู้ดูแลระบบ
+- หน้า **Audit Logs** แสดงทุกเหตุการณ์ตั้งแต่มีคนเข้าใช้งานเว็บ (เปิดหน้า, เข้า/ออกระบบ, แก้ไขข้อมูล) ในรูปแบบหน้าต่าง CLI พร้อมระดับความเสี่ยง `critical` / `warning` / `info`, ส่งออกเป็น Excel และเก็บย้อนหลัง 7 วัน
 
 ### Reporting
 
@@ -167,6 +168,7 @@
 3. หน้า P&ID อัปเดตการ์ดเครื่องจักรและเส้นท่อไหลทันทีโดยไม่ต้องรีเฟรช
 4. PostgreSQL Trigger `trg_machine_history` จับการเปลี่ยนแปลงแล้วเขียนลง `machine_history` พร้อมชื่อผู้ปฏิบัติการ
 5. Dashboard ดึงข้อมูลล่าสุด 30 แถวจาก `system_telemetry` เพื่อวาดกราฟอนุกรมเวลา
+6. ทุกการเปลี่ยนแปลงข้อมูลและทุกการเปิดหน้าถูกบันทึกลง `audit_logs` (ผ่าน Trigger และ RPC `record_audit_event()`) เพื่อทำ Audit Log
 
 ### Communication Protocol
 
@@ -291,6 +293,8 @@
 | 4 | `04_add_waiting_part_status.sql` | เพิ่มสถานะ `Waiting Part` ให้ `machines` โดยตรวจสอบว่าไม่มีค่าเก่าหลงเหลือ | ได้ |
 | 5 | `05_machine_history.sql` | สร้างตาราง `machine_history`, ฟังก์ชัน `log_machine_change()`, trigger `trg_machine_history`, index และ RLS | ได้ |
 | 6 | `RLS.sql` | เปิด Row Level Security ทุกตาราง พร้อมฟังก์ชันช่วย `is_admin()` และ `is_active_user()` | ได้ |
+| 7 | `06_maintenance_technician_name.sql` | เพิ่มคอลัมน์ `technician_name` และ trigger บังคับสิทธิ์ชื่อผู้บันทึกซ่อม (ต้องรัน**หลัง** `RLS.sql` เพราะเรียกใช้ `is_admin()`) | ได้ |
+| 8 | `07_audit_logs.sql` | สร้างตาราง `audit_logs`, ฟังก์ชัน `record_audit_event()` / `audit_event_risk()` / `cleanup_audit_logs()`, trigger audit และ RLS (เฉพาะผู้ดูแลอ่านได้) พร้อมตั้ง `pg_cron` ลบข้อมูลเกิน 7 วัน | ได้ |
 
 **หลังรัน `RLS.sql` เสร็จ ต้องเปิด Realtime** ไม่เช่นนั้นหน้า P&ID จะไม่อัปเดตอัตโนมัติ (ค่าเริ่มต้นยังโหลดได้จากการ refresh ปกติ)
 
@@ -312,9 +316,17 @@ SELECT tablename, rowsecurity FROM pg_tables WHERE schemaname = 'public' ORDER B
 -- trigger ประวัติเครื่องจักร
 SELECT tgname, tgenabled FROM pg_trigger WHERE tgname = 'trg_machine_history';
 
+-- trigger ของ Audit Logs (ควรได้ 4 แถว)
+SELECT tgname FROM pg_trigger WHERE tgname LIKE 'trg_audit_%';
+
+-- จำนวน audit log ที่ถูกเก็บไว้ (ไม่เกิน 7 วัน)
+SELECT count(*) AS audit_events FROM public.audit_logs;
+
 -- ตารางที่เข้า Realtime แล้ว
 SELECT tablename FROM pg_publication_tables WHERE pubname = 'supabase_realtime';
 ```
+
+> `07_audit_logs.sql` จำเป็นสำหรับหน้า Audit Logs เท่านั้น ถ้ายังไม่รัน หน้าอื่น ๆ ยังทำงานได้ตามปกติ แต่หน้า Audit Logs จะแจ้งให้รันไฟล์นี้ ส่วนการลบข้อมูลเกิน 7 วันจะทำอัตโนมัติถ้าเปิด extension `pg_cron` (ถ้าไม่เปิด ระบบจะลบให้ตอนเปิดหน้า Audit Logs แทน)
 
 ### 5.4 สร้างผู้ดูแลระบบคนแรก
 
@@ -336,7 +348,7 @@ SELECT tablename FROM pg_publication_tables WHERE pubname = 'supabase_realtime';
     WHERE email = 'you@example.com';
    ```
 
-4. โหลดหน้าเว็บใหม่ (Refresh) แล้วเข้าสู่ระบบอีกครั้ง เมนู "ประวัติเครื่องจักร" และ "จัดการสิทธิ์ผู้ใช้" จะปรากฏในแถบด้านข้าง
+4. โหลดหน้าเว็บใหม่ (Refresh) แล้วเข้าสู่ระบบอีกครั้ง เมนู "ประวัติเครื่องจักร", "จัดการสิทธิ์ผู้ใช้" และ "บันทึกเหตุการณ์" จะปรากฏในแถบด้านข้าง
 
 > หน้าเว็บอ่าน role ครั้งเดียวตอน mount หากเปลี่ยน role ของบัญชีที่กำลังล็อกอินอยู่ ต้อง refresh หรือล็อกอินใหม่เสมอ
 
@@ -354,6 +366,7 @@ SELECT tablename FROM pg_publication_tables WHERE pubname = 'supabase_realtime';
 | บันทึกงานซ่อมบำรุง | ได้ | ได้ | ไม่ได้ |
 | เปลี่ยนสถานะเครื่องจักรจากฟอร์มซ่อม | ได้ | ไม่ได้ (บันทึกงานได้ แต่ข้ามการเปลี่ยนสถานะ) | ไม่ได้ |
 | ดูประวัติเครื่องจักร | ได้ | ไม่ได้ (เมนูไม่แสดง) | ไม่ได้ |
+| ดู Audit Logs | ได้ | ไม่ได้ (เมนูไม่แสดง) | ไม่ได้ |
 | อนุมัติ / เพิ่ม / แก้ไข / ลบผู้ใช้ | ได้ | ไม่ได้ | ไม่ได้ |
 
 **หลักการทำงานของระบบสิทธิ์**
@@ -521,6 +534,51 @@ SELECT tablename FROM pg_publication_tables WHERE pubname = 'supabase_realtime';
 | แก้ไขผู้ใช้ | เปลี่ยนชื่อ, อีเมล และ role |
 | ลบผู้ใช้ | ลบแถวใน `profiles` (บัญชีใน Supabase Auth ไม่ถูกลบ) |
 
+#### 5.6.10 บันทึกเหตุการณ์ (`/dashboard/audit-logs`)
+
+หน้า **Audit Logs** เปิดเฉพาะผู้ดูแลระบบ (ทั้งเมนูและ RLS) แสดงทุกเหตุการณ์ตั้งแต่มีคนเข้าใช้งานเว็บในรูปแบบหน้าต่าง CLI (เทอร์มินัล) พื้นหลังดำ ตัวอักษรแบบ monospace พร้อมสีกำกับระดับความเสี่ยง
+
+| ส่วน | รายละเอียด |
+| --- | --- |
+| แหล่งข้อมูล | ตาราง `audit_logs` เขียนได้ทางเดียวผ่าน RPC `record_audit_event()` และ Trigger `trg_audit_*` เท่านั้น |
+| สิ่งที่ถูกบันทึก | เปิดทุกหน้าใน Dashboard, เข้า/ออกระบบ, สมัครสมาชิก, ส่งออกรายงาน และการเพิ่ม/แก้ไข/ลบข้อมูลเครื่องจักร, Alarm, งานซ่อม และผู้ใช้ |
+| ระดับความเสี่ยง | `critical` (แดง), `warning` (เหลือง), `info` (ฟ้า) กำหนดจากรหัส event ด้วยฟังก์ชัน `audit_event_risk()` ที่ฐานข้อมูล |
+| ตัวกรอง | ค้นหา (รหัส, ข้อความ, ผู้ใช้, IP), ระดับความเสี่ยง, รหัส event, ผู้ใช้ และช่วงวันที่ |
+| Live | ปุ่ม `Live: ON/OFF` เปิดการรีเฟรชอัตโนมัติทุก 8 วินาที |
+| ขยายบรรทัด | คลิกบรรทัด log เพื่อดู Metadata (JSON), IP, User Agent และ Actor ID |
+| Export | ปุ่ม `Export Excel` ดาวน์โหลดรายการที่กรองอยู่เป็นไฟล์ `.xlsx` พร้อม metadata และ user-agent |
+| เก็บรักษา | เก็บย้อนหลัง 7 วัน เกินกว่านั้นลบอัตโนมัติ (ผ่าน `pg_cron`) หรือลบตอนเปิดหน้าเป็น fallback |
+| ความน่าเชื่อถือ | `actor`, IP และ user-agent ถูกดึงจาก session และ request headers ที่ฝั่งฐานข้อมูล จึงปลอมแปลงจากฝั่ง UI ไม่ได้ |
+
+**รหัส event และระดับความเสี่ยง (ตัวอย่าง)**
+
+| รหัส event | ระดับ | ความหมาย |
+| --- | --- | --- |
+| `AUTH_LOGIN` / `AUTH_LOGOUT` | warning | เข้า / ออกจากระบบสำเร็จ |
+| `AUTH_LOGIN_FAILED` | critical | เข้าสู่ระบบไม่สำเร็จ |
+| `AUTH_SIGNUP` | warning | สมัครสมาชิกใหม่ |
+| `PAGE_VIEW` | info | เปิดหน้าใน Dashboard |
+| `EXPORT_DATA` | warning | ส่งออกข้อมูลเป็นไฟล์ |
+| `USER_CREATED` / `USER_UPDATED` | warning | เพิ่ม / แก้ไขผู้ใช้ |
+| `USER_ROLE_CHANGED` | critical | เปลี่ยนสิทธิ์ (role) ของผู้ใช้ |
+| `USER_DELETED` | critical | ลบผู้ใช้ |
+| `MACHINE_CREATED` / `MACHINE_UPDATED` | warning | เพิ่ม / แก้ไขเครื่องจักร |
+| `MACHINE_DELETED` | critical | ลบเครื่องจักร |
+| `ALARM_CREATED` / `ALARM_UPDATED` | warning | เพิ่ม / แก้ไข Alarm |
+| `ALARM_DELETED` | critical | ลบ Alarm |
+| `MAINTENANCE_CREATED` / `MAINTENANCE_UPDATED` | warning | เพิ่ม / แก้ไขงานซ่อม |
+| `MAINTENANCE_DELETED` | critical | ลบงานซ่อม |
+| `RETENTION_CLEANUP` | critical | ลบ log ที่เกินอายุเก็บรักษา |
+
+> การลบทุกอย่างลงท้ายด้วย `_DELETED` และรหัสที่ขึ้นต้นด้วย `SECURITY_` จะถูกจัดเป็น `critical` โดยอัตโนมัติ
+
+**ที่มาของข้อมูล**
+
+- ทุก event ถูกเขียนผ่านฟังก์ชัน `record_audit_event()` แบบ `SECURITY DEFINER` โดยดึงตัวตนผู้ใช้จาก `auth.uid()` และดึง IP / user-agent จาก request headers
+- ตาราง `audit_logs` ไม่มี policy `INSERT` / `UPDATE` / `DELETE` โดยตั้งใจ เพื่อไม่ให้สร้างหรือลบร่องรอยได้จากฝั่งผู้ใช้
+- Trigger `trg_audit_machines`, `trg_audit_alarms`, `trg_audit_maintenance`, `trg_audit_profiles` ทำงานแบบกลืนข้อผิดพลาด (audit ล้มเหลวไม่ทำให้ operation จริงของผู้ใช้ล้มเหลว)
+- `UPDATE` ที่ค่าไม่เปลี่ยนจริงจะไม่ถูกบันทึก และหน้าแสดงผลดึงล่าสุด 1,000 รายการ
+
 ### 5.7 ชุดค่าคงที่ของระบบ
 
 | ค่า | ตำแหน่ง | ความหมาย |
@@ -528,6 +586,9 @@ SELECT tablename FROM pg_publication_tables WHERE pubname = 'supabase_realtime';
 | `TANK_CAPACITY_L = 75000` | `src/app/dashboard/scada/page.tsx` | ความจุถังน้ำ (ลิตร) ใช้คำนวณระดับน้ำเป็นเปอร์เซ็นต์ |
 | ความจุ 30 แถว | `src/app/dashboard/page.tsx` | จำนวนจุดข้อมูลที่ใช้วาดกราฟบน Dashboard |
 | จำนวน 500 แถว | `src/app/dashboard/machine-history/page.tsx` | จำนวนรายการประวัติที่โหลดมาแสดง |
+| จำนวน 1,000 แถว | `src/app/dashboard/audit-logs/page.tsx` | จำนวนรายการ audit log ที่โหลดมาแสดง |
+| รีเฟรชทุก 8 วินาที | `src/app/dashboard/audit-logs/page.tsx` | ช่วงเวลาของโหมด Live บนหน้า Audit Logs |
+| อายุ 7 วัน | `src/supabase/07_audit_logs.sql` | ระยะเวลาเก็บ audit log ก่อนถูกลบอัตโนมัติ |
 | 3 รายการ | `src/app/dashboard/alarms/page.tsx` | จำนวน Alarm ที่สร้างต่อครั้งเมื่อกด "จำลอง 3 Alarm" |
 | `Waiting Part` | `src/supabase/04_add_waiting_part_status.sql` | สถานะเครื่องจักรที่ต้องเพิ่ม constraint ก่อนใช้งาน |
 | ค่าเริ่มต้น telemetry | `src/supabase/01_init.sql` | `outdoor_temp 26.6`, `target_temp 36.0`, `pool_temp 35.9`, `water_level_liters 55000`, `pump_stop_rate 0` |
@@ -601,6 +662,8 @@ docker compose down
 | หน้า P&ID ไม่อัปเดตเอง | ตารางยังไม่ได้เข้า `supabase_realtime` | รัน `ALTER PUBLICATION supabase_realtime ADD TABLE public.machines;` |
 | กราฟบน Dashboard ไม่มีข้อมูล | ยังไม่มีแถวใน `system_telemetry` | ใช้คำสั่ง INSERT ตามหัวข้อ 5.8 |
 | หน้าประวัติเครื่องจักรขึ้น "ยังไม่ได้สร้างตาราง machine_history" | ยังไม่ได้รัน `05_machine_history.sql` | รันไฟล์ดังกล่าวใน SQL Editor แล้ว refresh |
+| หน้า Audit Logs ขึ้น "ยังไม่ได้สร้างตาราง audit_logs" | ยังไม่ได้รัน `07_audit_logs.sql` | รันไฟล์ดังกล่าวใน SQL Editor แล้ว refresh |
+| Audit Logs ไม่ลบข้อมูลเกิน 7 วันเอง | ยังไม่เปิด extension `pg_cron` | เปิด `pg_cron` หรือเปิดหน้า Audit Logs เพื่อลบแบบ fallback (หรือรัน `SELECT public.cleanup_audit_logs();` ด้วยตนเอง) |
 | กดบันทึกงานซ่อมแล้วสถานะเครื่องไม่เปลี่ยน | ผู้ใช้เป็น `technician` ซึ่ง RLS ไม่อนุญาต | ให้ผู้ดูแลเปลี่ยนสถานะจากหน้าเครื่องจักรหรือ P&ID |
 | แจ้งว่า role ค้างเป็น "ยังไม่อนุมัติ" | อ่าน role ครั้งเดียวตอน mount | Refresh หน้าเว็บหรือล็อกอินใหม่ |
 | Realtime หลุดเป็นระยะ | การเชื่อมต่อ WebSocket ถูกตัดเมื่อไม่มี activity | โหลดหน้าใหม่ ระบบ subscribe ใหม่ใน `useEffect` |
@@ -726,6 +789,24 @@ docker compose down
 | `performed_by_email` | `text`        | Nullable    |
 | `created_at`         | `timestamptz` | Nullable    |
 
+#### Table `audit_logs`
+
+| Name          | Type          | Constraints                          |
+| ------------- | ------------- | ------------------------------------ |
+| `id`          | `uuid`        | Primary                              |
+| `event_code`  | `text`        | NOT NULL                             |
+| `risk_level`  | `text`        | NOT NULL, default `info`, CHECK in (`info`/`warning`/`critical`) |
+| `category`    | `text`        | NOT NULL, default `app`              |
+| `message`     | `text`        | Nullable                             |
+| `actor_id`    | `uuid`        | Nullable                             |
+| `actor_name`  | `text`        | Nullable                             |
+| `actor_email` | `text`        | Nullable                             |
+| `actor_role`  | `text`        | Nullable                             |
+| `ip_address`  | `inet`        | Nullable                             |
+| `user_agent`  | `text`        | Nullable                             |
+| `metadata`    | `jsonb`       | Nullable                             |
+| `created_at`  | `timestamptz` | Nullable                             |
+
 #### RLS Policies: `profiles`
 
 | Policy                           | Command | Roles         | Action     | USING                               | WITH CHECK                          |
@@ -776,6 +857,14 @@ docker compose down
 | Policy                                | Command | Roles         | Action     | USING                                                                                                                                   | WITH CHECK |
 | ------------------------------------- | ------- | ------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | `Only admin can view machine history` | SELECT  | authenticated | PERMISSIVE | `(EXISTS ( SELECT 1    FROM profiles   WHERE ((profiles.id = auth.uid()) AND (lower(TRIM(BOTH FROM profiles.role)) = 'admin'::text))))` | -          |
+
+#### RLS Policies: `audit_logs`
+
+| Policy                           | Command | Roles         | Action     | USING                                                                                                                                   | WITH CHECK |
+| -------------------------------- | ------- | ------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `Only admin can view audit logs` | SELECT  | authenticated | PERMISSIVE | `(EXISTS ( SELECT 1    FROM profiles   WHERE ((profiles.id = auth.uid()) AND (lower(TRIM(BOTH FROM profiles.role)) = 'admin'::text))))` | -          |
+
+> ตั้งใจไม่เปิด policy `INSERT` / `UPDATE` / `DELETE` ข้อมูลถูกเขียนผ่าน `record_audit_event()` และ Trigger `trg_audit_*` แบบ `SECURITY DEFINER` เท่านั้น
 
 #### DDL อ้างอิง (คัดลอกจาก `src/supabase/`)
 
@@ -910,6 +999,64 @@ create table public.system_telemetry (
   pump_stop_rate numeric(5, 2) null default 0,
   constraint system_telemetry_pkey primary key (id)
 ) TABLESPACE pg_default;
+
+-- 7. Table for audit_logs
+create table public.audit_logs (
+  id uuid not null default extensions.uuid_generate_v4 (),
+  event_code text not null,
+  risk_level text not null default 'info'::text,
+  category text not null default 'app'::text,
+  message text null,
+  actor_id uuid null,
+  actor_name text null,
+  actor_email text null,
+  actor_role text null,
+  ip_address inet null,
+  user_agent text null,
+  metadata jsonb null,
+  created_at timestamp with time zone null default timezone ('utc'::text, now()),
+  constraint audit_logs_pkey primary key (id),
+  constraint audit_logs_risk_level_check check (
+    (
+      risk_level = any (
+        array['info'::text, 'warning'::text, 'critical'::text]
+      )
+    )
+  )
+) TABLESPACE pg_default;
+
+create index IF not exists idx_audit_logs_created_at on public.audit_logs using btree (created_at desc) TABLESPACE pg_default;
+create index IF not exists idx_audit_logs_event_code on public.audit_logs using btree (event_code) TABLESPACE pg_default;
+create index IF not exists idx_audit_logs_risk_level on public.audit_logs using btree (risk_level) TABLESPACE pg_default;
+create index IF not exists idx_audit_logs_actor on public.audit_logs using btree (actor_id) TABLESPACE pg_default;
+
+create trigger trg_audit_machines
+after INSERT
+or DELETE
+or
+update on machines for EACH row
+execute FUNCTION audit_table_change ();
+
+create trigger trg_audit_alarms
+after INSERT
+or DELETE
+or
+update on alarms for EACH row
+execute FUNCTION audit_table_change ();
+
+create trigger trg_audit_maintenance
+after INSERT
+or DELETE
+or
+update on maintenance_records for EACH row
+execute FUNCTION audit_table_change ();
+
+create trigger trg_audit_profiles
+after INSERT
+or DELETE
+or
+update on profiles for EACH row
+execute FUNCTION audit_table_change ();
 ```
 
 ---

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
+import { logAuditEvent } from "@/lib/audit";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -37,6 +38,12 @@ export default function LoginPage() {
 
       if (signUpError) {
         setErrorMsg(signUpError.message);
+        void logAuditEvent({
+          code: "AUTH_SIGNUP_FAILED",
+          category: "auth",
+          message: `สมัครสมาชิกไม่สำเร็จ: ${email}`,
+          metadata: { email, reason: signUpError.message },
+        });
         setLoading(false);
         return;
       }
@@ -59,6 +66,12 @@ export default function LoginPage() {
       }
 
       // 3. เมื่อสมัครสำเร็จ ส่งไปยังหน้า /pending ทันที
+      void logAuditEvent({
+        code: "AUTH_SIGNUP",
+        category: "auth",
+        message: `สมัครสมาชิกใหม่: ${email}`,
+        metadata: { email, full_name: fullName },
+      });
       router.push("/pending");
       router.refresh();
     } else {
@@ -70,12 +83,24 @@ export default function LoginPage() {
 
       if (error) {
         setErrorMsg(error.message);
+        void logAuditEvent({
+          code: "AUTH_LOGIN_FAILED",
+          category: "security",
+          message: `เข้าสู่ระบบไม่สำเร็จ: ${email}`,
+          metadata: { email, reason: error.message },
+        });
         setLoading(false);
         return;
       }
 
       // 2. ตรวจสอบ Role ของผู้ใช้จากตาราง profiles
       if (authData.user) {
+        void logAuditEvent({
+          code: "AUTH_LOGIN",
+          category: "auth",
+          message: `เข้าสู่ระบบ: ${email}`,
+          metadata: { email },
+        });
         const { data: profile } = await supabase
           .from("profiles")
           .select("role")

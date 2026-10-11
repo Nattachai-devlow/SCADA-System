@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
+import { logAuditEvent } from '@/lib/audit';
 
 export default function Navbar() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -21,6 +22,11 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
+    await logAuditEvent({
+      code: 'AUTH_LOGOUT',
+      category: 'auth',
+      message: userEmail ? `ออกจากระบบ: ${userEmail}` : 'ออกจากระบบ',
+    });
     await supabase.auth.signOut();
     router.push('/login');
   };

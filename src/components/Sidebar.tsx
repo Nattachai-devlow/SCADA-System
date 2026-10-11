@@ -12,6 +12,7 @@ import {
   Network,
   ShieldCheck,
   Siren,
+  Terminal,
   Wrench,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -34,6 +35,7 @@ const BASE_MENU_ITEMS: MenuItem[] = [
 const ADMIN_MENU_ITEMS: MenuItem[] = [
   { name: "ประวัติเครื่องจักร", sub: "Machine History", path: "/dashboard/machine-history", icon: History },
   { name: "จัดการสิทธิ์ผู้ใช้", sub: "User Access", path: "/dashboard/users", icon: ShieldCheck },
+  { name: "บันทึกเหตุการณ์", sub: "Audit Logs", path: "/dashboard/audit-logs", icon: Terminal },
 ];
 
 export default function Sidebar() {
